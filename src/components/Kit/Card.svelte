@@ -1,4 +1,4 @@
-<div><slot></slot></div>
+<div><slot /></div>
 
 <style lang="scss">
 	div {
@@ -7,7 +7,3 @@
 		border-radius: 12px;
 	}
 </style>
-
-<script lang="ts">
-
-</script>
