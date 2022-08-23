@@ -1,31 +1,28 @@
 {
-  "name": "svelte-app",
-  "version": "1.0.0",
+  "name": "trans",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "build": "npx rollup -c",
-    "dev": "npx rollup -c -w",
-    "start": "npx serve -n -l 5000 public",
-    "validate": "svelte-check"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^16.0.0",
-    "@rollup/plugin-node-resolve": "^10.0.0",
-    "@rollup/plugin-typescript": "^6.0.0",
-    "@tsconfig/svelte": "^1.0.0",
-    "rollup": "^2.3.4",
-    "rollup-plugin-css-only": "^3.0.0",
-    "rollup-plugin-livereload": "^2.0.0",
-    "rollup-plugin-svelte": "^7.0.0",
-    "rollup-plugin-terser": "^7.0.0",
-    "svelte": "^3.0.0",
-    "svelte-check": "^1.0.0",
+    "@sveltejs/vite-plugin-svelte": "^1.0.1",
+    "@tsconfig/svelte": "^3.0.0",
+    "svelte": "^3.49.0",
+    "svelte-check": "^2.8.0",
     "svelte-preprocess": "^4.10.7",
-    "tslib": "^2.0.0",
-    "typescript": "^3.9.3"
+    "tslib": "^2.4.0",
+    "typescript": "^4.6.4",
+    "vite": "^3.0.7"
   },
   "dependencies": {
+    "prettier": "^2.7.1",
     "sass": "^1.54.5",
     "svelte-click-outside": "^1.0.0",
-    "svelte-spa-router": "^3.0.4"
+    "svelte-spa-router": "^3.3.0"
   }
 }
