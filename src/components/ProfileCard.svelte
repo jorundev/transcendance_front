@@ -21,6 +21,16 @@
 	let rank: Rank = "sachiel";
 
 	let rank_description: string = "Sachiel - Third Angel";
+
+	export let username: string;
+	export let id: number;
+
+	let id_str = "";
+
+	$: {
+		let s = "000" + id;
+		id_str = s.substring(s.length - 4);
+	}
 </script>
 
 <div class="profile-card">
@@ -28,7 +38,8 @@
 		<div class="profile-picture" />
 		<div class="profile-info-1">
 			<div class="profile-name-and-rank">
-				<div class="profile-name">agardet</div>
+				<div class="profile-name">{username}</div>
+				<div class="profile-id">#{id_str}</div>
 				<HoverableTooltip tooltip={rank_description}>
 					<div
 						class="profile-rank"
@@ -132,5 +143,12 @@
 		height: 80px;
 		background-size: cover;
 		border-radius: 100%;
+	}
+
+	.profile-id {
+		margin-top: 13px;
+		margin-left: 1px;
+		color: rgb(225, 225, 225);
+		height: auto;
 	}
 </style>
