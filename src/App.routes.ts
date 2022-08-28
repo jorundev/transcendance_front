@@ -1,12 +1,17 @@
-import Home from './routes/Home.svelte';
-import Login from './routes/Login.svelte';
-import LoginByUsername from './routes/LoginByUsername.svelte';
-import NotFound from './routes/NotFound.svelte';
+import Home from "./routes/Home.svelte";
+import Login from "./routes/Login.svelte";
+import LoginByEmail from "./routes/LoginByEmail.svelte";
+import NotFound from "./routes/NotFound.svelte";
+import Login2FA from "./routes/Login2FA.svelte";
+import UserWant2FAPromptSvelte from "./routes/UserWant2FAPrompt.svelte";
+import CreateAccountFromOAuthSvelte from "./routes/CreateAccountFromOAuth.svelte";
 
 export default {
-	'/': Home,
-	'/login': Login,
-	'/login/username': LoginByUsername,
-	// The catch-all route must always be last
-	'*': NotFound
+	"/": Home,
+	"/login": Login,
+	"/login/username": LoginByEmail,
+	"/login/2fa": Login2FA,
+	"/postsignup/2fa": UserWant2FAPromptSvelte,
+	"/postsignup/with": CreateAccountFromOAuthSvelte,
+	"*": NotFound,
 };

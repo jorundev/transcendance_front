@@ -4,8 +4,14 @@
 	import ProfileCard from "../components/ProfileCard.svelte";
 	import { stLoggedUser } from "../stores";
 	import { api } from "../api";
+	import { onMount } from "svelte";
 
 	let serverDown = false;
+
+	onMount(() => {
+		serverDown = false;
+		stLoggedUser.set(null);
+	});
 
 	stLoggedUser.subscribe(async (value) => {
 		if (value == null) {
@@ -21,6 +27,10 @@
 				id: response.identifier,
 				profile_picture: response.profile_picture,
 			});
+		} else {
+			if ($stLoggedUser.uuid != value.uuid) {
+				stLoggedUser.set(null);
+			}
 		}
 	});
 
@@ -39,6 +49,14 @@
 				console.log(user);
 			}
 		}}>Print users to console</button
+	>
+	<button
+		on:click={async () => {
+			let users = await api.users();
+			for (const user of users) {
+				fetch("/api/users/" + user.uuid, { method: "DELETE" });
+			}
+		}}>Wipe users</button
 	>
 	<button
 		on:click={async () => {
@@ -72,6 +90,7 @@
 		width: 100%;
 	}
 	.sorry {
+		color: gray;
 		text-align: center;
 		font-size: 40px;
 	}

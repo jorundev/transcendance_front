@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { stLoggedUser } from "../stores";
+	import { validateEmail } from "../utils";
 	import { replace } from "svelte-spa-router";
 
 	enum State {
@@ -30,20 +30,21 @@
 
 	let state = State.LogIn;
 
+	let isEmailValid = true;
+
 	let errormsg = "";
 
 	$: active =
 		email.length != 0 &&
 		password.length != 0 &&
 		(state == State.LogIn || confirm.length != 0) &&
-		(state == State.LogIn || username.length != 0);
+		(state == State.LogIn || username.length != 0) &&
+		isEmailValid;
 
-	async function login() {
+	async function login(firstConnection: boolean) {
 		if (!active) {
 			return;
 		}
-
-		stLoggedUser.set(null);
 
 		const req: LoginRequest = {
 			email,
@@ -58,10 +59,21 @@
 			body: JSON.stringify(req),
 		})
 			.then((res) => {
+				if (res.status == 202) {
+					replace("/login/2fa");
+				}
 				if (res.status == 200) {
-					replace("/");
-				} else if (res.status == 401) {
+					if (firstConnection) {
+						replace("/postsignup/2fa");
+						return;
+					} else {
+						replace("/");
+						return;
+					}
+				} else if (res.status == 401 || res.status == 400) {
+					errormsg = "Invalid email or password";
 					show_error = true;
+					return;
 				}
 			})
 			.catch((e) => {
@@ -95,17 +107,30 @@
 			body: JSON.stringify(req),
 		}).then(async (res) => {
 			if (res.status == 201) {
-				await login();
+				await login(true);
+			} else if (res.status == 400) {
+				errormsg = "Email address is already taken";
+				show_error = true;
 			}
 		});
+	}
+
+	function checkEmail() {
+		isEmailValid = validateEmail(email) || email.length == 0;
 	}
 </script>
 
 <div class="login">
 	<div class="sub">
 		{#if state == State.LogIn}
-			<div class="title">Login by username</div>
-			<input placeholder="Email" bind:value={email} />
+			<div class="title">Login using email</div>
+			<input
+				class={isEmailValid ? "" : "invalid"}
+				placeholder="Email"
+				bind:value={email}
+				on:input={checkEmail}
+				on:blur={checkEmail}
+			/>
 			<input
 				type="password"
 				placeholder="Password"
@@ -113,7 +138,7 @@
 			/>
 			<button
 				class={active ? "active" : ""}
-				on:click={async () => await login()}>Login</button
+				on:click={async () => await login(false)}>Login</button
 			>
 			<a
 				href={undefined}
@@ -122,14 +147,19 @@
 				}}>Don't have an account ? Click here</a
 			>
 			{#if show_error}
-				<div style="color: red;">Invalid username or password</div>
+				<div style="color: red;">{errormsg}</div>
 			{/if}
 		{/if}
 		{#if state == State.SignUp}
 			<div class="title">Create an account</div>
 			<input placeholder="Username" bind:value={username} />
-			<input placeholder="Email" bind:value={email} />
-			<br />
+			<input
+				class={isEmailValid ? "" : "invalid"}
+				placeholder="Email"
+				bind:value={email}
+				on:blur={checkEmail}
+				on:input={checkEmail}
+			/>
 			<input
 				type="password"
 				placeholder="Password"
@@ -197,6 +227,10 @@
 		&:focus {
 			outline: none;
 			background: #38383a;
+		}
+
+		&.invalid {
+			color: red;
 		}
 	}
 

@@ -1,3 +1,15 @@
+<script lang="ts">
+	import { stLoggedUser } from "../stores";
+	import { onMount } from "svelte";
+	import { push, replace } from "svelte-spa-router";
+
+	onMount(() => {
+		if ($stLoggedUser != null) {
+			replace("/");
+		}
+	});
+</script>
+
 <div class="login">
 	<div class="sub">
 		<h1>Hello.</h1>
@@ -5,7 +17,7 @@
 			<div
 				class="login-square blue"
 				on:click={() => {
-					window.location.href = "#/Login/42";
+					window.location.href = "/api/auth/oauth2/42";
 				}}
 			>
 				<div class="spinning">
@@ -14,9 +26,20 @@
 				<div class="text">Log in with <b>42</b></div>
 			</div>
 			<div
+				class="login-square discordblue"
+				on:click={() => {
+					window.location.href = "/api/auth/oauth2/discord";
+				}}
+			>
+				<div class="spinning">
+					<div class="inner logodiscord" />
+				</div>
+				<div class="text">Log in with <b>Discord</b></div>
+			</div>
+			<div
 				class="login-square red"
 				on:click={() => {
-					window.location.href = "#/Login/username";
+					push("/login/username");
 				}}
 			>
 				<div class="spinning">
@@ -51,6 +74,7 @@
 	.login-squares {
 		display: flex;
 		flex-wrap: wrap;
+		justify-content: center;
 		gap: 20px;
 	}
 
@@ -72,6 +96,11 @@
 
 		&.blue {
 			background: rgb(0, 110, 218);
+		}
+
+		&.discordblue {
+			letter-spacing: -0.2px;
+			background: rgb(104, 118, 228);
 		}
 
 		@keyframes spinning {
@@ -113,6 +142,10 @@
 
 				&.logoemail {
 					background-image: url("/img/mail.png");
+				}
+
+				&.logodiscord {
+					background-image: url("/img/discord.svg");
 				}
 			}
 		}

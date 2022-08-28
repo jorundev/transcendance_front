@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Achievement from "./Achievement.svelte";
 	import HoverableTooltip from "./Kit/HoverableTooltip.svelte";
+	import { stLoggedUser } from "../stores";
 	type Rank =
 		| "sachiel"
 		| "shamshel"
@@ -27,6 +28,12 @@
 
 	let id_str = "";
 
+	function getProfilePictureLink(): string {
+		return $stLoggedUser.profile_picture
+			? "/pictures/" + $stLoggedUser.profile_picture
+			: "/img/default.jpg";
+	}
+
 	$: {
 		let s = "000" + id;
 		id_str = s.substring(s.length - 4);
@@ -35,7 +42,12 @@
 
 <div class="profile-card">
 	<div class="profile-line-1">
-		<div class="profile-picture" />
+		<div
+			class="profile-picture"
+			style="{"background-image: url('" +
+				getProfilePictureLink() +
+				"');"};"
+		/>
 		<div class="profile-info-1">
 			<div class="profile-name-and-rank">
 				<div class="profile-name">{username}</div>
@@ -138,7 +150,6 @@
 
 	.profile-picture {
 		flex-shrink: 0;
-		background-image: url("/img/agardet.jpg");
 		width: 80px;
 		height: 80px;
 		background-size: cover;

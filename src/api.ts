@@ -1,4 +1,5 @@
 import { push } from "svelte-spa-router";
+import { stLoggedUser } from "./stores";
 
 async function fetchPOST(url: string, object: any): Promise<Response> {
 	return await fetch(url, {
@@ -55,7 +56,8 @@ async function makeRequest<T>(
 			}
 		})
 		.catch((_) => {
-			push("/Login");
+			stLoggedUser.set(null);
+			push("/login");
 			return;
 		})
 		.then((obj) => {
