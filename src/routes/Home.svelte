@@ -5,6 +5,7 @@
 	import { stLoggedUser } from "../stores";
 	import { api } from "../api";
 	import { onMount } from "svelte";
+	import TopBar from "../components/TopBar.svelte";
 
 	let serverDown = false;
 
@@ -42,28 +43,7 @@
 {/if}
 
 {#if $stLoggedUser != null}
-	<button
-		on:click={async () => {
-			let users = await api.users();
-			for (const user of users) {
-				console.log(user);
-			}
-		}}>Print users to console</button
-	>
-	<button
-		on:click={async () => {
-			let users = await api.users();
-			for (const user of users) {
-				fetch("/api/users/" + user.uuid, { method: "DELETE" });
-			}
-		}}>Wipe users</button
-	>
-	<button
-		on:click={async () => {
-			api.logout();
-			stLoggedUser.set(null);
-		}}>Logout</button
-	>
+	<TopBar />
 	<Tabs {tabs}>
 		<TabRegionElement href="Profile">
 			<div class="profile-tab">

@@ -28,15 +28,15 @@
 
 	let id_str = "";
 
+	$: {
+		let s = "000" + id;
+		id_str = s.substring(s.length - 4);
+	}
+
 	function getProfilePictureLink(): string {
 		return $stLoggedUser.profile_picture
 			? "/pictures/" + $stLoggedUser.profile_picture
 			: "/img/default.jpg";
-	}
-
-	$: {
-		let s = "000" + id;
-		id_str = s.substring(s.length - 4);
 	}
 </script>
 

@@ -1,7 +1,8 @@
-@import url('reset.css');
+@import url("reset.css");
 
-html, body {
-	font-family: 'basier_circleregular';
+html,
+body {
+	font-family: "basier_circleregular";
 	width: calc(100vw - var(--scrollbar-width));
 	height: calc(100% - var(--scrollbar-height));
 	padding: 0;
@@ -11,17 +12,17 @@ html, body {
 }
 
 @font-face {
-    font-family: 'basier_circleregular';
-    src: url('../fonts/basiercircle-regular-webfont.woff2') format('woff2'),
-         url('../fonts/basiercircle-regular-webfont.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
+	font-family: "basier_circleregular";
+	src: url("../fonts/basiercircle-regular-webfont.woff2") format("woff2"),
+		url("../fonts/basiercircle-regular-webfont.woff") format("woff");
+	font-weight: normal;
+	font-style: normal;
 }
 
 @font-face {
-    font-family: 'basier_squareregular';
-    src: url('../fonts/basiersquare-regular-webfont.woff2') format('woff2'),
-         url('../fonts/basiersquare-regular-webfont.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
+	font-family: "basier_squareregular";
+	src: url("../fonts/basiersquare-regular-webfont.woff2") format("woff2"),
+		url("../fonts/basiersquare-regular-webfont.woff") format("woff");
+	font-weight: normal;
+	font-style: normal;
 }
