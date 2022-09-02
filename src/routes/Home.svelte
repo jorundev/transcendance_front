@@ -4,8 +4,9 @@
 	import ProfileCard from "../components/ProfileCard.svelte";
 	import { stLoggedUser } from "../stores";
 	import TopBar from "../components/TopBar.svelte";
+	import AchievementsCard from "../components/AchievementsCard.svelte";
 
-	const tabs: Array<string> = ["Profile", "Friends"];
+	const tabs: Array<string> = ["Profile", "Achievements"];
 </script>
 
 {#if $stLoggedUser != null}
@@ -19,12 +20,9 @@
 				/>
 			</div>
 		</TabRegionElement>
-		<TabRegionElement href="Friends">
+		<TabRegionElement href="Achievements">
 			<div class="profile-tab">
-				<ProfileCard
-					username={$stLoggedUser.username}
-					id={$stLoggedUser.id}
-				/>
+				<AchievementsCard />
 			</div>
 		</TabRegionElement>
 	</Tabs>

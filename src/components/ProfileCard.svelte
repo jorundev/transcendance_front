@@ -1,7 +1,8 @@
 <script lang="ts">
-	import Achievement from "./Achievement.svelte";
 	import HoverableTooltip from "./Kit/HoverableTooltip.svelte";
 	import { stLoggedUser } from "../stores";
+	import HomeCategory from "./Kit/HomeCategory.svelte";
+	import FriendsScroll from "./Kit/FriendsScroll.svelte";
 	type Rank =
 		| "sachiel"
 		| "shamshel"
@@ -67,25 +68,15 @@
 			</div>
 		</div>
 	</div>
-	<div class="profile-line-2">
-		<div class="achievements">
-			<Achievement name="welcome" />
-			<Achievement name="first game" />
-		</div>
-	</div>
 </div>
+<HomeCategory title="Friends">
+	<FriendsScroll />
+</HomeCategory>
 
 <style lang="scss">
-	.achievements {
-		padding-top: 12px;
-		padding-bottom: 12px;
-		display: flex;
-		gap: 12px;
-	}
-
 	.profile-card {
 		width: 100%;
-		background: #0b82ff;
+		background: #161618;
 		padding: 20px;
 		border-radius: 12px;
 		box-sizing: border-box;
@@ -94,15 +85,6 @@
 	.profile-line-1 {
 		color: #f3f3f3;
 		width: 100%;
-		display: flex;
-	}
-
-	.profile-line-2 {
-		margin-top: 18px;
-		border-top: 1px solid #0a69cf;
-		color: #f3f3f3;
-		width: 100%;
-		height: 100px;
 		display: flex;
 	}
 
@@ -131,12 +113,12 @@
 		margin-top: 10px;
 		border-radius: 4px;
 		max-width: 400px;
-		background: rgb(103, 177, 255);
+		background: rgb(60, 60, 60);
 
 		.done {
 			height: 100%;
 			border-radius: 4px;
-			background: rgb(19, 61, 230);
+			background: rgb(202, 17, 85);
 		}
 	}
 
