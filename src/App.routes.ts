@@ -10,6 +10,7 @@ import { wrap } from "svelte-spa-router/wrap";
 import { isLogged, tryLoggingIn } from "./stores";
 import type { WrappedComponent } from "svelte-spa-router";
 import type { SvelteComponentDev } from "svelte/internal";
+import NotFound from "./routes/NotFound.svelte";
 
 /*export default {
 	"/": Home,
@@ -59,4 +60,5 @@ export default {
 	"/login/2fa": requiresNoLogin(Login2FA),
 	"/postsignup/2fa": UserWant2FAPromptSvelte,
 	"/postsignup/with": CreateAccountFromOAuthSvelte,
+	"*": NotFound,
 };
