@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { api } from "../api";
 
-	import { pop, replace } from "svelte-spa-router";
+	import { pop } from "svelte-spa-router";
 
 	import { stLoggedUser } from "../stores";
 
@@ -12,41 +12,44 @@
 	}
 </script>
 
-<div class="settings">
-	<div class="top">
+{#if $stLoggedUser != null}
+	<div class="settings">
+		<div class="top">
+			<div
+				class="back"
+				on:click={() => {
+					pop();
+				}}
+			/>
+			<div class="title">Settings</div>
+			<div class="empty" style="width: 40px;" />
+		</div>
+		<div class="category">Account</div>
+		<div class="setting profile">
+			<div
+				class="before"
+				style={"background-image: url('" +
+					getProfilePictureLink() +
+					"')"}
+			/>
+			{$stLoggedUser.username}
+		</div>
 		<div
-			class="back"
+			class="setting"
 			on:click={() => {
-				pop();
+				api.logout();
 			}}
-		/>
-		<div class="title">Settings</div>
-		<div class="empty" style="width: 40px;" />
+			style="color: red"
+		>
+			Log out
+		</div>
+		<div class="category">Security</div>
+		<div class="setting">Password</div>
+		<div class="setting">Two-Factor Authentication</div>
+		<div class="category">Activity</div>
+		<div class="setting">Blocked accounts</div>
 	</div>
-	<div class="category">Account</div>
-	<div class="setting profile">
-		<div
-			class="before"
-			style={"background-image: url('" + getProfilePictureLink() + "')"}
-		/>
-		{$stLoggedUser.username}
-	</div>
-	<div
-		class="setting"
-		on:click={() => {
-			api.logout();
-			replace("/login");
-		}}
-		style="color: red"
-	>
-		Log out
-	</div>
-	<div class="category">Security</div>
-	<div class="setting">Password</div>
-	<div class="setting">Two-Factor Authentication</div>
-	<div class="category">Activity</div>
-	<div class="setting">Blocked accounts</div>
-</div>
+{/if}
 
 <style lang="scss">
 	.settings {
@@ -92,17 +95,6 @@
 		background: rgb(29, 29, 29);
 		font-weight: bold;
 		text-transform: uppercase;
-	}
-
-	.profile-wrap {
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		width: 100%;
-
-		&:hover {
-			background-color: #202020;
-		}
 	}
 
 	.setting {

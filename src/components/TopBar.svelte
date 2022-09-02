@@ -66,7 +66,6 @@
 				class="menu-item logout"
 				on:click={async () => {
 					api.logout();
-					stLoggedUser.set(null);
 				}}
 			>
 				Log out
@@ -167,20 +166,6 @@
 		}
 		to {
 			transform: translateX(100%);
-		}
-	}
-
-	button {
-		font-size: 14px;
-		border: none;
-		background: #1e1e1e;
-		color: white;
-		border-radius: 10px;
-		border: 1px solid rgb(40, 40, 40);
-		padding: 8px;
-
-		&:hover {
-			background: #2e2e2e;
 		}
 	}
 </style>

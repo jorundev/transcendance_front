@@ -3,44 +3,10 @@
 	import TabRegionElement from "../components/Kit/TabRegionElement.svelte";
 	import ProfileCard from "../components/ProfileCard.svelte";
 	import { stLoggedUser } from "../stores";
-	import { api } from "../api";
-	import { onMount } from "svelte";
 	import TopBar from "../components/TopBar.svelte";
-
-	let serverDown = false;
-
-	onMount(() => {
-		serverDown = false;
-		stLoggedUser.set(null);
-	});
-
-	stLoggedUser.subscribe(async (value) => {
-		if (value == null) {
-			let response = await api.whoami();
-			if (response == null) {
-				serverDown = true;
-				return;
-			}
-			serverDown = false;
-			stLoggedUser.set({
-				username: response.username,
-				uuid: response.uuid,
-				id: response.identifier,
-				profile_picture: response.profile_picture,
-			});
-		} else {
-			if ($stLoggedUser.uuid != value.uuid) {
-				stLoggedUser.set(null);
-			}
-		}
-	});
 
 	const tabs: Array<string> = ["Profile", "Friends"];
 </script>
-
-{#if serverDown}
-	<div class="sorry">Server is down. Try again later!</div>
-{/if}
 
 {#if $stLoggedUser != null}
 	<TopBar />
@@ -68,10 +34,5 @@
 	.profile-tab {
 		height: 300px;
 		width: 100%;
-	}
-	.sorry {
-		color: gray;
-		text-align: center;
-		font-size: 40px;
 	}
 </style>

@@ -63,8 +63,6 @@
 			return;
 		}
 
-		stLoggedUser.set(null);
-
 		const req: LoginRequest = {
 			email,
 			password,
