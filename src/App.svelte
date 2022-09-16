@@ -3,7 +3,7 @@
 
 	import Router, { replace } from "svelte-spa-router";
 	import routes from "./App.routes";
-	import { stLoggedUser, stServerDown, tryLoggingIn } from "./stores";
+	import { stServerDown } from "./stores";
 
 	onMount(async () => {
 		document.documentElement.style.setProperty(
@@ -53,9 +53,11 @@
 	.main {
 		width: 100%;
 		height: 100%;
-		padding: 16px;
+		margin-left: auto;
+		margin-right: auto;
 		box-sizing: border-box;
 		overflow: hidden;
+		max-width: 1600px;
 	}
 
 	.sorry {

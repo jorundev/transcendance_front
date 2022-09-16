@@ -26,21 +26,18 @@
 		// WebKit annoys me
 		if (browserName() == "safari") {
 			if (
-				closest_left != scrollRegion.scrollLeft + 16 &&
+				closest_left != scrollRegion.scrollLeft - 16 &&
 				closest_left != scrollRegion.scrollLeft
 			) {
 				return;
 			}
-		} else if (!scrolling && closest_left != scrollRegion.scrollLeft + 16) {
+		} else if (!scrolling && closest_left != scrollRegion.scrollLeft) {
 			return;
 		}
 
 		scrolling = true;
 		setTimeout(() => (scrolling = false), 500);
 
-		if (scrollRegion == null) {
-			return;
-		}
 		let el = scrollRegion.querySelector(`.tab-section[href=${selected}]`);
 		if (el == null) {
 			return;
@@ -52,7 +49,7 @@
 		/* Too bad! */
 		scrollRegion.scrollTo({
 			top: 0,
-			left: (el.scrollWidth + 16) * index,
+			left: el.scrollWidth * index + 16,
 			behavior: "smooth",
 		});
 	}
@@ -101,8 +98,7 @@
 		overflow-x: auto;
 		scrollbar-width: none;
 		scroll-snap-type: x mandatory;
-		width: calc(100vw - var(--scrollbar-width));
-		transform: translateX(-16px);
+		width: 100%;
 
 		&::-webkit-scrollbar {
 			display: none;

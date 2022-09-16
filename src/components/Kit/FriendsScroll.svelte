@@ -40,7 +40,6 @@
 		display: flex;
 		align-items: center;
 		width: calc(100vw - var(--scrollbar-width));
-		transform: translateX(-16px);
 
 		-ms-overflow-style: none;
 		scrollbar-width: none;
@@ -61,5 +60,8 @@
 		margin-right: 16px;
 		margin-bottom: 10px;
 		background-size: cover;
+	}
+
+	@media screen and (min-width: 800px) {
 	}
 </style>

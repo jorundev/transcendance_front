@@ -34,7 +34,6 @@
 		scrollbar-width: none;
 		-ms-overflow-style: none;
 		width: calc(100vw - var(--scrollbar-width));
-		transform: translateX(-16px);
 		margin-bottom: 10px;
 
 		&::-webkit-scrollbar {
@@ -44,5 +43,8 @@
 	.padder {
 		min-width: 16px;
 		min-height: 100%;
+	}
+
+	@media screen and (min-width: 800px) {
 	}
 </style>

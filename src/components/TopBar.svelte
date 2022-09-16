@@ -3,6 +3,7 @@
 	import ClickOutside from "svelte-click-outside";
 	import { api } from "../api";
 	import { push } from "svelte-spa-router";
+	import SearchBar from "./Kit/SearchBar.svelte";
 
 	let isFocused = false;
 	let slideLeftAnimPlaying = false;
@@ -24,6 +25,9 @@
 	}}
 >
 	<div class="top-bar">
+		<div class="search">
+			<SearchBar />
+		</div>
 		<div
 			class="profile-button"
 			on:click={() => (isFocused = true)}
@@ -36,6 +40,7 @@
 				class="menu-item console"
 				on:click={async () => {
 					let users = await api.users();
+					//TODO:
 					for (const user of users) {
 						console.log(user);
 					}
@@ -76,11 +81,19 @@
 
 <style lang="scss">
 	.top-bar {
+		display: flex;
+		gap: 14px;
 		overflow: hidden;
 		position: relative;
-		width: 100%;
-		height: 44px;
+		align-items: center;
+		width: calc(100% - 32px);
+		height: 54px;
+		margin: 16px;
 		margin-bottom: 6px;
+
+		.search {
+			width: 100%;
+		}
 	}
 
 	.after {
@@ -137,9 +150,8 @@
 	}
 
 	.profile-button {
+		flex-shrink: 0;
 		overflow: hidden;
-		position: absolute;
-		right: 0;
 		background: rgb(37, 37, 37);
 		width: 42px;
 		height: 42px;

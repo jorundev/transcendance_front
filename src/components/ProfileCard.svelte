@@ -3,6 +3,7 @@
 	import { stLoggedUser } from "../stores";
 	import HomeCategory from "./Kit/HomeCategory.svelte";
 	import FriendsScroll from "./Kit/FriendsScroll.svelte";
+	import { onMount } from "svelte";
 	type Rank =
 		| "sachiel"
 		| "shamshel"
@@ -19,7 +20,12 @@
 		| "arael"
 		| "armisael";
 
-	let percentage = 50;
+	let percentage = 0;
+
+	onMount(() => {
+		percentage = Math.random() * 100;
+	});
+
 	let rank: Rank = "sachiel";
 
 	let rank_description: string = "Sachiel - Third Angel";
@@ -75,11 +81,13 @@
 
 <style lang="scss">
 	.profile-card {
-		width: 100%;
+		width: calc(100% - 32px);
 		background: #161618;
 		padding: 20px;
 		border-radius: 12px;
 		box-sizing: border-box;
+		margin-left: 16px;
+		margin-right: 16px;
 	}
 
 	.profile-line-1 {

@@ -13,6 +13,7 @@
 	.title {
 		color: #8c8c8e;
 		margin-bottom: 16px;
+		margin-left: 16px;
 	}
 
 	.home-category {

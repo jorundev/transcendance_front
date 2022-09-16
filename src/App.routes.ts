@@ -11,6 +11,8 @@ import { isLogged, tryLoggingIn } from "./stores";
 import type { WrappedComponent } from "svelte-spa-router";
 import type { SvelteComponentDev } from "svelte/internal";
 import NotFound from "./routes/NotFound.svelte";
+import Chat from "./routes/Chat.svelte";
+import ChatInside from "./components/Kit/ChatInside.svelte";
 
 /*export default {
 	"/": Home,
@@ -55,6 +57,9 @@ function requiresNoLogin(
 export default {
 	"/": requiresLogin(Home),
 	"/settings": requiresLogin(Settings),
+	"/chat": requiresLogin(Chat),
+	"/chat/group/:uuid": requiresLogin(ChatInside),
+	"/chat/single/:uuid": requiresLogin(ChatInside),
 	"/login": requiresNoLogin(Login),
 	"/login/username": requiresNoLogin(LoginByEmail),
 	"/login/2fa": requiresNoLogin(Login2FA),

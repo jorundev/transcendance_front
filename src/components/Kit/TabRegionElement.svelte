@@ -8,12 +8,10 @@
 
 <style lang="scss">
 	.tab-section {
-		width: calc(100% - 32px);
+		width: 100%;
 		flex-shrink: 0;
 		scroll-snap-align: center;
-
-		margin-left: 16px;
-		margin-right: 16px;
+		overflow: hidden;
 	}
 
 	/* Safari 11+ */

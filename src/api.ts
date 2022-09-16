@@ -77,7 +77,7 @@ async function makeRequest<T>(
 					console.log(
 						"Refresh token is absent or has expired. Login required"
 					);
-					push("/login");
+					await api.logout();
 					return null;
 				}
 		}

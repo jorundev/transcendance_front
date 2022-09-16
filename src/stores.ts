@@ -8,8 +8,30 @@ export interface LoggedUser {
 	uuid: string;
 }
 
+export interface User {
+	username: string;
+	id: string;
+	profile_picture: string | null;
+}
+
+export interface UserDictionary {
+	[key: string]: User;
+}
+
 export const stLoggedUser: Writable<LoggedUser | null> = writable(null);
 export const stServerDown: Writable<boolean> = writable(false);
+export const stUsers: Writable<UserDictionary> = writable({
+	"55c4d182-af87-4166-a0a6-7909072a48f7": {
+		username: "Random",
+		id: "0999",
+		profile_picture: null,
+	},
+	"58cdfb48-43b7-4551-ba65-9f49aeb80e03": {
+		username: "Michel",
+		id: "0001",
+		profile_picture: null,
+	},
+});
 
 export async function tryToLog() {
 	const response = await api.whoami();

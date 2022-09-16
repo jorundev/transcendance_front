@@ -46,6 +46,7 @@
 		<div class="category">Security</div>
 		<div class="setting">Password</div>
 		<div class="setting">Two-Factor Authentication</div>
+		<div class="setting">Sessions</div>
 		<div class="category">Activity</div>
 		<div class="setting">Blocked accounts</div>
 	</div>
