@@ -1,24 +1,40 @@
 <script lang="ts">
-	export let messages: Array<string>;
+	import { getUserProfilePictureLink } from "../../api";
+
+	export let messages: Array<{
+		value: string;
+		date: string;
+		username: string;
+		confirmed: boolean;
+		sender: string;
+	}>;
 	export let side: "left" | "right";
 </script>
 
-{#each messages as message, i}
-	<div class="bubble-wrapper {side}" class:last={i + 1 == messages.length}>
+{#each [...messages].reverse() as message, i}
+	<div
+		class="bubble-wrapper {side}"
+		class:last={i == 0}
+		data-date={message.date}
+		data-username={side == "left" ? message.username + " · " : ""}
+	>
 		{#if side == "left"}
 			<div
 				class="profile-picture"
-				style={i + 1 == messages.length
-					? "background-image: url('/img/default.jpg')"
+				style={i == 0
+					? `background-image: url("${getUserProfilePictureLink(
+							message.sender
+					  )}")`
 					: ""}
 			/>
 		{/if}
 		<div
 			class="bubble {side}"
-			class:last={i + 1 == messages.length}
-			class:one-above={i != 0}
+			class:last={i != 0}
+			class:one-above={i + 1 != messages.length}
+			class:pending={!message.confirmed}
 		>
-			{message}
+			{message.value}
 		</div>
 	</div>
 {/each}
@@ -34,7 +50,7 @@
 			&::after {
 				position: absolute;
 				bottom: -18px;
-				content: "00:14";
+				content: attr(data-username) attr(data-date);
 				color: gray;
 				font-size: 14px;
 			}
@@ -60,18 +76,19 @@
 	}
 
 	.profile-picture {
-		top: 3px;
 		position: absolute;
 		flex-shrink: 0;
 		width: 40px;
 		height: 40px;
 		border-radius: 100%;
 		background-size: cover;
-		bottom: 0;
+		bottom: 2px;
 	}
 
 	.bubble {
-		white-space: pre;
+		word-break: break-word;
+		word-wrap: break-word;
+		white-space: pre-wrap;
 		hyphens: auto;
 		position: relative;
 		width: auto;
@@ -81,6 +98,8 @@
 		border-radius: 30px;
 		max-width: 400px;
 		line-height: 22px;
+		margin-top: 3px;
+		margin-bottom: 3px;
 
 		&.left {
 			background: #272727;
@@ -97,6 +116,10 @@
 			border-bottom-right-radius: 0;
 			&.one-above {
 				border-top-right-radius: 0;
+			}
+
+			&.pending {
+				background: rgb(46, 46, 46);
 			}
 		}
 	}

@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { createEventDispatcher } from "svelte";
 
-	export let text: string;
+	export let text: string = null;
 	export let active: boolean = true;
+	export let highlight = true;
 
 	const dispatch = createEventDispatcher();
 
@@ -11,7 +12,13 @@
 	}
 </script>
 
-<button class={active ? "active" : ""} on:click={onClick}>{text}</button>
+<button class:active class:highlight on:click|stopPropagation={onClick}>
+	{#if text}
+		{text}
+	{:else}
+		<slot />
+	{/if}
+</button>
 
 <style lang="scss">
 	button {
@@ -30,14 +37,24 @@
 		&.active {
 			cursor: pointer;
 			color: white;
-			background: #0b82fa;
+
+			background: rgb(41, 41, 41);
+
+			&.highlight {
+				background: #0b82fa;
+			}
 
 			&:hover {
-				background: #0a73dd;
+				background: rgb(33, 33, 33);
+				&.highlight {
+					background: #0a73dd;
+				}
 			}
 
 			&:active {
-				background: #0969c9;
+				&.highlight {
+					background: #0969c9;
+				}
 			}
 		}
 	}

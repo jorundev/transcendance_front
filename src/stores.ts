@@ -1,5 +1,5 @@
 import { get, writable, type Writable } from "svelte/store";
-import { api, APIStatus } from "./api";
+import { api, APIStatus, getUsersFromUUIDs } from "./api";
 
 export interface LoggedUser {
 	username: string;
@@ -10,7 +10,7 @@ export interface LoggedUser {
 
 export interface User {
 	username: string;
-	id: string;
+	identifier: string;
 	profile_picture: string | null;
 }
 
@@ -18,20 +18,49 @@ export interface UserDictionary {
 	[key: string]: User;
 }
 
+export interface ChannelDictionary {
+	[key: string]: Channel;
+}
+
+export enum ChannelType {
+	Single,
+	Group,
+}
+
+export interface Channel {
+	type: ChannelType;
+	uuid: string;
+	id: number;
+	name: string;
+	last_message: {
+		sender: string | null;
+		value: string;
+		date: number;
+		id: number;
+	} | null;
+	loaded_messages: Array<{
+		sender: string;
+		value: string;
+		date: number;
+		id: number;
+	}>;
+	users: Array<{
+		uuid: string;
+		name: string;
+		id: number;
+		profile_picture: string;
+		is_moderator: boolean;
+	}>;
+	joined: boolean;
+	has_password: boolean;
+	last_loaded_page: number;
+}
+
 export const stLoggedUser: Writable<LoggedUser | null> = writable(null);
 export const stServerDown: Writable<boolean> = writable(false);
-export const stUsers: Writable<UserDictionary> = writable({
-	"55c4d182-af87-4166-a0a6-7909072a48f7": {
-		username: "Random",
-		id: "0999",
-		profile_picture: null,
-	},
-	"58cdfb48-43b7-4551-ba65-9f49aeb80e03": {
-		username: "Michel",
-		id: "0001",
-		profile_picture: null,
-	},
-});
+export const stUsers: Writable<UserDictionary> = writable({});
+export const stWebsocket: Writable<WebSocket | null> = writable(null);
+export const stChannels: Writable<ChannelDictionary> = writable({});
 
 export async function tryToLog() {
 	const response = await api.whoami();
@@ -52,6 +81,63 @@ export async function tryToLog() {
 	});
 
 	stServerDown.set(false);
+	api.ws.connect();
+	await initChannels();
+}
+
+async function initChannels() {
+	const joinedChannelsPromise = api.getJoinedChannels();
+	const channelsResponse = await api.listChannels();
+	if (channelsResponse == APIStatus.NoResponse) {
+		return;
+	}
+	const joinedChannels = await joinedChannelsPromise;
+	if (joinedChannels == APIStatus.NoResponse) {
+		return;
+	}
+	const channels: ChannelDictionary = {};
+	const messages_promises = [];
+	for (const channel of channelsResponse.data) {
+		messages_promises.push(
+			api.getChannelMessages(
+				channel.uuid,
+				Math.floor(channel.message_count / 10) + 1
+			)
+		);
+	}
+	const messages_promises_all = Promise.all(messages_promises);
+	let i = 0;
+	for (const channel of channelsResponse.data) {
+		const users = await getUsersFromUUIDs(channel);
+		channels[channel.uuid] = {
+			has_password: channel.password,
+			uuid: channel.uuid,
+			id: channel.identifier,
+			name: channel.name,
+			type: ChannelType.Group,
+			last_message: null,
+			loaded_messages: [],
+			joined:
+				joinedChannels.data.find((e) => e.uuid == channel.uuid) !=
+				undefined,
+			users,
+			last_loaded_page: Math.floor(channel.message_count / 10) + 1,
+		};
+		const messages = await messages_promises_all;
+		if (messages[i] == APIStatus.NoResponse) {
+			continue;
+		}
+		for (const message of messages[i].data) {
+			channels[channel.uuid].loaded_messages.push({
+				id: message.id,
+				value: message.message,
+				sender: message.user,
+				date: Date.parse(message.creation_date),
+			});
+		}
+		i += 1;
+	}
+	stChannels.set(channels);
 }
 
 export async function tryLoggingIn(): Promise<boolean> {

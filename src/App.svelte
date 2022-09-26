@@ -3,7 +3,7 @@
 
 	import Router, { replace } from "svelte-spa-router";
 	import routes from "./App.routes";
-	import { stServerDown } from "./stores";
+	import { stServerDown, stWebsocket } from "./stores";
 
 	onMount(async () => {
 		document.documentElement.style.setProperty(
@@ -14,17 +14,13 @@
 			"--scrollbar-height",
 			window.innerHeight - document.documentElement.clientHeight + "px"
 		);
-	});
 
-	/*stLoggedUser.subscribe(async (value) => {
-		if (value == null) {
-			tryLoggingIn();
-		} else {
-			if ($stLoggedUser.uuid != value.uuid) {
-				stLoggedUser.set(null);
+		setInterval(() => {
+			if ($stWebsocket) {
+				$stWebsocket.send("");
 			}
-		}
-	});*/
+		}, 20000);
+	});
 
 	function conditionsFailed(event) {
 		if (!event.detail.userData) {

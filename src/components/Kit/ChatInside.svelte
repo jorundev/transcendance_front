@@ -1,67 +1,180 @@
 <script lang="ts">
-	import { stLoggedUser } from "../../stores";
+	import {
+		stChannels,
+		stLoggedUser,
+		type Channel,
+		type ChannelDictionary,
+	} from "../../stores";
 
 	import { onMount } from "svelte";
 	import BubbleSet from "./BubbleSet.svelte";
+	import { api, APIStatus, loadNextPage } from "../../api";
+	import Modal from "./Modal.svelte";
+	import ChannelSettings from "../ChannelSettings.svelte";
 
-	let chatDiv: HTMLDivElement;
 	let textArea: HTMLInputElement;
+	let chatDiv: HTMLDivElement;
+
+	export let params: { uuid: string };
+
+	async function loadPages(n: number) {
+		/*while (n >= 0 && info?.last_loaded_page != 1) {
+			n -= 1;*/
+		await loadNextPage(params.uuid, n);
+		//}
+	}
+
+	$: if (params.uuid) {
+		loadPages(5);
+	}
+
+	let show_channel_settings_modal = false;
+
+	let joined: boolean;
+
+	$: joined = $stChannels[params.uuid]?.joined;
+	$: if (params.uuid) {
+		info = l_channels[params.uuid];
+		onInfoChange();
+	}
+
+	let old_length = 0;
+	let info: Channel = null;
 
 	const text_area_height = "80px";
+
+	// this handles the loading of previous messages on scroll
+	// this might look messy (and in a way it is) but it's actually pretty straightforward
+	let last_load = new Date();
+	function onScroll() {
+		const now = new Date();
+
+		// If we reached the top of the scroll, don't wait
+		if (
+			chatDiv?.scrollHeight + chatDiv?.scrollTop ==
+			chatDiv?.clientHeight
+		) {
+			last_load = now;
+			loadNextPage(info?.uuid).then(() => {});
+			return;
+		}
+
+		// else, wait 500ms between each page load
+		if (
+			Math.abs(now.getMilliseconds() - last_load.getMilliseconds()) < 500
+		) {
+			return;
+		}
+
+		// Number of pixels to the top of the scroll area before loading a new page
+		const sensitivity = 400;
+		if (
+			chatDiv?.scrollHeight + chatDiv?.scrollTop <=
+			chatDiv?.clientHeight + sensitivity
+		) {
+			last_load = now;
+			loadNextPage(info?.uuid).then(() => {});
+		}
+	}
 
 	interface ChatMessage {
 		sender: string;
 		value: string;
 		date: string;
+		username: string;
+		confirmed: boolean;
 	}
 
 	interface MessageSet {
 		side: "left" | "right";
-		messages: Array<string>;
+		id: number;
+		messages: Array<{
+			value: string;
+			date: string;
+			username: string;
+			confirmed: boolean;
+			sender: string;
+		}>;
 	}
 
-	let messages: Array<ChatMessage> = [
-		{
-			sender: "",
-			value: "Lorem ipsum dolor sit amet.",
-			date: "00:07",
-		},
-		{
-			sender: "",
-			value: "Lorem ipsum dolor sit amet.",
-			date: "00:07",
-		},
-		{
-			sender: "",
-			value: "Lorem ipsum dolor sit amet.",
-			date: "00:07",
-		},
-		{
-			sender: $stLoggedUser.uuid,
-			value: "ta gueule",
-			date: "00:09",
-		},
-		{
-			sender: "",
-			value: "Lorem ipsum dolor sit amet.",
-			date: "00:10",
-		},
-	];
+	function format_date(date: number) {
+		const dt_format = new Intl.DateTimeFormat("en-GB", {
+			timeStyle: "short",
+		});
 
+		return dt_format.format(new Date(date));
+	}
+
+	let messages: Array<ChatMessage> = [];
 	let groups: Array<MessageSet> = [];
+	let l_channels: ChannelDictionary;
+
+	async function onInfoChange() {
+		if (info == undefined) {
+			return;
+		}
+		if (info.loaded_messages.length != old_length) {
+			old_length = info.loaded_messages.length;
+			messages = [];
+			for (const message of info.loaded_messages) {
+				let user = await api.getUserData(message.sender);
+				if (user == APIStatus.NoResponse) {
+					continue;
+				}
+				let identifier = "000" + user.identifier;
+				messages.push({
+					sender: message.sender,
+					value: message.value,
+					date: format_date(message.date),
+					username:
+						user.username +
+						"#" +
+						identifier.substring(identifier.length - 4),
+					confirmed: true,
+				});
+			}
+			updateMessages();
+		}
+	}
+
+	stChannels.subscribe(async (channels) => {
+		l_channels = channels;
+		info = l_channels[params.uuid];
+		if (info == undefined) {
+			return;
+		}
+		await onInfoChange();
+	});
 
 	function updateMessages() {
 		groups = [];
+		let i = 0;
 		let previous: ChatMessage | null = null;
 		for (const message of messages) {
 			if (previous?.sender == message.sender) {
-				groups[groups.length - 1].messages.push(message.value);
+				groups[groups.length - 1].messages.push({
+					value: message.value,
+					date: message.date,
+					username: message.username,
+					confirmed: message.confirmed,
+					sender: message.sender,
+				});
 			} else {
 				groups.push({
 					side:
 						message.sender == $stLoggedUser.uuid ? "right" : "left",
-					messages: [message.value],
+					messages: [
+						{
+							value: message.value,
+							date: message.date,
+							username: message.username,
+							confirmed: message.confirmed,
+							sender: message.sender,
+						},
+					],
+					id: i,
 				});
+				i += 1;
 			}
 			previous = message;
 		}
@@ -73,34 +186,59 @@
 		if (value == "") {
 			return;
 		}
+
 		messages.push({
-			sender: $stLoggedUser?.uuid,
+			sender: $stLoggedUser.uuid,
 			value,
-			date: "",
+			date: "Sending...",
+			confirmed: false,
+			username: "You",
 		});
+
+		api.sendMessage(info.uuid, value);
 
 		updateMessages();
 	}
 
-	onMount(() => {
-		chatDiv.scrollTo(0, 9999999);
+	onMount(async () => {
 		updateMessages();
 	});
 </script>
 
 <div class="chat">
+	{#if show_channel_settings_modal}
+		<Modal>
+			<div class="channel-settings">
+				<ChannelSettings
+					channel={info}
+					on:back={() => {
+						show_channel_settings_modal = false;
+					}}
+				/>
+			</div>
+		</Modal>
+	{/if}
 	<div class="top">
 		<div
 			class="profile-picture"
 			style="background-image: url('/img/default.jpg')"
 		/>
-		<div class="name">Sample</div>
+		<div class="name">{$stChannels[params.uuid]?.name}</div>
+		{#if joined}
+			<div
+				class="settings-button"
+				on:click={() => {
+					show_channel_settings_modal = true;
+				}}
+			/>
+		{/if}
 	</div>
-	<div class="bubbles" bind:this={chatDiv}>
-		{#each groups as set}
+
+	<div class="bubbles" bind:this={chatDiv} on:scroll={onScroll}>
+		<div class="pad" />
+		{#each [...groups].reverse() as set (set.id)}
 			<BubbleSet side={set.side} messages={set.messages} />
 		{/each}
-		<div class="pad" />
 	</div>
 	<div class="response-bar" style="height: {text_area_height}">
 		<input
@@ -113,8 +251,9 @@
 					sendMessage();
 				}
 			}}
+			disabled={!joined}
 		/>
-		<div class="send" on:click={sendMessage} />
+		<div class="send" class:disabled={!joined} on:click={sendMessage} />
 	</div>
 </div>
 
@@ -123,14 +262,13 @@
 		position: relative;
 		padding-top: 10px;
 		overflow: auto;
-		height: calc(100vh - var(--scrollbar-height) - 197px);
+		height: calc(100% - var(--scrollbar-height) - 162px);
 		width: 100%;
 		transform: translateX(-16px);
 		padding-left: 16px;
 		padding-right: 16px;
 		display: flex;
-		flex-direction: column;
-		gap: 6px;
+		flex-direction: column-reverse;
 
 		&::-webkit-scrollbar {
 			background-color: black;
@@ -154,7 +292,6 @@
 		box-sizing: border-box;
 		display: flex;
 		align-items: center;
-		position: fixed;
 		bottom: 0;
 		left: 0;
 		background-color: black;
@@ -183,6 +320,13 @@
 			background: #282828;
 			outline: none;
 		}
+
+		&:disabled {
+			background: rgb(56, 56, 56);
+			&::placeholder {
+				color: rgb(117, 117, 117);
+			}
+		}
 	}
 
 	.pad {
@@ -201,6 +345,11 @@
 		background-repeat: no-repeat;
 		background-size: 20px;
 		background-image: url("/img/send.png");
+
+		&.disabled {
+			background-color: rgb(71, 71, 71);
+			opacity: 0.5;
+		}
 	}
 
 	.top {
@@ -208,10 +357,21 @@
 		gap: 14px;
 		align-items: center;
 		display: flex;
-		height: 80px;
+		height: 60px;
 		border-bottom: 1px solid #232323;
 		background: black;
-		padding-bottom: 10px;
+		padding-bottom: 4px;
+		padding-top: 4px;
+	}
+
+	.settings-button {
+		width: 20px;
+		height: 20px;
+		background-image: url("/img/settings.png");
+		background-size: cover;
+		background-repeat: no-repeat;
+		background-position: center;
+		cursor: pointer;
 	}
 
 	.profile-picture {
@@ -220,7 +380,20 @@
 		background-position: center;
 		background-size: cover;
 		background-repeat: no-repeat;
-		width: 50px;
-		height: 50px;
+		width: 40px;
+		height: 40px;
+	}
+
+	.chat {
+		padding-left: 16px;
+		padding-right: 16px;
+		height: 100%;
+	}
+
+	.channel-settings {
+		width: 100%;
+		height: 100%;
+		display: grid;
+		place-items: center;
 	}
 </style>

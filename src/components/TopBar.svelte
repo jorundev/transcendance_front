@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { stLoggedUser } from "../stores";
 	import ClickOutside from "svelte-click-outside";
-	import { api } from "../api";
+	import { api, APIStatus } from "../api";
 	import { push } from "svelte-spa-router";
 	import SearchBar from "./Kit/SearchBar.svelte";
 
@@ -40,6 +40,9 @@
 				class="menu-item console"
 				on:click={async () => {
 					let users = await api.users();
+					if (users == APIStatus.NoResponse) {
+						return;
+					}
 					//TODO:
 					for (const user of users) {
 						console.log(user);
@@ -52,6 +55,9 @@
 				class="menu-item wipe"
 				on:click={async () => {
 					let users = await api.users();
+					if (users == APIStatus.NoResponse) {
+						return;
+					}
 					for (const user of users) {
 						fetch("/api/users/" + user.uuid, { method: "DELETE" });
 					}

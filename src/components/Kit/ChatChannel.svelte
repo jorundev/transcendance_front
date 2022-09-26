@@ -1,34 +1,35 @@
-<script lang="ts" context="module">
-	import { stUsers } from "../../stores";
-
-	export enum ChannelType {
-		Single,
-		Group,
-	}
-
-	export interface Channel {
-		type: ChannelType;
-		id: string;
-		last_message: {
-			sender: string | null;
-			value: string;
-			date: Date;
-		};
-	}
-</script>
-
 <script lang="ts">
-	import { push } from "svelte-spa-router";
+	import {
+		ChannelType,
+		stUsers,
+		type Channel,
+		stLoggedUser,
+		type User,
+	} from "../../stores";
+	import { api, APIStatus } from "../../api";
+	import Button from "./Button.svelte";
+	import { createEventDispatcher } from "svelte";
 
 	export let info: Channel;
+	export let current: string;
+	export let joined: boolean;
 	let time_since_lm: number = 0;
 	let time_str: string = "";
 	let truncated_msg: string = "";
 
 	$: {
-		truncated_msg = info.last_message.value;
-		if (info.last_message.value.length > 50) {
-			truncated_msg = truncated_msg.substring(0, 50) + "...";
+		truncated_msg = info?.last_message?.value;
+		if (info?.last_message?.value.length > 20) {
+			truncated_msg = truncated_msg.substring(0, 20) + "...";
+		}
+	}
+
+	$: {
+		if (info?.loaded_messages.length != 0) {
+			info.last_message =
+				info?.loaded_messages[info?.loaded_messages.length - 1];
+		} else {
+			info.last_message = null;
 		}
 	}
 
@@ -56,34 +57,109 @@
 		return n_days + ` day${n_days != 1 ? "s" : ""} ago`;
 	}
 
-	$: time_since_lm =
-		(new Date().valueOf() - info.last_message.date.valueOf()) / 1000;
+	$: {
+		if (info?.last_message != null) {
+			time_since_lm =
+				(new Date().valueOf() - info?.last_message?.date.valueOf()) /
+				1000;
+		}
+	}
 
 	$: time_str = getTimeStr(time_since_lm);
 
-	function goToMessages() {
-		if (info.type == ChannelType.Single) {
-			push("/chat/single/" + info.id);
-		} else {
-			push("/chat/group/" + info.id);
+	let last_message_sender: User = null;
+
+	$: {
+		if (info?.last_message) {
+			api.getUserData(info?.last_message.sender).then((val) => {
+				if (val != APIStatus.NoResponse) {
+					last_message_sender = val;
+				}
+			});
 		}
 	}
+
+	function goToMessages() {
+		dispatch("click", {
+			channel: info,
+		});
+	}
+
+	let dispatch = createEventDispatcher();
 </script>
 
 {#if $stUsers}
-	<div class="channel" on:click={goToMessages}>
+	<div
+		class="channel"
+		on:click|stopPropagation={goToMessages}
+		class:current={current == info?.uuid}
+	>
 		<div class="profile-picture" />
 		<div class="data-line">
 			<div class="username">
-				<!-- TODO -->
-				{$stUsers[info.id]?.username}#{$stUsers[info.id]?.id} · {time_str}
+				{#if info?.type == ChannelType.Single}
+					<!-- TODO -->
+					{$stUsers[info?.id]?.username}#{$stUsers[info?.id]
+						?.identifier}
+				{:else}
+					{info?.name}<span class="id">#{info?.id}</span>
+					{#if info?.last_message != null}
+						· {time_str}
+					{/if}
+				{/if}
 			</div>
-			<div class="last-message">{truncated_msg}</div>
+			{#if info?.last_message != null}
+				<div class="last-message">
+					{#if info?.last_message.sender == $stLoggedUser.uuid}
+						You:
+					{:else if last_message_sender != null}
+						{last_message_sender.username}#{last_message_sender.identifier}:
+					{:else}
+						{"loading user:"}
+					{/if}
+					{truncated_msg}
+				</div>
+			{/if}
 		</div>
+		{#if !joined}
+			<div class="join-button">
+				<Button
+					on:click={() =>
+						dispatch("join", {
+							channel: info,
+						})}
+					><div
+						class="join-button-inner"
+						class:password={info?.has_password}
+					>
+						Join
+					</div></Button
+				>
+			</div>
+		{/if}
 	</div>
 {/if}
 
 <style lang="scss">
+	.join-button-inner {
+		flex-shrink: 0;
+		flex-grow: 0;
+		display: flex;
+		gap: 10px;
+		padding-left: 6px;
+		padding-right: 6px;
+		&.password {
+			padding-left: 0;
+			&::before {
+				content: "";
+				display: block;
+				width: 20px;
+				height: 20px;
+				background-image: url("/img/lock.svg");
+				background-size: cover;
+			}
+		}
+	}
 	.channel {
 		display: flex;
 		gap: 18px;
@@ -92,13 +168,18 @@
 		padding-bottom: 6px;
 		padding-top: 6px;
 		margin-bottom: 6px;
-		padding-left: 10px;
+		padding-left: 16px;
 
 		&:hover {
-			background: rgb(20, 20, 20);
-			border-radius: 20px;
+			background: #141414;
 			cursor: pointer;
 		}
+	}
+
+	.join-button {
+		margin-left: auto;
+		margin-right: 16px;
+		z-index: 1;
 	}
 
 	.profile-picture {
@@ -114,9 +195,22 @@
 		display: flex;
 		flex-direction: column;
 		gap: 6px;
+		overflow-wrap: break-word;
+		max-width: 220px;
 	}
 
 	.last-message {
 		color: #787771;
+	}
+
+	.id {
+		color: #787771;
+	}
+
+	@media screen and (min-width: 801px) {
+		.channel.current {
+			background-color: #202327;
+			border-right: 3px solid #0c82fa;
+		}
 	}
 </style>
