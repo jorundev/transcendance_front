@@ -105,14 +105,18 @@
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify(req),
-		}).then(async (res) => {
-			if (res.status == 201) {
-				await login(true);
-			} else if (res.status == 400) {
-				errormsg = "Email address is already taken";
-				show_error = true;
-			}
-		});
+		})
+			.then(async (res) => {
+				if (res.status == 201) {
+					await login(true);
+				} else if (res.status == 400) {
+					errormsg = "Email address is already taken";
+					show_error = true;
+				}
+			})
+			.catch((err) => {
+				console.log("Critical error: ", err);
+			});
 	}
 
 	function checkEmail() {

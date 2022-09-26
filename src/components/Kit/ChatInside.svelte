@@ -55,7 +55,11 @@
 			chatDiv?.clientHeight
 		) {
 			last_load = now;
-			loadNextPage(info?.uuid).then(() => {});
+			loadNextPage(info?.uuid)
+				.then(() => {})
+				.catch((err) => {
+					console.log("Critical error: ", err);
+				});
 			return;
 		}
 
@@ -73,7 +77,11 @@
 			chatDiv?.clientHeight + sensitivity
 		) {
 			last_load = now;
-			loadNextPage(info?.uuid).then(() => {});
+			loadNextPage(info?.uuid)
+				.then(() => {})
+				.catch((err) => {
+					console.log("Critical error: ", err);
+				});
 		}
 	}
 

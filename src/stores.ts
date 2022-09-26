@@ -98,17 +98,21 @@ async function initChannels() {
 	const channels: ChannelDictionary = {};
 	const messages_promises = [];
 	for (const channel of channelsResponse.data) {
-		messages_promises.push(
-			api.getChannelMessages(
-				channel.uuid,
-				Math.floor(channel.message_count / 10) + 1
-			)
-		);
+		let page = channel.message_count / 10;
+		if (page != Math.floor(page)) {
+			page = Math.floor(page) + 1;
+		}
+		messages_promises.push(api.getChannelMessages(channel.uuid, page));
 	}
 	const messages_promises_all = Promise.all(messages_promises);
 	let i = 0;
 	for (const channel of channelsResponse.data) {
 		const users = await getUsersFromUUIDs(channel);
+		// TODO: page is already calculated before ...
+		let page = channel.message_count / 10;
+		if (page != Math.floor(page)) {
+			page = Math.floor(page) + 1;
+		}
 		channels[channel.uuid] = {
 			has_password: channel.password,
 			uuid: channel.uuid,
@@ -121,7 +125,7 @@ async function initChannels() {
 				joinedChannels.data.find((e) => e.uuid == channel.uuid) !=
 				undefined,
 			users,
-			last_loaded_page: Math.floor(channel.message_count / 10) + 1,
+			last_loaded_page: page,
 		};
 		const messages = await messages_promises_all;
 		if (messages[i] == APIStatus.NoResponse) {

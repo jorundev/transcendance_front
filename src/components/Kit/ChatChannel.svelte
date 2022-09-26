@@ -71,11 +71,15 @@
 
 	$: {
 		if (info?.last_message) {
-			api.getUserData(info?.last_message.sender).then((val) => {
-				if (val != APIStatus.NoResponse) {
-					last_message_sender = val;
-				}
-			});
+			api.getUserData(info?.last_message.sender)
+				.then((val) => {
+					if (val != APIStatus.NoResponse) {
+						last_message_sender = val;
+					}
+				})
+				.catch((err) => {
+					console.log("Critical error: ", err);
+				});
 		}
 	}
 
@@ -110,7 +114,7 @@
 			</div>
 			{#if info?.last_message != null}
 				<div class="last-message">
-					{#if info?.last_message.sender == $stLoggedUser.uuid}
+					{#if info?.last_message.sender == $stLoggedUser?.uuid}
 						You:
 					{:else if last_message_sender != null}
 						{last_message_sender.username}#{last_message_sender.identifier}:

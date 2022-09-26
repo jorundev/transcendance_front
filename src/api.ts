@@ -276,18 +276,21 @@ export async function loadNextPage(uuid: string, n?: number) {
 			return;
 		}
 		for (const message of messages.data) {
-			channel.loaded_messages.push({
-				id: message.id,
-				value: message.message,
-				sender: message.user,
-				date: Date.parse(message.creation_date),
-			});
+			/* Avoid duplicates */
+			if (
+				!channel.loaded_messages
+					.map((msg) => msg.id)
+					.includes(message.id)
+			) {
+				channel.loaded_messages.push({
+					id: message.id,
+					value: message.message,
+					sender: message.user,
+					date: Date.parse(message.creation_date),
+				});
+			}
 		}
 	}
-
-	// remove duplicates
-	channel.loaded_messages = [...new Set(channel.loaded_messages)];
-
 	channel.loaded_messages.sort((a, b) => {
 		return a.id - b.id;
 	});
@@ -416,6 +419,11 @@ export const api = {
 							}
 							const users = await getUsersFromUUIDs(channel_data);
 
+							let page = channel_data.message_count / 10;
+							if (page != Math.floor(page)) {
+								page = Math.floor(page) + 1;
+							}
+
 							stChannels.update((channels) => {
 								channels[chat_data.channel] = {
 									type: ChannelType.Group,
@@ -427,9 +435,7 @@ export const api = {
 									joined: false,
 									has_password: channel_data.password,
 									users: users,
-									last_loaded_page:
-										channels[chat_data.channel]
-											.last_loaded_page,
+									last_loaded_page: page,
 								};
 								return channels;
 							});

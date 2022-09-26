@@ -46,6 +46,12 @@
 		margin-bottom: 16px;
 	}
 
+	.category {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+
 	.profile {
 		display: flex;
 		justify-content: space-between;
@@ -53,6 +59,10 @@
 		width: 100%;
 		align-items: center;
 		gap: 10px;
+		background: rgb(20, 20, 20);
+		border-radius: 18px;
+		padding-left: 10px;
+		padding-right: 10px;
 
 		.profile-picture {
 			background-size: cover;
