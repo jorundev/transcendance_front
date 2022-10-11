@@ -171,7 +171,7 @@ async function makeRequest<T>(
 			case 502:
 				console.error("A terrible error happened: ", response);
 				stServerDown.set(true);
-				break;
+				return APIStatus.NoResponse;
 			case 200:
 			case 201:
 				try {

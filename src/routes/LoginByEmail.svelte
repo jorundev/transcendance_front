@@ -75,6 +75,12 @@
 					errormsg = "Invalid email or password";
 					show_error = true;
 					return;
+				} else if (res.status >= 500 && res.status <= 599) {
+					errormsg =
+						"Something is wrong with the server (Error " +
+						res.status +
+						")";
+					show_error = true;
 				}
 			})
 			.catch((e) => {
@@ -112,6 +118,12 @@
 					await login(true);
 				} else if (res.status == 400) {
 					errormsg = "Email address is already taken";
+					show_error = true;
+				} else if (res.status >= 500 && res.status <= 599) {
+					errormsg =
+						"Something is wrong with the server (Error " +
+						res.status +
+						")";
 					show_error = true;
 				}
 			})

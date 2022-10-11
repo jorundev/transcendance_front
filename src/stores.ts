@@ -86,14 +86,18 @@ export const stWebsocket: Writable<WebSocket | null> = writable(null);
 export const stChannels: Writable<ChannelDictionary> = writable({});
 
 export async function tryToLog() {
-	const response = await api.whoami();
-	if (response == APIStatus.NoResponse) {
-		stServerDown.set(true);
-		return;
-	}
-
-	if (response == null) {
-		return;
+	for (;;) {
+		const response = await api.whoami();
+		if (
+			response == APIStatus.NoResponse ||
+			response == null ||
+			response.statusCode === 502
+		) {
+			stServerDown.set(true);
+			await new Promise((resolve) => setTimeout(resolve, 5000));
+			continue;
+		}
+		break;
 	}
 
 	stLoggedUser.set({
