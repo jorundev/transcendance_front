@@ -115,6 +115,7 @@
 		background-position: center;
 		width: 60px;
 		height: 60px;
+		flex-shrink: 0;
 	}
 
 	@media screen and (max-width: 800px) {
