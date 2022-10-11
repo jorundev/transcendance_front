@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { validateEmail } from "../utils";
 	import { replace } from "svelte-spa-router";
+	import Login from "./Login.svelte";
 
 	enum State {
 		LogIn,
@@ -124,6 +125,17 @@
 	}
 </script>
 
+<svelte:window
+	on:keydown={async (ev) => {
+		if (ev.key == "Enter") {
+			if (state == State.LogIn) {
+				await login(false);
+			} else {
+				await signup();
+			}
+		}
+	}}
+/>
 <div class="login">
 	<div class="sub">
 		{#if state == State.LogIn}

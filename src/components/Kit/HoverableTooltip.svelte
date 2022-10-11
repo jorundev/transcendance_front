@@ -17,7 +17,7 @@
 	data-id={tooltip}
 	style="--trans-y:{-h}px; --trans-x:{w / 2}px;"
 	on:mouseenter={() => {
-		is_hovered = true;
+		is_hovered = tooltip.length != 0;
 	}}
 	on:click={() => {
 		is_hovered = true;

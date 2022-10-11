@@ -3,6 +3,7 @@
 
 	export let text: string = null;
 	export let active: boolean = true;
+	export let red = false;
 	export let highlight = true;
 
 	const dispatch = createEventDispatcher();
@@ -12,7 +13,12 @@
 	}
 </script>
 
-<button class:active class:highlight on:click|stopPropagation={onClick}>
+<button
+	class:active
+	class:red
+	class:highlight
+	on:click|stopPropagation={onClick}
+>
 	{#if text}
 		{text}
 	{:else}
@@ -42,6 +48,9 @@
 
 			&.highlight {
 				background: #0b82fa;
+				&.red {
+					background: #e70000;
+				}
 			}
 
 			&:hover {
@@ -49,11 +58,17 @@
 				&.highlight {
 					background: #0a73dd;
 				}
+				&.red {
+					background: #c50000;
+				}
 			}
 
 			&:active {
 				&.highlight {
 					background: #0969c9;
+				}
+				&.red {
+					background: #ab0000;
 				}
 			}
 		}

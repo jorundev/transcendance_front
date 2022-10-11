@@ -6,57 +6,65 @@
 	import { stLoggedUser } from "../stores";
 
 	function getProfilePictureLink(): string {
-		return $stLoggedUser && $stLoggedUser.profile_picture
-			? "/pictures/" + $stLoggedUser.profile_picture
+		return $stLoggedUser && $stLoggedUser.avatar
+			? "/pictures/" + $stLoggedUser.avatar
 			: "/img/default.jpg";
 	}
 </script>
 
 {#if $stLoggedUser != null}
-	<div class="settings">
-		<div class="top">
+	<div class="s">
+		<div class="settings">
+			<div class="top">
+				<div
+					class="back"
+					on:click={() => {
+						pop();
+					}}
+				/>
+				<div class="title">Settings</div>
+				<div class="empty" style="width: 40px;" />
+			</div>
+			<div class="category">Account</div>
+			<div class="setting profile">
+				<div
+					class="before"
+					style={"background-image: url('" +
+						getProfilePictureLink() +
+						"')"}
+				/>
+				{$stLoggedUser.username}
+			</div>
 			<div
-				class="back"
+				class="setting"
 				on:click={() => {
-					pop();
+					api.logout();
 				}}
-			/>
-			<div class="title">Settings</div>
-			<div class="empty" style="width: 40px;" />
+				style="color: red"
+			>
+				Log out
+			</div>
+			<div class="category">Security</div>
+			<div class="setting">Password</div>
+			<div class="setting">Two-Factor Authentication</div>
+			<div class="setting">Sessions</div>
+			<div class="category">Activity</div>
+			<div class="setting">Blocked accounts</div>
 		</div>
-		<div class="category">Account</div>
-		<div class="setting profile">
-			<div
-				class="before"
-				style={"background-image: url('" +
-					getProfilePictureLink() +
-					"')"}
-			/>
-			{$stLoggedUser.username}
-		</div>
-		<div
-			class="setting"
-			on:click={() => {
-				api.logout();
-			}}
-			style="color: red"
-		>
-			Log out
-		</div>
-		<div class="category">Security</div>
-		<div class="setting">Password</div>
-		<div class="setting">Two-Factor Authentication</div>
-		<div class="setting">Sessions</div>
-		<div class="category">Activity</div>
-		<div class="setting">Blocked accounts</div>
 	</div>
 {/if}
 
 <style lang="scss">
+	.s {
+		display: flex;
+		justify-content: center;
+	}
+
 	.settings {
 		width: 100%;
 		display: flex;
 		flex-direction: column;
+		max-width: 1200px;
 	}
 
 	.title {
@@ -84,6 +92,8 @@
 	}
 
 	.category {
+		margin-left: 10px;
+		margin-right: 10px;
 		margin-top: 4px;
 		user-select: none;
 		-webkit-user-select: none;
@@ -92,7 +102,7 @@
 		padding-left: 16px;
 		color: rgb(94, 94, 94);
 		font-size: 14px;
-		width: calc(100vw - var(--scrollbar-width));
+		width: 100%;
 		background: rgb(29, 29, 29);
 		font-weight: bold;
 		text-transform: uppercase;
@@ -100,13 +110,15 @@
 
 	.setting {
 		cursor: pointer;
+		margin-left: 10px;
+		margin-right: 10px;
 		display: flex;
 		align-items: center;
 		padding-top: 16px;
 		padding-bottom: 16px;
 		transform: translateX(-16px);
 		padding-left: 16px;
-		width: calc(100vw - var(--scrollbar-width));
+		width: 100%;
 
 		.before {
 			flex-shrink: 0;

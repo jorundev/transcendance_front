@@ -41,8 +41,8 @@
 	}
 
 	function getProfilePictureLink(): string {
-		return $stLoggedUser.profile_picture
-			? "/pictures/" + $stLoggedUser.profile_picture
+		return $stLoggedUser.avatar
+			? "/pictures/" + $stLoggedUser.avatar
 			: "/img/default.jpg";
 	}
 </script>

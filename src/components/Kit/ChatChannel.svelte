@@ -19,7 +19,9 @@
 
 	$: {
 		truncated_msg = info?.last_message?.value;
-		if (info?.last_message?.value.length > 20) {
+		if (!info?.last_message?.value) {
+			truncated_msg = "<Deleted message>";
+		} else if (info?.last_message?.value.length > 20) {
 			truncated_msg = truncated_msg.substring(0, 20) + "...";
 		}
 	}
@@ -84,6 +86,9 @@
 	}
 
 	function goToMessages() {
+		if (!joined) {
+			return;
+		}
 		dispatch("click", {
 			channel: info,
 		});
@@ -101,7 +106,7 @@
 		<div class="profile-picture" />
 		<div class="data-line">
 			<div class="username">
-				{#if info?.type == ChannelType.Single}
+				{#if info?.type == ChannelType.Direct}
 					<!-- TODO -->
 					{$stUsers[info?.id]?.username}#{$stUsers[info?.id]
 						?.identifier}

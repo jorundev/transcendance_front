@@ -4,24 +4,29 @@
 		stLoggedUser,
 		type Channel,
 		type ChannelDictionary,
+		type ChatMessage,
 	} from "../../stores";
 
-	import { onMount } from "svelte";
+	import { onDestroy, onMount, tick } from "svelte";
 	import BubbleSet from "./BubbleSet.svelte";
 	import { api, APIStatus, loadNextPage } from "../../api";
 	import Modal from "./Modal.svelte";
 	import ChannelSettings from "../ChannelSettings.svelte";
+	import ChatSkeleton from "../ChatSkeleton.svelte";
+	import MuteBanModal from "../MuteBanModal.svelte";
 
 	let textArea: HTMLInputElement;
 	let chatDiv: HTMLDivElement;
 
+	let selectedId = -1;
+
+	let selectedUser: string;
+
 	export let params: { uuid: string };
+	export let render: boolean = true;
 
 	async function loadPages(n: number) {
-		/*while (n >= 0 && info?.last_loaded_page != 1) {
-			n -= 1;*/
 		await loadNextPage(params.uuid, n);
-		//}
 	}
 
 	$: if (params.uuid) {
@@ -29,6 +34,8 @@
 	}
 
 	let show_channel_settings_modal = false;
+	let show_muteban_modal = false;
+	let muteban_mode: "ban" | "mute";
 
 	let joined: boolean;
 
@@ -39,9 +46,18 @@
 	}
 
 	let old_length = 0;
+	let old_channel_uuid: string;
 	let info: Channel = null;
 
 	const text_area_height = "80px";
+
+	let last_message_id: number = 0;
+	let last_message_id_offset = 1000;
+
+	$: if (info?.loaded_messages.length > 0) {
+		last_message_id =
+			info?.loaded_messages[info.loaded_messages.length - 1].id;
+	}
 
 	// this handles the loading of previous messages on scroll
 	// this might look messy (and in a way it is) but it's actually pretty straightforward
@@ -85,24 +101,10 @@
 		}
 	}
 
-	interface ChatMessage {
-		sender: string;
-		value: string;
-		date: string;
-		username: string;
-		confirmed: boolean;
-	}
-
 	interface MessageSet {
 		side: "left" | "right";
 		id: number;
-		messages: Array<{
-			value: string;
-			date: string;
-			username: string;
-			confirmed: boolean;
-			sender: string;
-		}>;
+		messages: Array<ChatMessage>;
 	}
 
 	function format_date(date: number) {
@@ -117,20 +119,29 @@
 	let groups: Array<MessageSet> = [];
 	let l_channels: ChannelDictionary;
 
+	let groupsRev: Array<MessageSet>;
+	$: groupsRev = [...groups].reverse();
+
 	async function onInfoChange() {
 		if (info == undefined) {
 			return;
 		}
-		if (info.loaded_messages.length != old_length) {
+		if (
+			info.loaded_messages.length != old_length ||
+			info.uuid != old_channel_uuid ||
+			info.reload
+		) {
+			info.reload = undefined;
 			old_length = info.loaded_messages.length;
-			messages = [];
+			old_channel_uuid = info.uuid;
+			const messagesBuffer = [];
 			for (const message of info.loaded_messages) {
 				let user = await api.getUserData(message.sender);
 				if (user == APIStatus.NoResponse) {
 					continue;
 				}
 				let identifier = "000" + user.identifier;
-				messages.push({
+				messagesBuffer.push({
 					sender: message.sender,
 					value: message.value,
 					date: format_date(message.date),
@@ -139,8 +150,10 @@
 						"#" +
 						identifier.substring(identifier.length - 4),
 					confirmed: true,
+					id: message.id,
 				});
 			}
+			messages = messagesBuffer;
 			updateMessages();
 		}
 	}
@@ -159,6 +172,10 @@
 		let i = 0;
 		let previous: ChatMessage | null = null;
 		for (const message of messages) {
+			// Deleted messages
+			/*if (message.value == null) {
+				continue;
+			}*/
 			if (previous?.sender == message.sender) {
 				groups[groups.length - 1].messages.push({
 					value: message.value,
@@ -166,11 +183,14 @@
 					username: message.username,
 					confirmed: message.confirmed,
 					sender: message.sender,
+					id: message.id,
 				});
 			} else {
 				groups.push({
 					side:
-						message.sender == $stLoggedUser.uuid ? "right" : "left",
+						message.sender == $stLoggedUser?.uuid
+							? "right"
+							: "left",
 					messages: [
 						{
 							value: message.value,
@@ -178,6 +198,7 @@
 							username: message.username,
 							confirmed: message.confirmed,
 							sender: message.sender,
+							id: message.id,
 						},
 					],
 					id: i,
@@ -196,12 +217,15 @@
 		}
 
 		messages.push({
-			sender: $stLoggedUser.uuid,
+			sender: $stLoggedUser?.uuid,
 			value,
 			date: "Sending...",
 			confirmed: false,
 			username: "You",
+			id: last_message_id + last_message_id_offset,
 		});
+
+		last_message_id_offset += 1;
 
 		api.sendMessage(info.uuid, value);
 
@@ -211,59 +235,99 @@
 	onMount(async () => {
 		updateMessages();
 	});
+
+	onDestroy(() => {
+		messages = [];
+	});
+
+	function selectProfile(ev: CustomEvent<any>) {
+		selectedId = ev.detail.id;
+	}
 </script>
 
-<div class="chat">
-	{#if show_channel_settings_modal}
-		<Modal>
-			<div class="channel-settings">
-				<ChannelSettings
+{#await tick()}
+	Loading..
+{:then}
+	{#if joined}
+		<div class="chat">
+			{#if show_channel_settings_modal}
+				<Modal>
+					<div class="channel-settings">
+						<ChannelSettings
+							channel={info}
+							on:back={() => {
+								show_channel_settings_modal = false;
+							}}
+						/>
+					</div>
+				</Modal>
+			{:else if show_muteban_modal}
+				<MuteBanModal
+					on:back={() => (show_muteban_modal = false)}
+					userUUID={selectedUser}
 					channel={info}
-					on:back={() => {
-						show_channel_settings_modal = false;
+					mode={muteban_mode}
+				/>
+			{/if}
+			<div class="top">
+				<div
+					class="profile-picture"
+					style="background-image: url('/img/default.jpg')"
+				/>
+				<div class="name">{$stChannels[params.uuid]?.name}</div>
+				<div
+					class="settings-button"
+					on:click={() => {
+						show_channel_settings_modal = true;
 					}}
 				/>
 			</div>
-		</Modal>
-	{/if}
-	<div class="top">
-		<div
-			class="profile-picture"
-			style="background-image: url('/img/default.jpg')"
-		/>
-		<div class="name">{$stChannels[params.uuid]?.name}</div>
-		{#if joined}
-			<div
-				class="settings-button"
-				on:click={() => {
-					show_channel_settings_modal = true;
-				}}
-			/>
-		{/if}
-	</div>
 
-	<div class="bubbles" bind:this={chatDiv} on:scroll={onScroll}>
-		<div class="pad" />
-		{#each [...groups].reverse() as set (set.id)}
-			<BubbleSet side={set.side} messages={set.messages} />
-		{/each}
-	</div>
-	<div class="response-bar" style="height: {text_area_height}">
-		<input
-			placeholder="Start a message"
-			class="input"
-			tabindex="0"
-			bind:this={textArea}
-			on:keypress={(e) => {
-				if (e.key == "Enter") {
-					sendMessage();
-				}
-			}}
-			disabled={!joined}
-		/>
-		<div class="send" class:disabled={!joined} on:click={sendMessage} />
-	</div>
-</div>
+			<div class="bubbles" bind:this={chatDiv} on:scroll={onScroll}>
+				<div class="pad" />
+				{#if render}
+					{#each groupsRev as set (set.id)}
+						<BubbleSet
+							on:ban={(ev) => {
+								selectedUser = ev.detail.uuid;
+								muteban_mode = "ban";
+								show_muteban_modal = true;
+							}}
+							side={set.side}
+							messages={set.messages}
+							channel={params.uuid}
+							on:select={(ev) => selectProfile(ev)}
+							selected={selectedId}
+						/>
+					{/each}
+				{:else}
+					<ChatSkeleton />
+				{/if}
+			</div>
+			<div class="response-bar" style="height: {text_area_height}">
+				<input
+					placeholder="Start a message"
+					class="input"
+					tabindex="0"
+					bind:this={textArea}
+					on:keypress={(e) => {
+						if (e.key == "Enter") {
+							sendMessage();
+						}
+					}}
+					disabled={!joined}
+				/>
+				<div
+					class="send"
+					class:disabled={!joined}
+					on:click={sendMessage}
+				/>
+			</div>
+		</div>
+	{:else}
+		<div class="not-joined">Join the channel to see its content</div>
+	{/if}
+{/await}
 
 <style lang="scss">
 	.bubbles {
@@ -291,6 +355,12 @@
 			background-color: rgb(59, 59, 59);
 			border-radius: 10px;
 		}
+	}
+
+	.not-joined {
+		display: grid;
+		place-items: center;
+		height: 100%;
 	}
 
 	.response-bar {

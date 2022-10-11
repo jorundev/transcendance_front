@@ -13,7 +13,7 @@
 		password: string;
 		email: string;
 		confirm: string;
-		profile_picture?: string;
+		avatar?: string;
 	}
 
 	let show_error: boolean = false;
@@ -37,8 +37,8 @@
 
 		email = params.get("email");
 		username = params.has("username") ? params.get("username") : "";
-		profile_picture_link = params.has("profile_picture")
-			? params.get("profile_picture")
+		profile_picture_link = params.has("avatar")
+			? params.get("avatar")
 			: null;
 	});
 
@@ -106,7 +106,7 @@
 		};
 
 		if (profile_picture_link) {
-			req.profile_picture = profile_picture_link;
+			req.avatar = profile_picture_link;
 		}
 
 		await fetch("/api/auth/signup", {
@@ -115,17 +115,29 @@
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify(req),
-		}).then(async (res) => {
-			if (res.status == 201) {
-				await login();
-			}
-		});
+		})
+			.then(async (res) => {
+				if (res.status == 201) {
+					await login();
+				}
+			})
+			.catch((e) => {
+				console.log("Critical error: ", e);
+			});
 	}
 
 	function checkEmail() {
 		isEmailValid = validateEmail(email) || email.length == 0;
 	}
 </script>
+
+<svelte:window
+	on:keydown={async (ev) => {
+		if (ev.key == "Enter") {
+			await signup();
+		}
+	}}
+/>
 
 <div class="login">
 	<div class="sub">

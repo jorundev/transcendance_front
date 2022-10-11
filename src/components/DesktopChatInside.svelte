@@ -2,11 +2,12 @@
 	import ChatInside from "./Kit/ChatInside.svelte";
 
 	export let channel: string;
+	export let render: boolean;
 </script>
 
 <div class="chat-inside">
 	{#if channel.length != 0}
-		<ChatInside params={{ uuid: channel }} />
+		<ChatInside {render} params={{ uuid: channel }} />
 	{:else}
 		<div class="select">Select a channel to begin chatting</div>
 	{/if}

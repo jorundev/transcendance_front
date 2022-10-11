@@ -1,17 +1,24 @@
 import { get, writable, type Writable } from "svelte/store";
-import { api, APIStatus, getUsersFromUUIDs } from "./api";
+import {
+	api,
+	APIStatus,
+	getUsersFromUUIDs,
+	type APIChannel,
+	type ChannelMessagesResponse,
+	type ListChannelsResponse,
+} from "./api";
 
 export interface LoggedUser {
 	username: string;
 	id: number;
-	profile_picture: string | null;
+	avatar: string | null;
 	uuid: string;
 }
 
 export interface User {
 	username: string;
 	identifier: string;
-	profile_picture: string | null;
+	avatar: string | null;
 }
 
 export interface UserDictionary {
@@ -23,8 +30,18 @@ export interface ChannelDictionary {
 }
 
 export enum ChannelType {
-	Single,
-	Group,
+	Public,
+	Private,
+	Direct,
+}
+
+export interface ChannelUser {
+	uuid: string;
+	name: string;
+	id: number;
+	avatar: string;
+	is_moderator: boolean;
+	is_administrator: boolean;
 }
 
 export interface Channel {
@@ -44,16 +61,22 @@ export interface Channel {
 		date: number;
 		id: number;
 	}>;
-	users: Array<{
-		uuid: string;
-		name: string;
-		id: number;
-		profile_picture: string;
-		is_moderator: boolean;
-	}>;
+	users: Array<ChannelUser>;
 	joined: boolean;
 	has_password: boolean;
+	moderators: Array<string>;
+	administrator: string;
 	last_loaded_page: number;
+	reload?: boolean;
+}
+
+export interface ChatMessage {
+	sender: string;
+	value: string;
+	date: string;
+	username: string;
+	confirmed: boolean;
+	id: number;
 }
 
 export const stLoggedUser: Writable<LoggedUser | null> = writable(null);
@@ -77,14 +100,122 @@ export async function tryToLog() {
 		username: response.username,
 		uuid: response.uuid,
 		id: response.identifier,
-		profile_picture: response.profile_picture,
+		avatar: response.avatar,
 	});
 
 	stServerDown.set(false);
 	api.ws.connect();
-	await initChannels();
+	await initChannelsNew();
 }
 
+/* Removes duplicates channels (that are public AND joined) */
+function getChannelsData(
+	joined: ListChannelsResponse,
+	publics: ListChannelsResponse
+): Array<APIChannel> {
+	const data: Array<APIChannel> = joined.data;
+	for (const publicData of publics.data) {
+		if (!data.map((chan) => chan.uuid).includes(publicData.uuid)) {
+			data.push(publicData);
+		}
+	}
+	return data;
+}
+
+export function lastPage(channel: APIChannel): number {
+	let page = channel.message_count / 10;
+	if (page != Math.floor(page)) {
+		page = Math.floor(page) + 1;
+	}
+	return page;
+}
+
+async function channelFromAPIChannel(
+	channel: APIChannel,
+	joined: boolean
+): Promise<Channel> {
+	const users = await getUsersFromUUIDs(channel);
+	return {
+		has_password: channel.password,
+		uuid: channel.uuid,
+		id: channel.identifier,
+		name: channel.name,
+		type: channel.type,
+		last_message: null,
+		loaded_messages: [],
+		joined,
+		users,
+		last_loaded_page: lastPage(channel),
+		moderators: channel.moderators,
+		administrator: channel.administrator,
+	};
+}
+
+async function initChannelsNew() {
+	const promises = {
+		publicChannels: api.listChannels(),
+		joinedChannels: api.getJoinedChannels(),
+	};
+	const responses_raw = {
+		publicChannels: await promises.publicChannels,
+		joinedChannels: await promises.joinedChannels,
+	};
+	for (const property in responses_raw) {
+		if (responses_raw[property] === APIStatus.NoResponse) {
+			return;
+		}
+	}
+
+	// I miss shadowing
+	const responses = responses_raw as {
+		publicChannels: ListChannelsResponse;
+		joinedChannels: ListChannelsResponse;
+	};
+
+	const visibleChannels = getChannelsData(
+		responses.publicChannels,
+		responses.joinedChannels
+	);
+
+	const messagePromises: Array<Promise<APIStatus | ChannelMessagesResponse>> =
+		[];
+
+	// Only load last messages from joined channels
+	for (const channel of responses.joinedChannels.data) {
+		messagePromises.push(
+			api.getChannelMessages(channel.uuid, lastPage(channel))
+		);
+	}
+	const messagesPromises = Promise.all(messagePromises);
+	const channels: ChannelDictionary = {};
+	for (const visibleChannel of visibleChannels) {
+		const joined = responses.joinedChannels.data
+			.map((chan) => chan.uuid)
+			.includes(visibleChannel.uuid);
+
+		const channel = await channelFromAPIChannel(visibleChannel, joined);
+		channels[channel.uuid] = channel;
+	}
+	const messages = await messagesPromises;
+	for (const [i, messageRaw] of messages.entries()) {
+		if (messageRaw == APIStatus.NoResponse) {
+			continue;
+		}
+		for (const message of messageRaw?.data) {
+			const channel = responses.joinedChannels.data[i];
+			channels[channel.uuid].loaded_messages.push({
+				id: message.id,
+				value: message.message,
+				sender: message.user,
+				date: Date.parse(message.creation_date),
+			});
+		}
+	}
+
+	stChannels.set(channels);
+}
+
+/*
 async function initChannels() {
 	const joinedChannelsPromise = api.getJoinedChannels();
 	const channelsResponse = await api.listChannels();
@@ -98,6 +229,9 @@ async function initChannels() {
 	const channels: ChannelDictionary = {};
 	const messages_promises = [];
 	for (const channel of channelsResponse.data) {
+		if (!channel.users.includes(get(stLoggedUser).uuid)) {
+			continue;
+		}
 		let page = channel.message_count / 10;
 		if (page != Math.floor(page)) {
 			page = Math.floor(page) + 1;
@@ -113,12 +247,13 @@ async function initChannels() {
 		if (page != Math.floor(page)) {
 			page = Math.floor(page) + 1;
 		}
+
 		channels[channel.uuid] = {
 			has_password: channel.password,
 			uuid: channel.uuid,
 			id: channel.identifier,
 			name: channel.name,
-			type: ChannelType.Group,
+			type: channel.type,
 			last_message: null,
 			loaded_messages: [],
 			joined:
@@ -126,23 +261,27 @@ async function initChannels() {
 				undefined,
 			users,
 			last_loaded_page: page,
+			moderators: channel.moderators,
+			administrator: channel.administrator,
 		};
 		const messages = await messages_promises_all;
 		if (messages[i] == APIStatus.NoResponse) {
 			continue;
 		}
-		for (const message of messages[i].data) {
-			channels[channel.uuid].loaded_messages.push({
-				id: message.id,
-				value: message.message,
-				sender: message.user,
-				date: Date.parse(message.creation_date),
-			});
+		if (messages[i]?.data) {
+			for (const message of messages[i].data) {
+				channels[channel.uuid].loaded_messages.push({
+					id: message.id,
+					value: message.message,
+					sender: message.user,
+					date: Date.parse(message.creation_date),
+				});
+			}
 		}
 		i += 1;
 	}
 	stChannels.set(channels);
-}
+}*/
 
 export async function tryLoggingIn(): Promise<boolean> {
 	await tryToLog();

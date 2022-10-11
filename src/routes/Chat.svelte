@@ -8,14 +8,21 @@
 	import { push } from "svelte-spa-router";
 	import Modal from "../components/Kit/Modal.svelte";
 	import JoinChannelPopup from "../components/JoinChannelPopup.svelte";
-	import SearchBar from "../components/Kit/SearchBar.svelte";
 	import CreateChannelPopup from "../components/CreateChannelPopup.svelte";
+	import ChannelSearch from "../components/ChannelSearch.svelte";
 
 	let join_channel_modal = false;
 	let create_channel_modal = false;
 
 	let interval;
 	let current_channel = "";
+
+	let render = true;
+
+	$: if (current_channel) {
+		render = false;
+		setTimeout(() => (render = true), 1);
+	}
 
 	let join_channel: Channel;
 
@@ -40,6 +47,13 @@
 	onDestroy(() => {
 		clearInterval(interval);
 	});
+
+	/*stChannels.subscribe((channels) => {
+		console.log(
+			channels["ef7c824d-4a78-4325-8447-79b708f286f6"].loaded_messages
+				.length
+		);
+	});*/
 
 	function goToMessages(event: { detail: { channel: Channel } }) {
 		current_channel = event.detail.channel.uuid;
@@ -99,23 +113,25 @@
 	<div class="chat-menu">
 		<div class="top">
 			<div class="search">
-				<SearchBar />
+				<ChannelSearch on:join={joinChannel} />
 			</div>
 			<div class="add" on:click={createChannel} />
 		</div>
 		<div class="channels">
-			{#each Object.entries($stChannels) as [_key, channel], id}
-				<ChatChannel
-					info={channel}
-					on:click={goToMessages}
-					on:join={joinChannel}
-					current={current_channel}
-					joined={!mounted || $stChannels[channel.uuid]?.joined}
-				/>
+			{#each Object.entries($stChannels) as [key, channel] (key)}
+				{#if channel.joined}
+					<ChatChannel
+						info={channel}
+						on:click={goToMessages}
+						on:join={joinChannel}
+						current={current_channel}
+						joined={!mounted || $stChannels[channel.uuid]?.joined}
+					/>
+				{/if}
 			{/each}
 		</div>
 	</div>
-	<DesktopChatInside channel={current_channel} />
+	<DesktopChatInside channel={current_channel} {render} />
 </div>
 
 <style lang="scss">
@@ -124,6 +140,10 @@
 		flex-direction: column;
 		width: 100%;
 		height: 100%;
+
+		@media screen and (min-width: 1600px) {
+			border-left: 1px solid rgb(37, 37, 37);
+		}
 	}
 
 	@media screen and (min-width: 801px) {
@@ -158,7 +178,7 @@
 	.channels {
 		height: auto;
 		overflow-x: hidden;
-		overflow-y: scroll;
+		overflow-y: auto;
 	}
 
 	.add {
