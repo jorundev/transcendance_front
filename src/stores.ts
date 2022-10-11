@@ -6,6 +6,7 @@ import {
 	type APIChannel,
 	type ChannelMessagesResponse,
 	type ListChannelsResponse,
+	type WhoAmIResponse,
 } from "./api";
 
 export interface LoggedUser {
@@ -86,8 +87,9 @@ export const stWebsocket: Writable<WebSocket | null> = writable(null);
 export const stChannels: Writable<ChannelDictionary> = writable({});
 
 export async function tryToLog() {
+	let response: WhoAmIResponse | APIStatus;
 	for (;;) {
-		const response = await api.whoami();
+		response = await api.whoami();
 		if (
 			response == APIStatus.NoResponse ||
 			response == null ||
