@@ -1,7 +1,10 @@
 <script lang="ts">
+	import SideBar from "../components/SideBar.svelte";
+
 	let picture: boolean = true;
 </script>
 
+<SideBar />
 <div class="center">
 	<div>
 		<h1>{picture ? "404" : "GATO TEQUILA"}</h1>
