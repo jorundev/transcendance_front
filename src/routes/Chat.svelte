@@ -1,15 +1,17 @@
 <script lang="ts">
 	import { onDestroy, onMount } from "svelte";
 
-	import ChatChannel from "../components/Kit/ChatChannel.svelte";
-	import { stChannels, type Channel } from "../stores";
+	import ChatChannel from "../components/Chat/ChatChannel.svelte";
+	import { stChannels } from "../stores";
 
-	import DesktopChatInside from "../components/DesktopChatInside.svelte";
+	import DesktopChatInside from "../components/Chat/DesktopChatInside.svelte";
 	import { push } from "svelte-spa-router";
 	import Modal from "../components/Kit/Modal.svelte";
-	import JoinChannelPopup from "../components/JoinChannelPopup.svelte";
-	import CreateChannelPopup from "../components/CreateChannelPopup.svelte";
-	import ChannelSearch from "../components/ChannelSearch.svelte";
+	import JoinChannelPopup from "../components/Chat/JoinChannelPopup.svelte";
+	import CreateChannelPopup from "../components/Chat/CreateChannelPopup.svelte";
+	import ChannelSearch from "../components/Chat/ChannelSearch.svelte";
+	import SideBar from "../components/SideBar.svelte";
+	import type { Channel } from "../channels";
 
 	let join_channel_modal = false;
 	let create_channel_modal = false;
@@ -48,13 +50,6 @@
 		clearInterval(interval);
 	});
 
-	/*stChannels.subscribe((channels) => {
-		console.log(
-			channels["ef7c824d-4a78-4325-8447-79b708f286f6"].loaded_messages
-				.length
-		);
-	});*/
-
 	function goToMessages(event: { detail: { channel: Channel } }) {
 		current_channel = event.detail.channel.uuid;
 		if (window.innerWidth <= 800) {
@@ -72,6 +67,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Chat - NEW SHINJI MEGA PONG ULTIMATE</title>
+</svelte:head>
+<SideBar />
 <div class="chat">
 	{#if join_channel_modal}
 		<Modal>
@@ -140,10 +139,6 @@
 		flex-direction: column;
 		width: 100%;
 		height: 100%;
-
-		@media screen and (min-width: 1600px) {
-			border-left: 1px solid rgb(37, 37, 37);
-		}
 	}
 
 	@media screen and (min-width: 801px) {
@@ -159,6 +154,10 @@
 		display: flex;
 		flex-direction: row;
 		height: 100%;
+
+		@media screen and (min-width: 800px) {
+			margin-left: 52px;
+		}
 	}
 
 	.popup {
@@ -173,6 +172,7 @@
 		margin-left: 16px;
 		margin-right: 16px;
 		display: flex;
+		align-items: center;
 	}
 
 	.channels {
@@ -189,7 +189,7 @@
 		background-size: 48%;
 		width: 40px;
 		height: 40px;
-		margin: 10px;
+		margin-left: 10px;
 		background-color: #1e1e1e;
 		border-radius: 10px;
 		cursor: pointer;

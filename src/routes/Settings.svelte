@@ -12,6 +12,9 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Settings - NEW SHINJI MEGA PONG ULTIMATE</title>
+</svelte:head>
 {#if $stLoggedUser != null}
 	<div class="s">
 		<div class="settings">

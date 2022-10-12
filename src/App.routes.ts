@@ -12,7 +12,7 @@ import type { WrappedComponent } from "svelte-spa-router";
 import type { SvelteComponentDev } from "svelte/internal";
 import NotFound from "./routes/NotFound.svelte";
 import Chat from "./routes/Chat.svelte";
-import ChatInside from "./components/Kit/ChatInside.svelte";
+import ChatInside from "./components/Chat/ChatInside.svelte";
 
 /*export default {
 	"/": Home,

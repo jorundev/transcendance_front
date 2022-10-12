@@ -3,14 +3,13 @@
 	import { getUserProfilePictureLink } from "../api";
 	import Card from "../components/Kit/Card.svelte";
 	import SideBar from "../components/SideBar.svelte";
+	import { padIdentifier } from "../utils";
+	import FriendListHorizontal from "../components/Friends/FriendListHorizontal.svelte";
+	import MatchHistory from "../components/MatchHistory.svelte";
 
-	let id: string = "";
+	let id = "";
 
-	$: {
-		let pad = "0000";
-		pad += $stLoggedUser.id;
-		id = pad.substring(4);
-	}
+	$: id = padIdentifier($stLoggedUser?.id);
 
 	let avatarLink = "";
 	$: avatarLink = getUserProfilePictureLink($stLoggedUser.uuid);
@@ -18,6 +17,9 @@
 	let levelPercentage = 50;
 </script>
 
+<svelte:head>
+	<title>Home - NEW SHINJI MEGA PONG ULTIMATE</title>
+</svelte:head>
 <SideBar />
 <div class="home">
 	<div class="column">
@@ -45,14 +47,59 @@
 				</div>
 			</div>
 		</Card>
+		<div class="nodesktop">
+			<Card>
+				<div class="home-div">
+					<div class="title">Friends</div>
+					<FriendListHorizontal />
+				</div>
+			</Card>
+		</div>
+		<Card>
+			<div class="home-div">
+				<div class="title">Match History</div>
+				<MatchHistory />
+			</div>
+		</Card>
+	</div>
+	<div class="s-column nomobile">
+		<div class="artwork" />
 	</div>
 </div>
 
 <style lang="scss">
+	.home {
+		display: flex;
+		justify-content: space-evenly;
+		gap: 30px;
+		height: 100%;
+	}
+
+	.s-column {
+		width: 300px;
+		height: 100%;
+	}
+
+	.home-div {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
 	.column {
 		display: flex;
 		flex-direction: column;
+		gap: 16px;
 		width: 100%;
+		height: 100%;
+	}
+
+	.artwork {
+		background-image: url("/img/artwork.gif");
+		background-size: 90%;
+		background-repeat: no-repeat;
+		background-position: center;
+		height: 100%;
 	}
 
 	.profile {
@@ -124,18 +171,24 @@
 			padding: 16px;
 			box-sizing: border-box;
 		}
-	}
-
-	@media screen and (min-width: 800px) {
-		.column {
-			max-width: 400px;
-			margin-left: 100px;
-			margin-right: 30px;
-			margin-top: 30px;
-			margin-bottom: 30px;
+		.nomobile {
+			display: none;
 		}
 	}
 
-	@media screen and (min-width: 1600px) {
+	@media screen and (min-width: 800px) {
+		.home {
+			padding-left: 72px;
+			padding-right: 20px;
+		}
+		.column {
+			max-width: 400px;
+			margin-top: 30px;
+			margin-bottom: 30px;
+		}
+
+		.nodesktop {
+			display: none;
+		}
 	}
 </style>

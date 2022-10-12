@@ -26,3 +26,41 @@ export function validateEmail(email: string): boolean {
 		email
 	);
 }
+
+function hashString(str: string): number {
+	let hash = 0;
+	for (let i = 0; i < str.length; ++i) {
+		hash = str.charCodeAt(i) + ((hash << 5) - hash);
+	}
+	return hash;
+}
+
+function numberToColor(i: number): string {
+	const abs = Math.abs(i);
+	const components = [abs & 0xff, (abs >> 8) & 0xff, (abs >> 16) & 0xff];
+	for (let i = 0; i < 3; ++i) {
+		components[i] /= 3;
+	}
+	return (
+		"rgb(" +
+		components[0] +
+		", " +
+		components[1] +
+		", " +
+		components[2] +
+		")"
+	);
+}
+
+export function colorFromString(str: string): string {
+	return numberToColor(hashString(str));
+}
+
+export function padIdentifier(id: number): string {
+	if (id === undefined) {
+		return "????";
+	}
+	let pad = "0000";
+	pad += id;
+	return pad.substring(pad.length - 4);
+}

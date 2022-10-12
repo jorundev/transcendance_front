@@ -1,16 +1,16 @@
 import { Mutex } from "async-mutex";
 import { push } from "svelte-spa-router";
 import { get } from "svelte/store";
+import type { ChannelType } from "./channels";
 import {
-	ChannelType,
 	lastPage,
 	stChannels,
 	stLoggedUser,
 	stServerDown,
 	stUsers,
 	stWebsocket,
-	type User,
 } from "./stores";
+import type { User } from "./users";
 import {
 	ChatAction,
 	UserAction,
@@ -343,11 +343,9 @@ export async function loadNextPage(uuid: string, n?: number) {
 	}
 
 	const promises = [];
-	console.log("last loaded page", channel.last_loaded_page);
 	let i = channel.last_loaded_page - 1;
 	//console.log("total: ", i - (channel.last_loaded_page - n - 1));
 	while (i >= 1 && i >= channel.last_loaded_page - n - 1) {
-		console.log("loading page", i);
 		promises.push(api.getChannelMessages(uuid, i));
 		i -= 1;
 	}

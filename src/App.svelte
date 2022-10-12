@@ -54,6 +54,8 @@
 		box-sizing: border-box;
 		overflow: hidden;
 		max-width: 1600px;
+		border-right: 1px solid rgb(37, 37, 37);
+		border-left: 1px solid rgb(37, 37, 37);
 	}
 
 	.sorry {

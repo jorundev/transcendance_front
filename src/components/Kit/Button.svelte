@@ -6,17 +6,29 @@
 	export let red = false;
 	export let highlight = true;
 
+	export let timeout = 0;
+	export let timeoutVisible = true;
+
+	let canClick = true;
+
 	const dispatch = createEventDispatcher();
 
 	function onClick() {
-		dispatch("click", {});
+		if (active && canClick) {
+			dispatch("click", {});
+			if (timeout !== 0) {
+				canClick = false;
+				setTimeout(() => (canClick = true), timeout);
+			}
+		}
 	}
 </script>
 
 <button
 	class:active
 	class:red
-	class:highlight
+	class:timeout={!canClick && timeoutVisible}
+	class:highlight={highlight && (canClick || !timeoutVisible)}
 	on:click|stopPropagation={onClick}
 >
 	{#if text}
@@ -58,7 +70,7 @@
 				&.highlight {
 					background: #0a73dd;
 				}
-				&.red {
+				&.red:not(.timeout) {
 					background: #c50000;
 				}
 			}
@@ -67,9 +79,19 @@
 				&.highlight {
 					background: #0969c9;
 				}
-				&.red {
+				&.red:not(.timeout) {
 					background: #ab0000;
 				}
+			}
+		}
+
+		&.timeout {
+			cursor: not-allowed;
+			background: rgb(87, 87, 87);
+			color: rgba(255, 255, 255, 0.419);
+
+			&:hover {
+				background: rgb(87, 87, 87);
 			}
 		}
 	}

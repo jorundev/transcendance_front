@@ -7,17 +7,19 @@
 	<div class="elem play" on:click={() => push("/play")} />
 	<div class="elem chat" on:click={() => push("/chat")} />
 	<div class="elem settings" on:click={() => push("/settings")} />
+	<div class="elem notifications" on:click={() => push("/notifications")} />
 </div>
 
 <style lang="scss">
 	.sidebar {
 		display: flex;
 		flex-shrink: 0;
+		background-color: rgb(18, 18, 18);
 
 		.elem {
 			cursor: pointer;
-			width: 70px;
-			height: 70px;
+			width: 52px;
+			height: 52px;
 			background-size: 45%;
 			background-position: center;
 			background-repeat: no-repeat;
@@ -43,6 +45,10 @@
 			&.settings {
 				background-image: url("/img/settings.png");
 			}
+
+			&.notifications {
+				background-image: url("/img/bell.png");
+			}
 		}
 	}
 
@@ -51,34 +57,29 @@
 			position: absolute;
 			bottom: 0;
 			width: 100%;
-			height: 70px;
+			height: 52px;
 			justify-content: space-evenly;
+			border-top: 1px solid rgb(37, 37, 37);
 		}
 	}
 
 	@media screen and (min-width: 800px) {
 		.sidebar {
 			padding-top: 50px;
-			border-right: 1px solid #ffffff42;
+			border-right: 1px solid rgb(37, 37, 37);
 			position: fixed;
 			height: 100%;
-			width: 70px;
+			width: 52px;
 			flex-direction: column;
 			gap: 35px;
 
 			:nth-child(1)::after {
 				content: "";
 				position: absolute;
-				width: 70px;
-				height: 70px;
-				border-bottom: 1px solid #ffffff42;
+				width: 52px;
+				height: 52px;
+				border-bottom: 1px solid rgb(37, 37, 37);
 			}
-		}
-	}
-
-	@media screen and (min-width: 1600px) {
-		.sidebar {
-			border-left: 1px solid #ffffff42;
 		}
 	}
 </style>
