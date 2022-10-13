@@ -16,6 +16,7 @@
 	} from "../../channels";
 	import { padIdentifier } from "../../utils";
 	import SideBar from "../SideBar.svelte";
+	import { pop } from "svelte-spa-router";
 
 	let textArea: HTMLInputElement;
 	let chatDiv: HTMLDivElement;
@@ -285,6 +286,9 @@
 				/>
 			{/if}
 			<div class="top">
+				{#if !desktop}
+					<div class="back" on:click={() => pop()} />
+				{/if}
 				<div class="profile-picture">
 					<ChannelAvatar
 						displayName={$stChannels[params.uuid]?.name}
@@ -356,6 +360,21 @@
 {/await}
 
 <style lang="scss">
+	.back {
+		position: absolute;
+		left: 20px;
+		cursor: pointer;
+		background-image: url("img/left.png");
+		background-size: 20px;
+		background-repeat: no-repeat;
+		background-position: center;
+		width: 40px;
+		height: 40px;
+
+		@media screen and (min-width: 800px) {
+			left: 60px;
+		}
+	}
 	.bubbles {
 		position: relative;
 		padding-top: 10px;

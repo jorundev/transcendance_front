@@ -64,6 +64,8 @@
 	}
 
 	.settings {
+		user-select: none;
+		-webkit-user-select: none;
 		width: 100%;
 		display: flex;
 		flex-direction: column;
