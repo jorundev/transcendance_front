@@ -2,7 +2,7 @@
 	import { onDestroy, onMount } from "svelte";
 
 	import ChatChannel from "../components/Chat/ChatChannel.svelte";
-	import { stChannels } from "../stores";
+	import { initPrivChannel, stChannels } from "../stores";
 
 	import DesktopChatInside from "../components/Chat/DesktopChatInside.svelte";
 	import { push } from "svelte-spa-router";
@@ -11,7 +11,8 @@
 	import CreateChannelPopup from "../components/Chat/CreateChannelPopup.svelte";
 	import ChannelSearch from "../components/Chat/ChannelSearch.svelte";
 	import SideBar from "../components/SideBar.svelte";
-	import type { Channel } from "../channels";
+	import { ChannelType, type Channel } from "../channels";
+	import type { PrivateChannelData } from "src/api";
 
 	let join_channel_modal = false;
 	let create_channel_modal = false;
@@ -59,6 +60,27 @@
 
 	function joinChannel(event: { detail: { channel: Channel } }) {
 		join_channel = event.detail.channel;
+		join_channel_modal = true;
+	}
+
+	async function joinPrivChannel(event: {
+		detail: { channel: PrivateChannelData };
+	}) {
+		const tmpChannel: Channel = {
+			type: ChannelType.Private,
+			uuid: event.detail.channel.uuid,
+			id: event.detail.channel.identifier,
+			name: event.detail.channel.name,
+			joined: false,
+			has_password: true,
+			users: [],
+			administrator: "",
+			moderators: [],
+			loaded_messages: [],
+			last_loaded_page: -1,
+			last_message: null,
+		};
+		join_channel = tmpChannel;
 		join_channel_modal = true;
 	}
 
@@ -112,7 +134,10 @@
 	<div class="chat-menu">
 		<div class="top">
 			<div class="search">
-				<ChannelSearch on:join={joinChannel} />
+				<ChannelSearch
+					on:join={joinChannel}
+					on:joinpriv={joinPrivChannel}
+				/>
 			</div>
 			<div class="add" on:click={createChannel} />
 		</div>

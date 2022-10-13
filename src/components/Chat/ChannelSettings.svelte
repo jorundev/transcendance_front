@@ -51,6 +51,12 @@
 				timeout={2000}
 				on:click={async () => {
 					await api.leaveChannel(channel.uuid);
+					if (channel.type === ChannelType.Private) {
+						stChannels.update((channels) => {
+							delete channels[channel.uuid];
+							return channels;
+						});
+					}
 					if (window.innerWidth <= 800) {
 						pop();
 						return;

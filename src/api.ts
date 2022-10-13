@@ -1,7 +1,7 @@
 import { Mutex } from "async-mutex";
 import { push } from "svelte-spa-router";
 import { get } from "svelte/store";
-import type { ChannelType } from "./channels";
+import { ChannelType } from "./channels";
 import {
 	lastPage,
 	stChannels,
@@ -215,8 +215,23 @@ export interface WhoAmIResponse extends APIResponse {
 	avatar: string | null;
 }
 
+export interface PrivateChannelData extends APIResponse {
+	uuid: string;
+	identifier: number;
+	name: string;
+	avatar: string | null;
+}
+
 export interface APIUser extends WhoAmIResponse {
 	is_online: boolean;
+}
+
+export interface ListChannelsResponse extends APIResponse {
+	data: Array<APIChannel>;
+	count: number;
+	total: number;
+	page: number;
+	page_count: number;
 }
 
 export interface APIChannel {
@@ -231,41 +246,8 @@ export interface APIChannel {
 	administrator: string;
 }
 
-export interface ListChannelsResponse extends APIResponse {
-	data: Array<APIChannel>;
-	count: number;
-	total: number;
-	page: number;
-	page_count: number;
-}
-
-export interface ChannelDataResponse extends APIResponse {
-	type: ChannelType;
-	uuid: string;
-	identifier: number;
-	name: string;
-	password: boolean;
-	message_count: 0;
-	moderators: Array<string>;
-	users: Array<string>;
-	administrator: string;
-}
-
 export interface CreateChannelResponse extends APIResponse {
 	uuid: string;
-}
-
-enum WebsocketEvent {
-	Ping = 0,
-	Chat = 1,
-}
-
-enum ChatState {
-	Create = 0,
-	Join = 1,
-	Leave = 2,
-	Send = 3,
-	Delete = 4,
 }
 
 export enum ChannelVisibility {
@@ -299,6 +281,9 @@ export async function getUsersFromUUIDs(channel: APIChannel): Promise<
 > {
 	const users = [];
 	const users_promises = [];
+	if (channel.users === undefined) {
+		return users;
+	}
 	for (const user of channel.users) {
 		users_promises.push(api.getUserData(user));
 	}
@@ -569,6 +554,19 @@ async function wsChatJoin(data: WsChatJoin) {
 
 async function wsChatLeave(data: WsChatLeave) {
 	const loggedUser = get(stLoggedUser);
+
+	// We do not want to keep private channels that we are not in in stChannels
+	if (get(stChannels)[data.channel].type === ChannelType.Private) {
+		stChannels.update((channels) => {
+			if (data.user == loggedUser.uuid) {
+				delete channels[data.channel];
+			}
+			return channels;
+		});
+		return;
+	}
+
+	// For the other ones, just set the appropriate data
 	stChannels.update((channels) => {
 		if (data.user == loggedUser.uuid) {
 			channels[data.channel].joined = false;
@@ -604,10 +602,7 @@ export const api = {
 		return makeRequest<ListChannelsResponse>("/api/chats/channels", "GET");
 	},
 	getChannelData: async (uuid: string) => {
-		return makeRequest<ChannelDataResponse>(
-			"/api/chats/channels/" + uuid,
-			"GET"
-		);
+		return makeRequest<APIChannel>("/api/chats/channels/" + uuid, "GET");
 	},
 	getChannelMessages: async (uuid: string, page: number) => {
 		return makeRequest<ChannelMessagesResponse>(
@@ -727,6 +722,23 @@ export const api = {
 		return makeRequest("/api/chats/channels/" + channel, "PATCH", {
 			password,
 		});
+	},
+	getPrivateChannelData: async (
+		channelName: string,
+		channelID: number
+	): Promise<PrivateChannelData | undefined> => {
+		const req = await makeRequest<PrivateChannelData>(
+			"/api/chats/channels/private",
+			"POST",
+			{
+				name: channelName,
+				identifier: channelID,
+			}
+		);
+		if (req === APIStatus.NoResponse || req.statusCode === 404) {
+			return undefined;
+		}
+		return req;
 	},
 	ws: {
 		connect: async () => {

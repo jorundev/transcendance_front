@@ -5,7 +5,7 @@
 	import { createEventDispatcher } from "svelte";
 	import type { Channel } from "../../channels";
 	import { padIdentifier } from "../../utils";
-
+	import { api, type PrivateChannelData } from "../../api";
 	let searchValue: string;
 
 	$: if (searchValue) {
@@ -34,24 +34,41 @@
 	}
 
 	let pubs: Array<Channel> = [];
+	let privs: Array<PrivateChannelData> = [];
 
-	function onInput() {
+	async function onInput() {
+		privs = [];
 		if (searchValue === undefined) {
 			searchValue = "";
 		}
 		const publics: Array<Channel> = [];
-		const toks = searchValue.split("#");
+		const toks = searchValue.split("#", 2);
 
 		let name = toks[0];
 		if (name === undefined) {
 			name = "";
 		}
+		if (toks[1]?.length > 4) {
+			pubs = [];
+			return;
+		}
+
 		let number = parseInt(toks[1]);
 		if (isNaN(number)) {
 			number = undefined;
 		}
 
+		let privChannel: PrivateChannelData;
+		let privChannelListed = true;
+		if (number !== undefined) {
+			privChannel = await api.getPrivateChannelData(name, number);
+			privChannelListed = false;
+		}
+
 		for (const [_, channel] of Object.entries($stChannels)) {
+			if (channel.uuid === privChannel?.uuid) {
+				privChannelListed = true;
+			}
 			if (channel.joined) {
 				continue;
 			}
@@ -64,6 +81,9 @@
 					publics.push(channel);
 				}
 			}
+		}
+		if (privChannel !== undefined && !privChannelListed) {
+			privs = [privChannel];
 		}
 		pubs = publics;
 	}
@@ -78,8 +98,8 @@
 	<input
 		bind:this={searchInput}
 		bind:value={searchValue}
-		on:input={onInput}
-		on:focus={onInput}
+		on:input={async () => await onInput()}
+		on:focus={async () => await onInput()}
 		class="search-bar-input"
 		class:menu
 		on:focus={onFocus}
@@ -98,6 +118,17 @@
 			style="min-width: {searchWidth - 2}px;"
 			bind:this={overlayDiv}
 		>
+			{#each privs as priv}
+				<ChannelSearchEntry
+					on:click={() => {
+						dispatch("joinpriv", { channel: priv });
+						menu = false;
+					}}
+					password
+					displayName={priv.name}
+					channelID={padIdentifier(priv.identifier)}
+				/>
+			{/each}
 			{#each pubs as pub}
 				<ChannelSearchEntry
 					on:click={() => {

@@ -72,20 +72,21 @@ async function channelFromAPIChannel(
 	joined: boolean
 ): Promise<Channel> {
 	const users = await getUsersFromUUIDs(channel);
-	return {
-		has_password: channel.password,
-		uuid: channel.uuid,
-		id: channel.identifier,
-		name: channel.name,
-		type: channel.type,
-		last_message: null,
-		loaded_messages: [],
-		joined,
-		users,
-		last_loaded_page: lastPage(channel),
-		moderators: channel.moderators,
-		administrator: channel.administrator,
-	};
+	if (users)
+		return {
+			has_password: channel.password,
+			uuid: channel.uuid,
+			id: channel.identifier,
+			name: channel.name,
+			type: channel.type,
+			last_message: null,
+			loaded_messages: [],
+			joined,
+			users,
+			last_loaded_page: lastPage(channel),
+			moderators: channel.moderators,
+			administrator: channel.administrator,
+		};
 }
 
 async function initChannelsNew() {
@@ -150,6 +151,22 @@ async function initChannelsNew() {
 	}
 
 	stChannels.set(channels);
+}
+
+export async function initPrivChannel(channelUUID: string) {
+	const channelData = await api.getChannelData(channelUUID);
+	if (channelData === APIStatus.NoResponse) {
+		return;
+	}
+
+	console.log(channelData);
+	const channel: Channel = await channelFromAPIChannel(channelData, false);
+	channel.has_password = true;
+
+	stChannels.update((channels) => {
+		channels[channelUUID] = channel;
+		return channels;
+	});
 }
 
 export async function tryLoggingIn(): Promise<boolean> {
