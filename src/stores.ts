@@ -21,11 +21,10 @@ export async function tryToLog() {
 	let response: WhoAmIResponse | APIStatus;
 	for (;;) {
 		response = await api.whoami();
-		if (
-			response == APIStatus.NoResponse ||
-			response == null ||
-			response.statusCode === 502
-		) {
+		if (response == null) {
+			return;
+		}
+		if (response == APIStatus.NoResponse || response?.statusCode === 502) {
 			stServerDown.set(true);
 			await new Promise((resolve) => setTimeout(resolve, 5000));
 			continue;
