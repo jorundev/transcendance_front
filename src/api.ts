@@ -788,6 +788,11 @@ export const api = {
 };
 
 export function getUserProfilePictureLink(user_uuid: string): string {
+	const defaultLink = "/img/default.jpg";
+	if (user_uuid == get(stLoggedUser).uuid) {
+		const avatar = get(stLoggedUser).avatar;
+		return avatar ? "/pictures/" + avatar : defaultLink;
+	}
 	const user = get(stUsers)[user_uuid];
 	if (user == undefined || !user.avatar) {
 		return "/img/default.jpg";
