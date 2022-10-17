@@ -1,4 +1,5 @@
-<script>
+<script lang="ts">
+	import { stHasNotifications } from "../stores";
 	import { push } from "svelte-spa-router";
 </script>
 
@@ -7,11 +8,16 @@
 	<div class="elem play" on:click={() => push("/play")} />
 	<div class="elem chat" on:click={() => push("/chat")} />
 	<div class="elem settings" on:click={() => push("/settings")} />
-	<div class="elem notifications" on:click={() => push("/notifications")} />
+	<div
+		class="elem notifications"
+		class:has-notif={$stHasNotifications}
+		on:click={() => push("/notifications")}
+	/>
 </div>
 
 <style lang="scss">
 	.sidebar {
+		z-index: 10;
 		display: flex;
 		flex-shrink: 0;
 		background-color: rgb(18, 18, 18);
@@ -48,11 +54,24 @@
 
 			&.notifications {
 				background-image: url("/img/bell.png");
+				position: relative;
+
+				&.has-notif::after {
+					content: "";
+					position: absolute;
+					width: 20%;
+					height: 20%;
+					left: 28px;
+					top: 12px;
+					background: red;
+					border-radius: 100%;
+					border: 1px solid rgb(18, 18, 18);
+				}
 			}
 		}
 	}
 
-	@media screen and (max-width: 800px) {
+	@media screen and (max-width: 799px) {
 		.sidebar {
 			position: absolute;
 			bottom: 0;

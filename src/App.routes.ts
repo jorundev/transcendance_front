@@ -5,6 +5,7 @@ import Login2FA from "./routes/Login2FA.svelte";
 import UserWant2FAPromptSvelte from "./routes/UserWant2FAPrompt.svelte";
 import CreateAccountFromOAuthSvelte from "./routes/CreateAccountFromOAuth.svelte";
 import Settings from "./routes/Settings.svelte";
+import Notifications from "./routes/Notifications.svelte";
 
 import { wrap } from "svelte-spa-router/wrap";
 import { isLogged, tryLoggingIn } from "./stores";
@@ -13,17 +14,7 @@ import type { SvelteComponentDev } from "svelte/internal";
 import NotFound from "./routes/NotFound.svelte";
 import Chat from "./routes/Chat.svelte";
 import ChatInside from "./components/Chat/ChatInside.svelte";
-
-/*export default {
-	"/": Home,
-	"/settings": Settings,
-	"/login": Login,
-	"/login/username": LoginByEmail,
-	"/login/2fa": Login2FA,
-	"/postsignup/2fa": UserWant2FAPromptSvelte,
-	"/postsignup/with": CreateAccountFromOAuthSvelte,
-	"*": NotFound,
-};*/
+import ChooseLobby from "./routes/ChooseLobby.svelte";
 
 function requiresLogin(component: typeof SvelteComponentDev): WrappedComponent {
 	return wrap({
@@ -60,6 +51,8 @@ export default {
 	"/chat": requiresLogin(Chat),
 	"/chat/group/:uuid": requiresLogin(ChatInside),
 	"/chat/single/:uuid": requiresLogin(ChatInside),
+	"/notifications": requiresLogin(Notifications),
+	"/play": requiresLogin(ChooseLobby),
 	"/login": requiresNoLogin(Login),
 	"/login/username": requiresNoLogin(LoginByEmail),
 	"/login/2fa": requiresNoLogin(Login2FA),
