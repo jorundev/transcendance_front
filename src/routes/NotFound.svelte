@@ -4,6 +4,9 @@
 	let picture: boolean = true;
 </script>
 
+<svelte:head>
+	<title>404 - NEW SHINJI MEGA PONG ULTIMATE</title>
+</svelte:head>
 <SideBar />
 <div class="center">
 	<div>

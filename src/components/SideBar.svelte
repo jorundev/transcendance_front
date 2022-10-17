@@ -95,6 +95,19 @@
 
 			&.notifications {
 				background-image: url("/img/bell.png");
+				position: relative;
+
+				&.has-notif::after {
+					content: "";
+					position: absolute;
+					width: 20%;
+					height: 20%;
+					left: 28px;
+					top: 12px;
+					background: red;
+					border-radius: 100%;
+					border: 1px solid rgb(18, 18, 18);
+				}
 			}
 		}
 	}

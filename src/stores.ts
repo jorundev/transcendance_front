@@ -16,6 +16,7 @@ export const stServerDown: Writable<boolean> = writable(false);
 export const stUsers: Writable<UserDictionary> = writable({});
 export const stWebsocket: Writable<WebSocket | null> = writable(null);
 export const stChannels: Writable<ChannelDictionary> = writable({});
+export const stHasNotifications: Writable<boolean> = writable(false);
 
 export async function tryToLog() {
 	let response: WhoAmIResponse | APIStatus;
