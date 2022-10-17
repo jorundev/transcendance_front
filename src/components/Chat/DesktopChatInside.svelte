@@ -17,6 +17,7 @@
 	.chat-inside {
 		flex-basis: 100%;
 		border-left: 1px solid rgb(37, 37, 37);
+		border-right: 1px solid rgb(37, 37, 37);
 	}
 
 	.select {
