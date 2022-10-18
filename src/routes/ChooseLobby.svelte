@@ -49,7 +49,7 @@
 		align-items: center;
 		margin: 20px;
 		margin-top: 40px;
-		margin-left: 73px;
+		margin-left: 100px;
 		display: flex;
 		justify-content: center;
 

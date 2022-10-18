@@ -39,7 +39,7 @@
 			<div
 				class="login-square red"
 				on:click={() => {
-					push("/login/username");
+					push("/login/email");
 				}}
 			>
 				<div class="spinning">

@@ -4,6 +4,7 @@
 	import { pop } from "svelte-spa-router";
 
 	import { stLoggedUser } from "../stores";
+	import SideBar from "../components/SideBar.svelte";
 
 	function getProfilePictureLink(): string {
 		return $stLoggedUser && $stLoggedUser.avatar
@@ -16,6 +17,7 @@
 	<title>Settings - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
 {#if $stLoggedUser != null}
+	<SideBar />
 	<div class="s">
 		<div class="settings">
 			<div class="top">

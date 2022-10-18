@@ -744,8 +744,9 @@ export const api = {
 	ws: {
 		connect: async () => {
 			if (get(stWebsocket) == null) {
+				const protocol = window.location.protocol === "https:" ? "wss" : "ws";
 				const ws = new WebSocket(
-					"wss://" + window.location.hostname + "/api/streaming"
+					protocol + "://" + window.location.hostname + "/api/streaming"
 				);
 				ws.onerror = async () => {
 					console.log(

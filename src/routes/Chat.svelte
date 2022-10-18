@@ -2,34 +2,51 @@
 	import { onDestroy, onMount } from "svelte";
 
 	import ChatChannel from "../components/Chat/ChatChannel.svelte";
-	import { initPrivChannel, stChannels } from "../stores";
+	import { stChannels } from "../stores";
 
 	import DesktopChatInside from "../components/Chat/DesktopChatInside.svelte";
-	import { push } from "svelte-spa-router";
+	import { push, replace } from "svelte-spa-router";
 	import Modal from "../components/Kit/Modal.svelte";
 	import JoinChannelPopup from "../components/Chat/JoinChannelPopup.svelte";
 	import CreateChannelPopup from "../components/Chat/CreateChannelPopup.svelte";
 	import ChannelSearch from "../components/Chat/ChannelSearch.svelte";
 	import SideBar from "../components/SideBar.svelte";
 	import { ChannelType, type Channel } from "../channels";
-	import type { PrivateChannelData } from "src/api";
+	import type { PrivateChannelData } from "../api";
 
 	let join_channel_modal = false;
 	let create_channel_modal = false;
 
 	let interval;
-	let current_channel = "";
-
+	
 	let render = true;
-
+	
+	let innerWidth = 0;
+	let oldInnerWidth = 0;
+	
 	$: if (current_channel) {
 		render = false;
 		setTimeout(() => (render = true), 1);
 	}
 
 	let join_channel: Channel;
-
+	
 	let mounted = false;
+	
+	export let params: { uuid?: string };
+	let current_channel = params?.uuid ? params.uuid : "";
+	
+	$: {
+		current_channel = params?.uuid ? params.uuid : "";
+		window.history.replaceState({}, null, "/#/chat/" + current_channel);
+	}
+	
+	$: {
+		if (innerWidth <= 800 && oldInnerWidth > 800 && current_channel.length !== 0) {
+			replace("/chat/group/" + current_channel);
+		}	
+		oldInnerWidth = innerWidth;
+	}
 
 	function reRenderChannels() {
 		for (const channel in $stChannels) {
@@ -52,9 +69,9 @@
 	});
 
 	function goToMessages(event: { detail: { channel: Channel } }) {
-		current_channel = event.detail.channel.uuid;
+		params = { uuid: event.detail.channel.uuid }
 		if (window.innerWidth <= 800) {
-			push("/chat/group/" + current_channel);
+			push("/chat/group/" + params.uuid);
 		}
 	}
 
@@ -89,6 +106,7 @@
 	}
 </script>
 
+<svelte:window bind:innerWidth />
 <svelte:head>
 	<title>Chat - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
@@ -103,10 +121,10 @@
 						join_channel_modal = false;
 					}}
 					on:join={() => {
-						current_channel = join_channel.uuid;
+						params = {uuid: join_channel.uuid };
 						join_channel_modal = false;
 						if (window.innerWidth <= 800) {
-							push("/chat/group/" + current_channel);
+							push("/chat/group/" + params.uuid);
 						}
 					}}
 				/>
@@ -122,9 +140,9 @@
 					}}
 					on:create={(data) => {
 						create_channel_modal = false;
-						current_channel = data.detail.uuid;
+						params = {uuid: data.detail.uuid};
 						if (window.innerWidth <= 800) {
-							push("/chat/group/" + current_channel);
+							push("/chat/group/" + params.uuid);
 						}
 					}}
 				/>

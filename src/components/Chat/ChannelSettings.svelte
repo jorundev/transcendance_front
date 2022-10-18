@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { api } from "../../api";
-	import { createEventDispatcher } from "svelte";
+	import { createEventDispatcher, onMount } from "svelte";
 	import { stChannels, stLoggedUser } from "../../stores";
 	import ChannelSettingsProfile from "./ChannelSettingsProfile.svelte";
 	import Button from "../Kit/Button.svelte";
 	import Card from "../Kit/Card.svelte";
 	import { ChannelType, type Channel } from "../../channels";
 	import { pop } from "svelte-spa-router";
+	import ClickOutside from "svelte-click-outside";
 
 	export let channel: Channel;
 
@@ -18,6 +19,12 @@
 	let dispatch = createEventDispatcher();
 	let is_moderator = false;
 	let is_administrator = false;
+	
+	let canClickOutside = false;
+	
+	onMount(() => {
+		setTimeout(() => canClickOutside = true, 200);
+	});
 
 	$: is_moderator = channel.moderators.includes($stLoggedUser?.uuid);
 	$: is_administrator = channel.administrator === $stLoggedUser?.uuid;
@@ -32,6 +39,7 @@
 	}
 </script>
 
+<ClickOutside on:clickoutside={() => {if (canClickOutside) dispatch("back");}}>
 <Card>
 	<div class="settings">
 		<div class="title">Settings for {channel.name}</div>
@@ -106,6 +114,7 @@
 		>
 	</div>
 </Card>
+</ClickOutside>
 
 <style lang="scss">
 	.settings {

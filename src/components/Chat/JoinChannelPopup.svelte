@@ -1,15 +1,23 @@
 <script lang="ts">
 	import { api, APIStatus } from "../../api";
-	import { createEventDispatcher } from "svelte";
+	import { createEventDispatcher, onMount } from "svelte";
 	import Button from "../Kit/Button.svelte";
 	import Card from "../Kit/Card.svelte";
 	import type { Channel } from "../../channels";
+	import ClickOutside from "svelte-click-outside";
+	
 	export let channel: Channel;
 
 	let dispatch = createEventDispatcher();
 	let password: string;
 
 	let error = "";
+	
+	let canClickOutside = false;
+	
+	onMount(() => {
+		setTimeout(() => canClickOutside = true, 200);
+	});
 
 	async function joinChannel(): Promise<boolean> {
 		const resp = await api.joinChannel(
@@ -28,6 +36,9 @@
 </script>
 
 <div class="jcp">
+	<ClickOutside on:clickoutside={() => {
+		if (canClickOutside) dispatch("back");
+	}}>
 	<Card>
 		<div class="join">
 			{#if channel}
@@ -72,6 +83,7 @@
 			{/if}
 		</div>
 	</Card>
+	</ClickOutside>
 </div>
 
 <style lang="scss">

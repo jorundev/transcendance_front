@@ -170,10 +170,12 @@ export async function initPrivChannel(channelUUID: string) {
 }
 
 export async function tryLoggingIn(): Promise<boolean> {
-	await tryToLog();
+	if (!isLogged()) {
+		await tryToLog();		
+	}
 	return isLogged();
 }
 
-export async function isLogged(): Promise<boolean> {
+export function isLogged(): boolean {
 	return get(stLoggedUser) != null;
 }

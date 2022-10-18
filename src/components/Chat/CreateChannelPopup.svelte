@@ -3,6 +3,8 @@
 	import { createEventDispatcher } from "svelte";
 	import Button from "../Kit/Button.svelte";
 	import Card from "../Kit/Card.svelte";
+	import { onMount } from "svelte";
+	import ClickOutside from "svelte-click-outside";
 
 	let dispatch = createEventDispatcher();
 
@@ -20,6 +22,12 @@
 			password_value = "";
 		}
 	}
+	
+	let canClickOutside = false;
+	
+	onMount(() => {
+		setTimeout(() => canClickOutside = true, 200);
+	});
 
 	function setPasswordCache() {
 		has_password_cache = has_password;
@@ -58,6 +66,9 @@
 </script>
 
 <div class="csp">
+	<ClickOutside on:clickoutside={() => {
+		if (canClickOutside) dispatch("back");
+	}}>
 	<Card>
 		<div class="title">Create channel</div>
 		<div class="body">
@@ -127,6 +138,7 @@
 			</div>
 		</div>
 	</Card>
+	</ClickOutside>
 </div>
 
 <style lang="scss">

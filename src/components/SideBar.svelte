@@ -11,15 +11,16 @@
 	let oldWidth = 0;
 	
 	onMount(() => {
+		notransition = true;
 		setTimeout(() => {
 			notransition = false;
-		}, 1);
+		}, 100);
 	});
 	
 	$: bigDisplay = innerWidth >= 1948;
 	
 	$: {
-		if (innerWidth < 1948 && oldWidth >= 1948) {
+		if ((innerWidth < 1948 && oldWidth >= 1948) || (innerWidth >= 800 && oldWidth < 800)) {
 			notransition = true;
 			setTimeout(() => {
 				notransition = false;
@@ -112,7 +113,7 @@
 		}
 	}
 
-	@media screen and (max-width: 800px) {
+	@media screen and (max-width: 799px) {
 		.sidebar-hover, .sidebar {
 			position: absolute;
 			bottom: 0;

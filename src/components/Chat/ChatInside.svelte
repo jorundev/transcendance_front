@@ -16,7 +16,7 @@
 	} from "../../channels";
 	import { padIdentifier } from "../../utils";
 	import SideBar from "../SideBar.svelte";
-	import { pop } from "svelte-spa-router";
+	import { replace } from "svelte-spa-router";
 
 	let textArea: HTMLInputElement;
 	let chatDiv: HTMLDivElement;
@@ -28,6 +28,16 @@
 	export let params: { uuid: string };
 	export let render: boolean = true;
 	export let desktop = false;
+	
+	let innerWidth = 0;
+	let oldInnerWidth = 0;
+	
+	$: {
+		if (!desktop && innerWidth >= 1600 && innerWidth !== oldInnerWidth) {
+			replace("/chat/" + params.uuid);
+		}
+		oldInnerWidth = innerWidth;
+	}
 
 	let channelID = "";
 
@@ -180,10 +190,6 @@
 		let i = 0;
 		let previous: ChatMessage | null = null;
 		for (const message of messages) {
-			// Deleted messages
-			/*if (message.value == null) {
-				continue;
-			}*/
 			if (previous?.sender == message.sender) {
 				groups[groups.length - 1].messages.push({
 					value: message.value,
@@ -258,7 +264,8 @@
 		<title>{info?.name}#{channelID} - NEW SHINJI MEGA PONG ULTIMATE</title>
 	{/if}
 </svelte:head>
-{#if !desktop}
+<svelte:window bind:innerWidth />
+{#if innerWidth > 800 && !desktop}
 	<SideBar />
 {/if}
 {#await tick()}
@@ -287,7 +294,7 @@
 			{/if}
 			<div class="top">
 				{#if !desktop}
-					<div class="back" on:click={() => pop()} />
+					<div class="back" on:click={() => replace("/chat")} />
 				{/if}
 				<div class="profile-picture">
 					<ChannelAvatar
@@ -364,7 +371,7 @@
 		position: absolute;
 		left: 20px;
 		cursor: pointer;
-		background-image: url("img/left.png");
+		background-image: url("/img/left.png");
 		background-size: 20px;
 		background-repeat: no-repeat;
 		background-position: center;
@@ -399,12 +406,6 @@
 		&::-webkit-scrollbar-thumb {
 			background-color: rgb(59, 59, 59);
 			border-radius: 10px;
-		}
-
-		@media screen and (max-width: 800px) {
-			&.mobile {
-				height: calc(100% - var(--scrollbar-height) - 162px - 52px);
-			}
 		}
 	}
 

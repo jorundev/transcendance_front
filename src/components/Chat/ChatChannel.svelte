@@ -44,21 +44,21 @@
 
 		if (ts < 60) {
 			let n_seconds = Math.floor(ts);
-			return n_seconds + ` second${n_seconds != 1 ? "s" : ""} ago`;
+			return n_seconds + `s ago`;
 		}
 
 		if (ts < 3600) {
 			let n_minutes = Math.floor(ts / 60);
-			return n_minutes + ` minute${n_minutes != 1 ? "s" : ""} ago`;
+			return n_minutes + `min ago`;
 		}
 
 		if (ts < 3600 * 24) {
 			let n_hours = Math.floor(ts / 3600);
-			return n_hours + ` hour${n_hours != 1 ? "s" : ""} ago`;
+			return n_hours + `h ago`;
 		}
 
 		let n_days = Math.floor(ts / (3600 * 24));
-		return n_days + ` day${n_days != 1 ? "s" : ""} ago`;
+		return n_days + `d ago`;
 	}
 
 	$: {
