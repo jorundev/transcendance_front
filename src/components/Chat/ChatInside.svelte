@@ -57,7 +57,12 @@
 
 	let joined: boolean;
 
-	$: joined = $stChannels[params.uuid]?.joined;
+	$: {
+		joined = $stChannels[params.uuid]?.joined;
+		if (!joined) {
+			replace("/chat");
+		}	
+	}
 	$: if (params.uuid) {
 		info = l_channels[params.uuid];
 		onInfoChange();
@@ -266,7 +271,7 @@
 </svelte:head>
 <svelte:window bind:innerWidth />
 {#if innerWidth > 800 && !desktop}
-	<SideBar />
+	<SideBar active="chat" />
 {/if}
 {#await tick()}
 	Loading..

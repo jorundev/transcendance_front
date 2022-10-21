@@ -1,12 +1,15 @@
 <script lang="ts">
 	import { push } from "svelte-spa-router";
 	import { onMount } from "svelte";
+	import { stHasNotifications } from "../stores";
 	
 	let bigDisplay = false;
 	let innerWidth = 0;
 	
 	let hover = false;
 	let notransition = true;
+	
+	export let active: "home" | "notifications" | "play" | "chat" | "settings" | undefined = undefined;
 	
 	let oldWidth = 0;
 	
@@ -15,10 +18,12 @@
 		setTimeout(() => {
 			notransition = false;
 		}, 100);
+		
+		$stHasNotifications = true;
 	});
 	
 	$: bigDisplay = innerWidth >= 1948;
-	
+
 	$: {
 		if ((innerWidth < 1948 && oldWidth >= 1948) || (innerWidth >= 800 && oldWidth < 800)) {
 			notransition = true;
@@ -31,20 +36,22 @@
 </script>
 
 <div class:notransition class:hover={bigDisplay || hover} class:sidebar={bigDisplay} class:sidebar-hover={!bigDisplay} on:mouseenter={() => hover = true} on:mouseleave={() => hover = false}>
-	<div class="elem home" on:click={() => push("/")}>
+	<div class="elem home" class:active={active === "home"} class:has-notif={$stHasNotifications && innerWidth >= 800} on:click={() => push("/")}>
 		<div class="inner">Home</div>
 	</div>
-	<div class="elem play" on:click={() => push("/play")} >
+	{#if innerWidth < 800}
+	<div class="elem notifications" class:active={active === "notifications"} class:has-notif={$stHasNotifications} on:click={() => push("/notifications")}>
+		<div class="inner">Notifications</div>
+	</div>
+	{/if}
+	<div class="elem play" class:active={active === "play"} on:click={() => push("/play")} >
 		<div class="inner">Play</div>
 	</div>
-	<div class="elem chat" on:click={() => push("/chat")}>
+	<div class="elem chat" class:active={active === "chat"} on:click={() => push("/chat")}>
 		<div class="inner">Chat</div>
 	</div>
-	<div class="elem settings" on:click={() => push("/settings")}>
+	<div class="elem settings" class:active={active === "settings"} on:click={() => push("/settings")}>
 		<div class="inner">Settings</div>
-	</div>
-	<div class="elem notifications" on:click={() => push("/notifications")}>
-		<div class="inner">Notifications</div>
 	</div>
 </div>
 
@@ -68,6 +75,7 @@
 			background-position: center;
 			background-repeat: no-repeat;
 			flex-shrink: 0;
+			position: relative;
 
 			&:hover {
 				background-color: rgb(40, 40, 40);
@@ -96,10 +104,12 @@
 
 			&.notifications {
 				background-image: url("/img/bell.png");
-				position: relative;
-
-				&.has-notif::after {
+			}
+			
+			&.has-notif::after {
 					content: "";
+					text-align: center;
+					font-size: 8px;
 					position: absolute;
 					width: 20%;
 					height: 20%;
@@ -109,7 +119,6 @@
 					border-radius: 100%;
 					border: 1px solid rgb(18, 18, 18);
 				}
-			}
 		}
 	}
 
@@ -123,6 +132,23 @@
 			border-top: 1px solid rgb(37, 37, 37);
 			.inner {
 				display: none;	
+			}
+			
+			.elem {
+				&.active::before {
+					content: "";
+					z-index: -1;
+					border-bottom: 3px solid #0c82fa;
+					width: 100%;
+					height: 100%;
+					position: absolute;
+					box-sizing: border-box;
+				}
+				
+				&:hover {
+					background-color: transparent;
+					border-radius: 0;
+				}
 			}
 		}
 	}

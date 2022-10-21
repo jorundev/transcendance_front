@@ -17,7 +17,7 @@
 	<title>Settings - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
 {#if $stLoggedUser != null}
-	<SideBar />
+	<SideBar active="settings"/>
 	<div class="s">
 		<div class="settings">
 			<div class="top">

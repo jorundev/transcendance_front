@@ -110,7 +110,7 @@
 <svelte:head>
 	<title>Chat - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
-<SideBar />
+<SideBar active="chat"/>
 <div class="chat">
 	{#if join_channel_modal}
 		<Modal>

@@ -9,6 +9,7 @@ import {
 	type WhoAmIResponse,
 } from "./api";
 import type { Channel, ChannelDictionary } from "./channels";
+import { NotificationType, type NotificationDataDictionary } from "./notifications";
 import type { LoggedUser, UserDictionary } from "./users";
 
 export const stLoggedUser: Writable<LoggedUser | null> = writable(null);
@@ -17,6 +18,20 @@ export const stUsers: Writable<UserDictionary> = writable({});
 export const stWebsocket: Writable<WebSocket | null> = writable(null);
 export const stChannels: Writable<ChannelDictionary> = writable({});
 export const stHasNotifications: Writable<boolean> = writable(false);
+export const stNotifications: Writable<NotificationDataDictionary> = writable({
+	testnotif0: {
+		type: NotificationType.GameInvite,
+		user: "24a32cdb-f992-43a9-bf3d-d7c99acb9f46",
+		lobby: "logobi gt",
+		date: new Date(),
+	},
+	testnotif1: {
+		type: NotificationType.GameInvite,
+		user: "24a32cdb-f992-43a9-bf3d-d7c99acb9f46",
+		lobby: "logobi gt",
+		date: new Date(),
+	}
+});
 
 export async function tryToLog() {
 	let response: WhoAmIResponse | APIStatus;

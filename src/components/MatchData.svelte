@@ -15,11 +15,12 @@
 		padding-left: 10px;
 		padding-right: 10px;
 		min-height: 30px;
-		border: 1px solid rgb(75, 75, 75);
 		border-radius: 10px;
+		background: rgb(18, 18, 18);
+        border: 1px solid rgb(50, 50, 51);
 
 		.nodata {
-			color: rgb(188, 188, 188);
+			color: rgb(207, 207, 207);
 		}
 	}
 </style>

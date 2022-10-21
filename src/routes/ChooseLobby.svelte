@@ -3,7 +3,7 @@
 	import SideBar from "../components/SideBar.svelte";
 </script>
 
-<SideBar />
+<SideBar active="play" />
 <div class="play">
 	<div class="your-rank">
 		<Card>

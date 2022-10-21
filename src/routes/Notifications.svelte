@@ -1,7 +1,15 @@
 <script lang="ts">
-	import GameInviteNotification from "../components/Notifications/GameInviteNotification.svelte";
+	import NotificationList from "../components/Notifications/NotificationList.svelte";
 	import SideBar from "../components/SideBar.svelte";
 </script>
 
-<SideBar />
-<GameInviteNotification />
+<SideBar active="notifications"/>
+<div class="notifications">
+	<NotificationList />
+</div>
+
+<style lang="scss">
+	.notifications {
+		padding: 16px;
+	}
+</style>

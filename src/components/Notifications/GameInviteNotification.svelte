@@ -1,70 +1,45 @@
-<script>
-	import Button from "../Kit/Button.svelte";
-	import Card from "../Kit/Card.svelte";
+<script lang="ts">
+	import type { GameInviteNotificationData } from "../../notifications";
+	import { api, APIStatus } from "../../api";
+	import type { User } from "../../users";
+    
+    export let data: GameInviteNotificationData;
+    let user: User = undefined;
+    $: api.getUserData(data.user).then((data) => {
+        if (data != APIStatus.NoResponse) {
+            user = data;
+        }
+    });
 </script>
 
-<div class="notifications">
-	<Card>
-		<div class="game-invite">
-			<div class="user">
-				<div class="avatar" />
-				<div class="name">username</div>
-				<div class="id">#9999</div>
-			</div>
-			<div class="desc">has challenged you to a game!</div>
-		</div>
-		<div class="buttons">
-			<Button red>Decline</Button>
-			<Button>Accept</Button>
-		</div>
-	</Card>
+<div class="invite">
+    <div class="avatar"></div>
+    <div class="resume">You got challenged by {user?.username}
+        <div class="id">#{user?.identifier}</div>
+    </div>
 </div>
 
 <style lang="scss">
-	.notifications {
-		margin: 20px;
-		margin-left: 73px;
-	}
+    .invite {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    
+    .resume {
+        display: flex;
+        
+        .id {
+            color: #787771;
+        }
+    }
 
-	.avatar {
-		width: 60px;
-		height: 60px;
-		background-image: url("/img/default.jpg");
-		background-size: 100%;
-		border-radius: 100%;
-		margin-right: 12px;
-	}
-
-	.desc {
-		text-align: center;
-		padding: 16px;
-		font-size: 18px;
-	}
-
-	.game-invite {
-		display: flex;
-		justify-content: center;
-		margin-bottom: 20px;
-	}
-
-	.user {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background: rgb(47, 47, 47);
-		padding: 16px;
-		padding-left: 20px;
-		padding-right: 20px;
-		border-radius: 10px;
-	}
-
-	.buttons {
-		justify-content: center;
-		max-width: 800px;
-		width: 100%;
-		margin-left: auto;
-		margin-right: auto;
-		display: flex;
-		gap: 10px;
-	}
+    .avatar {
+        flex-shrink: 0;
+        width: 30px;
+        height: 30px;
+        border-radius: 100%;
+        background-size: cover;
+        background-image: url("/img/default.jpg");
+    }
 </style>

@@ -6,6 +6,7 @@
 	import { padIdentifier } from "../utils";
 	import FriendListHorizontal from "../components/Friends/FriendListHorizontal.svelte";
 	import MatchHistory from "../components/MatchHistory.svelte";
+	import NotificationList from "../components/Notifications/NotificationList.svelte";
 
 	let id = "";
 
@@ -20,7 +21,7 @@
 <svelte:head>
 	<title>Home - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
-<SideBar />
+<SideBar active="home"/>
 <div class="home">
 	<div class="column">
 		<Card>
@@ -31,7 +32,7 @@
 				/>
 				<div class="info">
 					<div class="user">
-						<div class="name">{$stLoggedUser.username}</div>
+						<div class="name">{$stLoggedUser?.username}</div>
 						<div class="id">#{id}</div>
 						<div class="rank" />
 					</div>
@@ -61,6 +62,14 @@
 				<MatchHistory />
 			</div>
 		</Card>
+		<div class="nomobile">
+			<Card>
+				<div class="home-div">
+					<div class="title">Notifications</div>
+					<NotificationList />
+				</div>
+			</Card>
+		</div>
 	</div>
 	<div class="s-column nomobile">
 		<div class="artwork" />
@@ -123,7 +132,7 @@
 				}
 
 				.id {
-					color: rgb(210, 210, 210);
+					color: #787771;
 				}
 			}
 
