@@ -5,6 +5,8 @@ import Login2FA from "./routes/Login2FA.svelte";
 import UserWant2FAPromptSvelte from "./routes/UserWant2FAPrompt.svelte";
 import CreateAccountFromOAuthSvelte from "./routes/CreateAccountFromOAuth.svelte";
 import Settings from "./routes/Settings.svelte";
+import Sessions from "./routes/Sessions.svelte";
+import TFASettings from "./routes/TFASettings.svelte";
 import Notifications from "./routes/Notifications.svelte";
 
 import { wrap } from "svelte-spa-router/wrap";
@@ -48,6 +50,8 @@ function requiresNoLogin(
 export default {
 	"/": requiresLogin(Home),
 	"/settings": requiresLogin(Settings),
+	"/settings/sessions": requiresLogin(Sessions),
+	"/settings/2fa": requiresLogin(TFASettings),
 	"/chat/:uuid?": requiresLogin(Chat),
 	"/chat/group/:uuid": requiresLogin(ChatInside),
 	"/chat/single/:uuid": requiresLogin(ChatInside),

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { GameInviteNotificationData } from "../../notifications";
+	import type { AcceptedFriendRequestNotificationData } from "../../notifications";
 	import { api, APIStatus } from "../../api";
 	import type { User } from "../../users";
     
-    export let data: GameInviteNotificationData;
+    export let data: AcceptedFriendRequestNotificationData;
     let user: User = undefined;
-    $: api.getUserData(data.user).then((data) => {
+    $: api.getUserData(data.sender).then((data) => {
         if (data != APIStatus.NoResponse) {
             user = data;
         }
@@ -20,7 +20,7 @@
     <div class="resume">
         <div class="inner">
             <div class="username">{user?.username}<div class="id">#{user?.identifier}</div></div>
-            <div>challenged you to a battle</div>
+            <div>accepted your friend request</div>
         </div>
     </div>
 </div>
@@ -61,7 +61,7 @@
         background-size: 80%;
         background-position: center;
         background-repeat: no-repeat;
-        background-image: url("/img/swords.png");
+        background-image: url("/img/check.png");
     }
 
     .avatar {

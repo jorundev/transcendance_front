@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { api } from "../../api";
 	import ClickOutside from "svelte-click-outside";
-	import type { ChatMessage } from "../../stores";
+	import type { ChatMessage } from "../../channels";
 	export let message: ChatMessage;
 	export let side: "left" | "right";
 	export let last: boolean;
@@ -79,6 +79,8 @@
 
 <style lang="scss">
 	.bubble {
+		user-select: text;
+		-webkit-user-select: text;
 		word-break: break-word;
 		word-wrap: break-word;
 		white-space: pre-wrap;

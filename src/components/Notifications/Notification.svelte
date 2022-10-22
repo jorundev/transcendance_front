@@ -5,10 +5,10 @@
 </script>
 
 <div class="notification">
-    <div class="dismiss" on:click={() => dispatch("dismiss")}/>
     <div class="content">
         <slot />
     </div>
+    <div class="dismiss" on:click={() => dispatch("dismiss")}/>
 </div>
 
 <style lang="scss">
@@ -16,6 +16,7 @@
         cursor: pointer;
         position: relative;
         display: flex;
+        justify-content: space-between;
         align-items: center;
         padding: 10px;
         border-radius: 10px;
@@ -23,11 +24,9 @@
         border: 1px solid rgb(50, 50, 50);
         
         .dismiss {
-            display: none;
-            position: absolute;
             width: 20px;
             height: 20px;
-            background-image: url("/img/cross.png");
+            background-image: none;
             background-size: cover;
             opacity: 0.5;
             cursor: pointer;
@@ -36,7 +35,11 @@
         
         &:hover {
             .dismiss {
-                display: block;
+                background-image: url("/img/cross.png");
+                
+                &:hover {
+                    opacity: 0.7;
+                }
             }
             
             background: rgb(50, 50, 50);

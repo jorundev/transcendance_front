@@ -388,29 +388,21 @@
 		}
 	}
 	.bubbles {
-		position: relative;
-		padding-top: 10px;
+		//padding-top: 10px;
 		overflow: auto;
-		height: calc(100% - var(--scrollbar-height) - 162px);
+		//height: calc(100% - var(--scrollbar-height) - 162px);
+		height: 100vh;
 		width: 100%;
 		transform: translateX(-16px);
 		padding-left: 16px;
 		padding-right: 16px;
 		display: flex;
+		margin-bottom: 82px;
+		padding-top: 82px;
 		flex-direction: column-reverse;
 
 		&::-webkit-scrollbar {
-			background-color: black;
-		}
-
-		::-webkit-scrollbar-track {
-			border-radius: 10px;
-			width: 1px;
-		}
-
-		&::-webkit-scrollbar-thumb {
-			background-color: rgb(59, 59, 59);
-			border-radius: 10px;
+			display: none;
 		}
 	}
 
@@ -421,6 +413,7 @@
 	}
 
 	.response-bar {
+		position: absolute;
 		border-top: 1px solid #232323;
 		gap: 8px;
 		padding: 16px;
@@ -430,7 +423,12 @@
 		bottom: 0;
 		left: 0;
 		background-color: black;
-		width: 100%;
+		width: calc(100% + 1px);
+		@media screen and (min-width: 800px) {
+			&.mobile {
+				padding-left: 68px;
+			}
+		}
 	}
 
 	.input {
@@ -488,13 +486,17 @@
 	}
 
 	.top {
+		position: absolute;
+		width: 100%;
+		z-index: 2;
 		justify-content: center;
 		gap: 14px;
 		align-items: center;
 		display: flex;
 		height: 60px;
 		border-bottom: 1px solid #232323;
-		background: black;
+		backdrop-filter: blur(4px);
+		background: rgba(0, 0, 0, 0.679);
 		padding-bottom: 4px;
 		padding-top: 4px;
 	}
@@ -516,15 +518,12 @@
 	}
 
 	.chat {
+		position: relative;
+		display: flex;
+		flex-direction: column;
 		padding-left: 16px;
 		padding-right: 16px;
 		height: 100%;
-
-		@media screen and (min-width: 800px) {
-			&.mobile {
-				padding-left: 68px;
-			}
-		}
 	}
 
 	.channel-settings {

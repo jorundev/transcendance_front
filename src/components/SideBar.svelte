@@ -62,6 +62,8 @@
 		width: 52px;
 	}
 	.sidebar-hover, .sidebar {
+		user-select: none;
+		-webkit-user-select: none;
 		z-index: 20;
 		display: flex;
 		flex-shrink: 0;

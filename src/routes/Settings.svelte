@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { api } from "../api";
 
-	import { pop } from "svelte-spa-router";
+	import { pop, push } from "svelte-spa-router";
 
 	import { stLoggedUser } from "../stores";
 	import SideBar from "../components/SideBar.svelte";
+	
+	let innerWidth = 0;
 
 	function getProfilePictureLink(): string {
 		return $stLoggedUser && $stLoggedUser.avatar
@@ -13,6 +15,7 @@
 	}
 </script>
 
+<svelte:window bind:innerWidth />
 <svelte:head>
 	<title>Settings - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
@@ -21,12 +24,14 @@
 	<div class="s">
 		<div class="settings">
 			<div class="top">
+				{#if innerWidth < 800}
 				<div
 					class="back"
 					on:click={() => {
 						pop();
 					}}
 				/>
+				{/if}
 				<div class="title">Settings</div>
 				<div class="empty" style="width: 40px;" />
 			</div>
@@ -38,7 +43,7 @@
 						getProfilePictureLink() +
 						"')"}
 				/>
-				{$stLoggedUser.username}
+				{$stLoggedUser?.username}
 			</div>
 			<div
 				class="setting"
@@ -51,8 +56,8 @@
 			</div>
 			<div class="category">Security</div>
 			<div class="setting">Password</div>
-			<div class="setting">Two-Factor Authentication</div>
-			<div class="setting">Sessions</div>
+			<div class="setting" on:click={() => push("/settings/2fa")}>Two-Factor Authentication</div>
+			<div class="setting" on:click={() => push("/settings/sessions")}>Sessions</div>
 			<div class="category">Activity</div>
 			<div class="setting">Blocked accounts</div>
 		</div>
@@ -144,6 +149,37 @@
 
 		&:hover {
 			background-color: #202020;
+		}
+	}
+	
+	@media screen and (min-width: 800px) {
+		.settings {
+			padding-left: 59px;
+			padding-top: 20px;
+			max-width: none;
+			border-right: 1px solid rgb(40, 40, 40);
+			height: 100vh;
+		}
+		.title {
+			margin-left: 10px;
+			font-size: 28px;
+		}
+		.category {
+			margin-top: 20px;
+			margin-bottom: 10px;
+			padding-top: 20px;
+			border-top: 1px solid rgb(40, 40, 40);
+			background: transparent;
+			text-transform: none;
+			color: white;
+			font-size: 24px;
+		}
+		.setting {
+			font-size: 18px;
+			
+			&:hover {
+				background-color: rgb(22, 24, 28);
+			}
 		}
 	}
 </style>

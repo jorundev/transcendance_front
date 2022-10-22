@@ -270,6 +270,18 @@ interface WebsocketMessage {
 	namespace: WsNamespace;
 }
 
+export interface SessionsResponse extends APIResponse {
+	data: Array<Session>,
+}
+
+export interface Session {
+	id: number,
+	platform: string,
+	creation_date: string,
+	active: boolean,
+	current: boolean,
+}
+
 export async function getUsersFromUUIDs(channel: APIChannel): Promise<
 	Array<{
 		name: string;
@@ -741,6 +753,12 @@ export const api = {
 		}
 		return req;
 	},
+	getSessions: async () => {
+		return makeRequest<SessionsResponse>("/api/sessions", "GET");
+	},
+	killSession: async (id: number) => {
+		return makeRequest<APIResponse>("/api/sessions/" + id, "DELETE");	
+	},
 	ws: {
 		connect: async () => {
 			if (get(stWebsocket) == null) {
@@ -790,12 +808,12 @@ export const api = {
 
 export function getUserProfilePictureLink(user_uuid: string): string {
 	const defaultLink = "/img/default.jpg";
-	if (user_uuid == get(stLoggedUser).uuid) {
-		const avatar = get(stLoggedUser).avatar;
+	if (user_uuid == get(stLoggedUser)?.uuid) {
+		const avatar = get(stLoggedUser)?.avatar;
 		return avatar ? "/pictures/" + avatar : defaultLink;
 	}
 	const user = get(stUsers)[user_uuid];
-	if (user == undefined || !user.avatar) {
+	if (!user?.avatar) {
 		return "/img/default.jpg";
 	}
 	return "/pictures/" + user.avatar;

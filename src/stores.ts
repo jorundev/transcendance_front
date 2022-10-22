@@ -21,15 +21,19 @@ export const stHasNotifications: Writable<boolean> = writable(false);
 export const stNotifications: Writable<NotificationDataDictionary> = writable({
 	testnotif0: {
 		type: NotificationType.GameInvite,
-		user: "24a32cdb-f992-43a9-bf3d-d7c99acb9f46",
+		user: "56e4093e-ed21-4412-8d8c-5d979fd43757",
 		lobby: "logobi gt",
 		date: new Date(),
 	},
 	testnotif1: {
-		type: NotificationType.GameInvite,
-		user: "24a32cdb-f992-43a9-bf3d-d7c99acb9f46",
-		lobby: "logobi gt",
+		type: NotificationType.FriendRequest,
 		date: new Date(),
+		sender: "56e4093e-ed21-4412-8d8c-5d979fd43757",
+	},
+	testnotif2: {
+		type: NotificationType.AcceptedFriendRequest,
+		date: new Date(),
+		sender: "56e4093e-ed21-4412-8d8c-5d979fd43757",
 	}
 });
 

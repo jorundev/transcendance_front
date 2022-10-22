@@ -57,6 +57,13 @@
 		//border-right: 1px solid rgb(37, 37, 37);
 		//border-left: 1px solid rgb(37, 37, 37);
 	}
+	
+	@media screen and (max-width: 799px) {
+		div {
+			user-select: none;
+			-webkit-user-select: none;
+		}
+	}
 
 	.sorry {
 		color: gray;

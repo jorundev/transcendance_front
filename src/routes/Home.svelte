@@ -13,7 +13,7 @@
 	$: id = padIdentifier($stLoggedUser?.id);
 
 	let avatarLink = "";
-	$: avatarLink = getUserProfilePictureLink($stLoggedUser.uuid);
+	$: avatarLink = getUserProfilePictureLink($stLoggedUser?.uuid);
 
 	let levelPercentage = 50;
 </script>
@@ -191,7 +191,7 @@
 			padding-right: 20px;
 		}
 		.column {
-			max-width: 400px;
+			max-width: 500px;
 			margin-top: 30px;
 			margin-bottom: 30px;
 		}

@@ -156,7 +156,6 @@
 	}
 
 	.search-bar-icon {
-		transition: background-color 140ms;
 		flex-shrink: 0;
 		width: 40px;
 		height: 40px;
@@ -176,7 +175,7 @@
 		position: relative;
 		width: 100%;
 		margin: 0;
-		transition: background-color 140ms, width 140ms;
+		transition: width 140ms;
 		font-size: 16px;
 		flex-grow: 1;
 		height: 10px;

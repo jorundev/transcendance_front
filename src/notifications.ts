@@ -33,3 +33,11 @@ export interface NotificationDataDictionary {
 export function isGameInviteNotificationData(data: NotificationData): data is GameInviteNotificationData {
     return data.type === NotificationType.GameInvite;
 }
+
+export function isFriendRequestNotificationData(data: NotificationData): data is FriendRequestNotificationData {
+    return data.type === NotificationType.FriendRequest;
+}
+
+export function isFriendRequestAcceptedNotificationData(data: NotificationData): data is AcceptedFriendRequestNotificationData {
+    return data.type === NotificationType.AcceptedFriendRequest;
+}
