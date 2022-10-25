@@ -159,25 +159,30 @@
 			</div>
 			<div class="add" on:click={createChannel} />
 		</div>
-		<div class="channels">
-			{#each Object.entries($stChannels) as [key, channel] (key)}
-				{#if channel.joined}
-					<ChatChannel
-						info={channel}
-						on:click={goToMessages}
-						on:join={joinChannel}
-						current={current_channel}
-						joined={!mounted || $stChannels[channel.uuid]?.joined}
-					/>
-				{/if}
-			{/each}
-		</div>
+		{#if Object.entries($stChannels).length > 0}
+			<div class="channels">
+				{#each Object.entries($stChannels) as [key, channel] (key)}
+					{#if channel.joined}
+						<ChatChannel
+							info={channel}
+							on:click={goToMessages}
+							on:join={joinChannel}
+							current={current_channel}
+							joined={!mounted || $stChannels[channel.uuid]?.joined}
+						/>
+					{/if}
+					{/each}
+				</div>
+			{:else}
+				<div class="no-channels">You didn't join any channel</div>
+			{/if}
 	</div>
 	<DesktopChatInside channel={current_channel} {render} />
 </div>
 
 <style lang="scss">
 	.chat-menu {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		width: 100%;
@@ -222,6 +227,15 @@
 		height: auto;
 		overflow-x: hidden;
 		overflow-y: auto;
+	}
+	
+	.no-channels {
+		position: absolute;
+		display: grid;
+		place-items: center;
+		width: 100%;
+		text-align: center;
+		height: 100%;
 	}
 
 	.add {

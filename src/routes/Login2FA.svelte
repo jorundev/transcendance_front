@@ -1,19 +1,14 @@
 <script lang="ts">
-	import TfaInput from "../components/Kit/TFAInput.svelte";
+	import SvelteSegmentedInput from 'svelte-segmented-input';
 	import Button from "../components/Kit/Button.svelte";
 	import Card from "../components/Kit/Card.svelte";
 	import { replace } from "svelte-spa-router";
-	import { onMount } from "svelte";
 
 	let buttonText = "Continue";
 	let buttonActive = true;
 	let play_wiggle = false;
 
-	let full_query: string = undefined;
-
-	onMount(() => {
-		validate();
-	});
+	let full_query: string = "";
 
 	function validate() {
 		buttonText = "Validating...";
@@ -38,7 +33,7 @@
 				} else if (res.status == 200) {
 					replace("/");
 				} else if (res.status == 417) {
-					full_query = undefined;
+					full_query = "";
 					buttonText = "Continue";
 					play_wiggle = true;
 					setTimeout(() => {
@@ -54,7 +49,7 @@
 	}
 
 	$: {
-		if (full_query && buttonActive) {
+		if (full_query.length === 6 && buttonActive) {
 			validate();
 		}
 	}
@@ -68,10 +63,8 @@
 			<div class="text">
 				Please enter the 6-digit code from your 2FA application
 			</div>
-			<div class="digit-zone {play_wiggle ? 'wiggle' : ''}">
-				<TfaInput
-					on:finish={(event) => (full_query = event.detail.code)}
-				/>
+			<div class="digit-zone" class:wiggle={play_wiggle}>
+				<SvelteSegmentedInput bind:value={full_query} length={6} style={{textColor: "white", borderColor: "gray"}}></SvelteSegmentedInput>
 			</div>
 			<Button
 				text={buttonText}

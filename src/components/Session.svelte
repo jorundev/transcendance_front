@@ -31,15 +31,24 @@
 </script>
 
 <div class="session" class:inactive={!session.active}>
-    <div class="browser-info">
-        <div class="browser-icon" style={"flex-shrink:0;background-image: url('/img/browsers/" + browser + ".png');"} />
-        <div class="title">{session.platform}</div>
+    <div class="info">
+        <div class="browser-info">
+            <div class="b">
+                <div class="browser-icon" style={"flex-shrink:0;background-image: url('/img/browsers/" + browser + ".png');"} />
+                <div class="info-text">
+                    <div class="title">{session.platform}</div>
+                    <div class="date">({date})</div>
+                </div>
+            </div>
+            {#if session.current}
+                <div class="badge">Current session</div>
+            {/if}
+        </div>
     </div>
-    <div class="date">({date})</div>
     {#if session.active}
-        <div class="button">
-            <Button red on:click={async () => {
-                const res = await api.killSession(session.id);
+        <div class="button" class:nomobile={session.current}>
+            <Button active={!session.current} red on:click={async () => {
+                await api.killSession(session.id);
                 dispatch("kill");
             }}>Revoke</Button>
         </div>
@@ -65,11 +74,23 @@
         .browser-info {
             display: flex;
             align-items: center;
+        }
+        
+        .b {
+            display: flex;
+            align-items: center;
             gap: 16px;
         }
         
         .date {
+            display: flex;
+            align-items: center;
             color: rgb(103, 103, 103);
+            font-size: 14px;
+        }
+        
+        .title, .date {
+            flex-shrink: 0;
         }
         
         .button {
@@ -78,6 +99,17 @@
             margin-left: auto;
             margin-right: 10px;
         }
+        
+        .info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            
+            .info-text {
+                display: flex;
+                gap: 6px;
+            }
+        }
     }
     .browser-icon {
         width: 40px;
@@ -85,9 +117,53 @@
         background-size: cover;
     }
     
-    @media screen and (max-width: 800px) {
-        .session .button {
-            max-width: 96px;
+    .badge {
+        flex-shrink: 0;
+        text-align: center;
+        font-size: 14px;
+        margin-right: 8px;
+        margin-left: 8px;
+        background: rgb(0, 44, 0);
+        padding: 7px;
+        border-radius: 100px;
+        border: 1px solid rgb(0, 152, 0);
+        color: rgb(0, 152, 0);
+    }
+    
+    @media screen and (max-width: 799px) {
+        .nomobile {
+            display: none;
         }
+
+        .session { 
+            gap: 30px;
+            margin-bottom: 16px;
+            justify-content: space-between;
+            
+            .button {
+                max-width: 100px;
+                margin-left: 0;
+            }
+
+            .info {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                width: 100%;
+                gap: 6px;
+                
+                .browser-info {
+                    display: flex;
+                    justify-content: space-between;
+                    width: 100%;
+                }
+                
+                .info-text {
+                    flex-direction: column;
+                    gap: 4px;
+                }
+            }
+        }
+        
     }
 </style>

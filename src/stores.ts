@@ -57,6 +57,7 @@ export async function tryToLog() {
 		uuid: response.uuid,
 		id: response.identifier,
 		avatar: response.avatar,
+		tfa: response.twofactor,
 	});
 
 	stServerDown.set(false);

@@ -11,6 +11,6 @@
 		height: 100vh;
 		overflow: hidden;
 		background-color: #000000a7;
-		z-index: 2;
+		z-index: 100;
 	}
 </style>

@@ -55,7 +55,7 @@
 				Log out
 			</div>
 			<div class="category">Security</div>
-			<div class="setting">Password</div>
+			<div class="setting" on:click={() => push("/settings/password")}>Password</div>
 			<div class="setting" on:click={() => push("/settings/2fa")}>Two-Factor Authentication</div>
 			<div class="setting" on:click={() => push("/settings/sessions")}>Sessions</div>
 			<div class="category">Activity</div>
@@ -77,6 +77,7 @@
 		display: flex;
 		flex-direction: column;
 		max-width: 1200px;
+		padding-top: 10px;
 	}
 
 	.title {
@@ -161,6 +162,7 @@
 			height: 100vh;
 		}
 		.title {
+			margin-bottom: 10px;
 			margin-left: 10px;
 			font-size: 28px;
 		}
@@ -180,6 +182,11 @@
 			&:hover {
 				background-color: rgb(22, 24, 28);
 			}
+		}
+		.top {
+			display: flex;
+			justify-content: left;
+			align-items: center;
 		}
 	}
 </style>

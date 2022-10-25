@@ -128,7 +128,7 @@ async function refreshToken(): Promise<boolean> {
 async function makeRequest<T>(
 	url: string,
 	method: string,
-	object?: any
+	object?: any,
 ): Promise<T | APIStatus.NoResponse | null> {
 	let promise: Promise<Response>;
 
@@ -175,9 +175,9 @@ async function makeRequest<T>(
 			case 200:
 			case 201:
 				try {
-					return JSON.parse(await response.text());
+					return { statusCode: response.status, message: response.statusText, ...JSON.parse(await response.text())};
 				} catch (e) {
-					return null;
+					return { statusCode: response.status, message: response.statusText } as any;
 				}
 			case 401:
 				console.log(
@@ -213,7 +213,9 @@ export interface WhoAmIResponse extends APIResponse {
 	uuid: string;
 	identifier: number;
 	username: string;
+	email: string;
 	avatar: string | null;
+	twofactor: boolean;
 }
 
 export interface PrivateChannelData extends APIResponse {
@@ -600,16 +602,41 @@ async function wsChatRemove(data: WsChatRemove) {
 
 export const api = {
 	whoami: async (): Promise<WhoAmIResponse | APIStatus.NoResponse | null> => {
-		const res = makeRequest<WhoAmIResponse>("/api/users", "GET");
+		const res = makeRequest<WhoAmIResponse>("/api/users/whoami", "GET");
 		return res;
-	},
-	users: async (): Promise<APIUser[] | APIStatus.NoResponse | null> => {
-		return makeRequest<APIUser[]>("/api/users", "GET");
 	},
 	logout: async () => {
 		await fetchPOST("/api/auth/logout", {});
 		stLoggedUser.set(null);
 		push("/login");
+	},
+	getQRCode: async (): Promise<string> => {
+		let ret: string | null = null;
+		await api.whoami();
+		await fetch("/api/auth/2fa", {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+			.then(async (res) => {
+				if (res.status == 202) {
+					ret = await res.text();
+					if (ret == null) {
+						return "/img/frame.png";
+					}
+				} else if (res.status == 401) {
+					return null;
+				}
+			})
+			.catch((e) => {
+				console.error(e);
+			});
+
+		return ret ? ret : "/img/frame.png";
+	},
+	remove2FA: async () => {
+		return makeRequest("/api/auth/2fa", "DELETE");	
 	},
 	listChannels: async () => {
 		return makeRequest<ListChannelsResponse>("/api/chats/channels", "GET");
@@ -754,10 +781,17 @@ export const api = {
 		return req;
 	},
 	getSessions: async () => {
-		return makeRequest<SessionsResponse>("/api/sessions", "GET");
+		return makeRequest<SessionsResponse>("/api/users/sessions", "GET");
 	},
 	killSession: async (id: number) => {
-		return makeRequest<APIResponse>("/api/sessions/" + id, "DELETE");	
+		return makeRequest<APIResponse>("/api/users/sessions/" + id, "DELETE");	
+	},
+	changePassword: async (oldPassword: string, newPassword: string, confirmNewPassword: string) => {
+		return makeRequest<APIResponse>("/api/users", "PATCH", {
+			current_password: oldPassword,
+			new_password: newPassword,
+			confirm: confirmNewPassword,
+		});
 	},
 	ws: {
 		connect: async () => {
