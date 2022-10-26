@@ -33,6 +33,11 @@
 	}
 </script>
 
+<svelte:head>
+	{#if $stServerDown}
+		<title>Server down - NEW SHINJI MEGA PONG ULTIMATE</title>
+	{/if}
+</svelte:head>
 <div class="main">
 	{#if $stServerDown}
 		<div class="sorry">Server is down. Try again later!</div>

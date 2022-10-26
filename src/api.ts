@@ -661,7 +661,7 @@ export const api = {
 			return from_store;
 		}
 		if (userCache[uuid] === undefined) {
-			userCache[uuid] = makeRequest<User>("/api/users/" + uuid, "GET");
+			userCache[uuid] = makeRequest<User>("/api/users/profile/" + uuid, "GET");
 		}
 		const user = await userCache[uuid];
 		if (user != APIStatus.NoResponse) {

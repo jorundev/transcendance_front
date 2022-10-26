@@ -236,6 +236,7 @@
 		width: 100%;
 		text-align: center;
 		height: 100%;
+		pointer-events: none;
 	}
 
 	.add {
