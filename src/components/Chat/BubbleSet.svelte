@@ -21,11 +21,11 @@
 
 	$: moderator = $stChannels[channel]?.users.find(
 		(usr) => usr.uuid == $stLoggedUser?.uuid
-	).is_moderator;
+	)?.is_moderator;
 
 	$: administrator = $stChannels[channel]?.users.find(
 		(usr) => usr.uuid == $stLoggedUser?.uuid
-	).is_administrator;
+	)?.is_administrator;
 
 	let showProfileMenu = false;
 

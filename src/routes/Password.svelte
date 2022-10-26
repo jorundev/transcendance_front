@@ -57,7 +57,15 @@
 			successText = "Password changed successfuly";
 			return ;
 		}
-		errorTextBottom = res.message;
+		switch (res.message) {
+			case "Password mismatch":
+				errorTextTop = "Invalid password";
+				break ;
+			default:
+				errorTextBottom = res.message;
+				break ;
+		}
+		
 	}
 </script>
 

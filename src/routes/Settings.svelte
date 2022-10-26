@@ -36,7 +36,7 @@
 				<div class="empty" style="width: 40px;" />
 			</div>
 			<div class="category">Account</div>
-			<div class="setting profile">
+			<div class="setting profile" on:click={() => push("/settings/profile")}>
 				<div
 					class="before"
 					style={"background-image: url('" +

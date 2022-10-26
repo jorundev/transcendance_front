@@ -30,43 +30,51 @@ export enum APIStatus {
 	NoResponse,
 }
 
-async function fetchPOST(url: string, object: any): Promise<Response> {
+async function fetchPOST(url: string, object: any, type = "application/json"): Promise<Response> {
+	let headers = {};
+	if (type.length !== 0) {
+		headers["Content-Type"] = type;
+	}
 	return await fetch(url, {
 		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify(object),
+		headers,
+		body: type === "application/json" ? JSON.stringify(object) : object,
 	});
 }
 
-async function fetchPATCH(url: string, object: any): Promise<Response> {
+async function fetchPATCH(url: string, object: any, type = "application/json"): Promise<Response> {
+	let headers = {};
+	if (type.length !== 0) {
+		headers["Content-Type"] = type;
+	}
 	return await fetch(url, {
 		method: "PATCH",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify(object),
+		headers,
+		body: type === "application/json" ? JSON.stringify(object) : object,
 	});
 }
 
-async function fetchDELETE(url: string, object: any): Promise<Response> {
+async function fetchDELETE(url: string, object: any, type = "application/json"): Promise<Response> {
+	let headers = {};
+	if (type.length !== 0) {
+		headers["Content-Type"] = type;
+	}
 	return await fetch(url, {
 		method: "DELETE",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify(object),
+		headers,
+		body: type === "application/json" ? JSON.stringify(object) : object,
 	});
 }
 
-async function fetchPUT(url: string, object: any): Promise<Response> {
+async function fetchPUT(url: string, object: any, type = "application/json"): Promise<Response> {
+	let headers = {};
+	if (type.length !== 0) {
+		headers["Content-Type"] = type;
+	}
 	return await fetch(url, {
 		method: "PUT",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify(object),
+		headers,
+		body: type === "application/json" ? JSON.stringify(object) : object,
 	});
 }
 
@@ -129,6 +137,7 @@ async function makeRequest<T>(
 	url: string,
 	method: string,
 	object?: any,
+	type = "application/json"
 ): Promise<T | APIStatus.NoResponse | null> {
 	let promise: Promise<Response>;
 
@@ -138,16 +147,16 @@ async function makeRequest<T>(
 				promise = fetchGET(url);
 				break;
 			case "POST":
-				promise = fetchPOST(url, object ? object : {});
+				promise = fetchPOST(url, (object !== undefined) ? object : {}, type);
 				break;
 			case "DELETE":
-				promise = fetchDELETE(url, object ? object : {});
+				promise = fetchDELETE(url, (object !== undefined) ? object : {}, type);
 				break;
 			case "PUT":
-				promise = fetchPUT(url, object ? object : {});
+				promise = fetchPUT(url, (object !== undefined) ? object : {}, type);
 				break;
 			case "PATCH":
-				promise = fetchPATCH(url, object ? object : {});
+				promise = fetchPATCH(url, (object !== undefined) ? object : {}, type);
 				break;
 		}
 
@@ -167,7 +176,7 @@ async function makeRequest<T>(
 		}
 
 		switch (response.status) {
-			case 500:
+			// TODO: 500
 			case 502:
 				console.error("A terrible error happened: ", response);
 				stServerDown.set(true);
@@ -196,9 +205,10 @@ async function makeRequest<T>(
 				}
 			default:
 				try {
-					return response.json();
+					return await response.json();
 				} catch (e) {
-					return null;
+					// return null;
+					return { statusCode: response.status, message: response.statusText } as any;
 				}
 		}
 	}
@@ -216,6 +226,10 @@ export interface WhoAmIResponse extends APIResponse {
 	email: string;
 	avatar: string | null;
 	twofactor: boolean;
+}
+
+export interface ChangeAvatarResponse extends APIResponse {
+	avatar: string;
 }
 
 export interface PrivateChannelData extends APIResponse {
@@ -634,6 +648,19 @@ export const api = {
 			});
 
 		return ret ? ret : "/img/frame.png";
+	},
+	changeAvatar: async (file: File) => {
+		let formData = new FormData();
+		formData.append("avatar", file);
+		const res = await makeRequest<ChangeAvatarResponse>("/api/users/avatar", "POST", formData, "");
+		await new Promise((resolve) => setTimeout(resolve, 200));
+		if (res !== null && res !== APIStatus.NoResponse && res.statusCode !== 413) {
+			stLoggedUser.update((old) => {
+				old.avatar = res.avatar;
+				return old;
+			});
+		}
+		return res;
 	},
 	remove2FA: async () => {
 		return makeRequest("/api/auth/2fa", "DELETE");	

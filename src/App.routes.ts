@@ -10,6 +10,7 @@ import TFASettings from "./routes/TFASettings.svelte";
 import Notifications from "./routes/Notifications.svelte";
 import TFAQRCode from "./routes/TFAQRCode.svelte";
 import Password from "./routes/Password.svelte";
+import ProfileSettings from "./routes/ProfileSettings.svelte";
 
 import { wrap } from "svelte-spa-router/wrap";
 import { isLogged, tryLoggingIn } from "./stores";
@@ -55,6 +56,7 @@ export default {
 	"/settings/sessions": requiresLogin(Sessions),
 	"/settings/2fa": requiresLogin(TFASettings),
 	"/settings/password": requiresLogin(Password),
+	"/settings/profile": requiresLogin(ProfileSettings),
 	"/chat/:uuid?": requiresLogin(Chat),
 	"/chat/group/:uuid": requiresLogin(ChatInside),
 	"/chat/single/:uuid": requiresLogin(ChatInside),
