@@ -7,6 +7,7 @@
 	export let administrator: boolean;
 	export let user: { is_moderator: boolean; is_administrator: boolean };
 	export let offsetY: number;
+	export let is_in_channel: boolean;
 
 	let pxOffset = "0px";
 
@@ -43,7 +44,15 @@
 			<div class="entry red" on:click={() => dispatch("mute", { uuid })}>
 				Mute
 			</div>
-			<div class="entry red" on:click={() => dispatch("kick", { uuid })}>
+			<div
+				class="entry red"
+				class:disabled={!is_in_channel}
+				on:click={() => {
+					if (is_in_channel) {
+						dispatch("kick", { uuid });
+					}
+				}}
+			>
 				Kick
 			</div>
 			<div class="entry red" on:click={() => dispatch("ban", { uuid })}>
@@ -55,13 +64,18 @@
 			{#if user?.is_moderator}
 				<div
 					class="entry yellow"
-					on:click={() => dispatch("demote", { uuid })}
+					on:click={() => {
+						if (is_in_channel) {
+							dispatch("demote", { uuid });
+						}
+					}}
 				>
 					Demote
 				</div>
 			{:else}
 				<div
 					class="entry yellow"
+					class:disabled={!is_in_channel}
 					on:click={() => dispatch("promote", { uuid })}
 				>
 					Promote
@@ -73,6 +87,8 @@
 
 <style lang="scss">
 	.cpm {
+		user-select: none;
+		-webkit-user-select: none;
 		position: absolute;
 		display: flex;
 		left: 50px;
@@ -109,6 +125,11 @@
 
 		&:hover {
 			background: rgb(23, 23, 23);
+		}
+
+		&.disabled {
+			color: gray;
+			cursor: not-allowed;
 		}
 
 		&:active {

@@ -141,7 +141,7 @@ async function makeRequest<T>(
 ): Promise<T | APIStatus.NoResponse | null> {
 	let promise: Promise<Response>;
 
-	for (;;) {
+	for (; ;) {
 		switch (method) {
 			case "GET":
 				promise = fetchGET(url);
@@ -184,7 +184,7 @@ async function makeRequest<T>(
 			case 200:
 			case 201:
 				try {
-					return { statusCode: response.status, message: response.statusText, ...JSON.parse(await response.text())};
+					return { statusCode: response.status, message: response.statusText, ...JSON.parse(await response.text()) };
 				} catch (e) {
 					return { statusCode: response.status, message: response.statusText } as any;
 				}
@@ -590,7 +590,7 @@ async function wsChatLeave(data: WsChatLeave) {
 	const loggedUser = get(stLoggedUser);
 
 	// We do not want to keep private channels that we are not in in stChannels
-	if (get(stChannels)[data.channel].type === ChannelType.Private) {
+	if (data.user === loggedUser.uuid && get(stChannels)[data.channel].type === ChannelType.Private) {
 		stChannels.update((channels) => {
 			if (data.user == loggedUser.uuid) {
 				delete channels[data.channel];
@@ -637,14 +637,14 @@ export const api = {
 				"Content-Type": "application/json",
 			},
 		})
-		.then(async (raw) => {
-			return await raw.json();
-		})
-		.catch((e) => {
-			console.error(e);
-			return null;
-		});
-		
+			.then(async (raw) => {
+				return await raw.json();
+			})
+			.catch((e) => {
+				console.error(e);
+				return null;
+			});
+
 		if (res === null || res.statusCode === 401) {
 			return {
 				message: res ? res.message : "Bad response",
@@ -653,7 +653,7 @@ export const api = {
 				image: "/img/frame.png",
 			};
 		}
-		
+
 		return res;
 	},
 	changeAvatar: async (file: File) => {
@@ -670,7 +670,7 @@ export const api = {
 		return res;
 	},
 	remove2FA: async () => {
-		return makeRequest("/api/auth/2fa", "DELETE");	
+		return makeRequest("/api/auth/2fa", "DELETE");
 	},
 	listChannels: async () => {
 		return makeRequest<ListChannelsResponse>("/api/chats/channels", "GET");
@@ -681,11 +681,11 @@ export const api = {
 	getChannelMessages: async (uuid: string, page: number) => {
 		return makeRequest<ChannelMessagesResponse>(
 			"/api/chats/channels/" +
-				uuid +
-				"/messages" +
-				"?page=" +
-				page +
-				"&limit=10",
+			uuid +
+			"/messages" +
+			"?page=" +
+			page +
+			"&limit=10",
 			"GET"
 		);
 	},
@@ -719,7 +719,7 @@ export const api = {
 				"POST",
 				{ message }
 			);
-		} catch (_e) {}
+		} catch (_e) { }
 	},
 	deleteMessage: async (channel: string, id: number) => {
 		return makeRequest(
@@ -757,6 +757,9 @@ export const api = {
 		});
 	},
 	kickFromChannel: async (user: string, channel: string) => {
+		if (get(stChannels)[channel]?.moderators.includes(user)) {
+			await api.demoteUserInChannel(user, channel);
+		}
 		return makeRequest("/api/chats/channels/" + channel, "DELETE", {
 			action: "KICK",
 			user_uuid: user,
@@ -816,7 +819,7 @@ export const api = {
 		return makeRequest<SessionsResponse>("/api/users/sessions", "GET");
 	},
 	killSession: async (id: number) => {
-		return makeRequest<APIResponse>("/api/users/sessions/" + id, "DELETE");	
+		return makeRequest<APIResponse>("/api/users/sessions/" + id, "DELETE");
 	},
 	changePassword: async (oldPassword: string, newPassword: string, confirmNewPassword: string) => {
 		return makeRequest<APIResponse>("/api/users", "PATCH", {

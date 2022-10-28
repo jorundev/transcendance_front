@@ -10,6 +10,9 @@
 		is_moderator: boolean;
 		is_administrator: boolean;
 	};
+
+	export let is_in_channel: boolean;
+
 	// true if the logged user is a moderator of the channel
 	//export let is_moderator: boolean;
 	// true if the logged user is the administrator of the channel

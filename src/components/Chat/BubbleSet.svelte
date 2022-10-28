@@ -76,6 +76,9 @@
 							api.demoteUserInChannel(ev.detail.uuid, channel);
 						}}
 						on:ban
+						is_in_channel={$stChannels[channel]?.users
+							.map((u) => u.uuid)
+							.includes(message.sender)}
 					/>
 				{/if}
 			</div>

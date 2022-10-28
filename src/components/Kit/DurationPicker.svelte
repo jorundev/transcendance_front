@@ -28,24 +28,41 @@
 </script>
 
 <div class="duration-picker">
-	<div>Duration:</div>
-	<input type="number" bind:value={num} />
-	<select bind:value={selected}>
-		<option value="months">Months</option>
-		<option value="days">Days</option>
-		<option value="hours">Hours</option>
-		<option value="minutes">Minutes</option>
-	</select>
+	<div class="duration">Duration:</div>
+	<div class="selectors">
+		<input type="number" bind:value={num} />
+		<div class="selector">
+			<select bind:value={selected}>
+				<option value="months">Months</option>
+				<option value="days">Days</option>
+				<option value="hours">Hours</option>
+				<option value="minutes">Minutes</option>
+			</select>
+		</div>
+	</div>
 </div>
 
 <style lang="scss">
 	.duration-picker {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
 		width: 100%;
 		margin-top: 10px;
 		margin-bottom: 10px;
 
+		.duration {
+			width: 100%;
+			margin-bottom: 6px;
+		}
+
+		.selectors {
+			display: flex;
+			gap: 10px;
+		}
+
 		input[type="number"] {
-			width: 120px;
+			max-width: 48.5%;
 			border: none;
 			background: #242424;
 			color: white;
@@ -60,12 +77,19 @@
 			}
 		}
 
+		.selector {
+			width: 100%;
+		}
+
 		select {
+			width: 100%;
 			font-size: 20px;
 			color: white;
 			background: #282828;
 			border: none;
 			padding-left: 10px;
+			padding: 10px;
+			border-radius: 10px;
 		}
 	}
 </style>

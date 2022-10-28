@@ -19,11 +19,11 @@
 	let dispatch = createEventDispatcher();
 	let is_moderator = false;
 	let is_administrator = false;
-	
+
 	let canClickOutside = false;
-	
+
 	onMount(() => {
-		setTimeout(() => canClickOutside = true, 200);
+		setTimeout(() => (canClickOutside = true), 200);
 	});
 
 	$: is_moderator = channel.moderators.includes($stLoggedUser?.uuid);
@@ -39,81 +39,92 @@
 	}
 </script>
 
-<ClickOutside on:clickoutside={() => {if (canClickOutside) dispatch("back");}}>
-<Card>
-	<div class="settings">
-		<div class="title">Settings for {channel.name}</div>
-		<div class="category">
-			<div class="category-name">Members</div>
-			<div class="members">
-				{#each channel.users as user}
-					<ChannelSettingsProfile {user} />
-				{/each}
-			</div>
-		</div>
-		<div class="category">
-			<div class="category-name">General</div>
-			<Button
-				red
-				timeoutVisible
-				timeout={2000}
-				on:click={async () => {
-					await api.leaveChannel(channel.uuid);
-					if (channel.type === ChannelType.Private) {
-						stChannels.update((channels) => {
-							delete channels[channel.uuid];
-							return channels;
-						});
-					}
-					if (window.innerWidth <= 800) {
-						pop();
-						return;
-					}
-					dispatch("back");
-				}}
-			>
-				{#if channel.users.length == 1}
-					Leave and destroy channel
-				{:else}
-					Leave channel
-				{/if}
-			</Button>
-		</div>
-		{#if is_administrator}
+<ClickOutside
+	on:clickoutside={() => {
+		if (canClickOutside) dispatch("back");
+	}}
+>
+	<Card>
+		<div class="settings">
+			<div class="title">Settings for {channel.name}</div>
 			<div class="category">
-				<div class="category-name">Password</div>
-				<div class="require-password">
-					<input
-						bind:checked={require_password}
-						type="checkbox"
-						disabled={channel.type === ChannelType.Private}
-					/>
-					<label for="checkbox">Require password</label>
+				<div class="category-name">Members</div>
+				<div class="members">
+					{#each channel.users as user}
+						<ChannelSettingsProfile
+							{user}
+							is_in_channel={channel.users
+								.map((u) => u.uuid)
+								.includes(user.uuid)}
+						/>
+					{/each}
 				</div>
-				<input
-					bind:value={password}
-					type="password"
-					disabled={!require_password}
-					placeholder="Channel password"
-				/>
-				{#if password?.length != 0 || (!require_password && channel.has_password)}
-					<Button on:click={changePassword}>Change password</Button>
-				{/if}
 			</div>
 			<div class="category">
-				<div class="category-name">Administrator</div>
-				<Button red timeoutVisible timeout={2000}
-					>Destroy channel</Button
+				<div class="category-name">General</div>
+				<Button
+					red
+					timeoutVisible
+					timeout={2000}
+					on:click={async () => {
+						await api.leaveChannel(channel.uuid);
+						if (channel.type === ChannelType.Private) {
+							stChannels.update((channels) => {
+								delete channels[channel.uuid];
+								return channels;
+							});
+						}
+						if (window.innerWidth <= 800) {
+							pop();
+							return;
+						}
+						dispatch("back");
+					}}
 				>
+					{#if channel.users.length == 1}
+						Leave and destroy channel
+					{:else}
+						Leave channel
+					{/if}
+				</Button>
 			</div>
-		{/if}
-		<Button
-			on:click={() => {
-				dispatch("back");
-			}}>Back</Button
-		>
-	</div>
-</Card>
+			{#if is_administrator}
+				<div class="category">
+					<div class="category-name">Password</div>
+					<div class="require-password">
+						<input
+							bind:checked={require_password}
+							type="checkbox"
+							disabled={channel.type === ChannelType.Private}
+						/>
+						<label for="checkbox">Require password</label>
+					</div>
+					<input
+						bind:value={password}
+						type="password"
+						disabled={!require_password}
+						placeholder="Channel password"
+					/>
+					{#if password?.length != 0 || (!require_password && channel.has_password)}
+						<Button on:click={changePassword}
+							>Change password</Button
+						>
+					{/if}
+				</div>
+				<div class="category">
+					<div class="category-name">Administrator</div>
+					<Button red timeoutVisible timeout={2000}
+						>Destroy channel</Button
+					>
+				</div>
+			{/if}
+			<Button
+				on:click={() => {
+					dispatch("back");
+				}}>Back</Button
+			>
+		</div>
+	</Card>
 </ClickOutside>
 
 <style lang="scss">
