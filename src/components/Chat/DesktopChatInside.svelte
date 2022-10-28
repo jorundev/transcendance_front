@@ -21,6 +21,8 @@
 	}
 
 	.select {
+		user-select: none;
+		-webkit-user-select: none;
 		height: 100%;
 		display: grid;
 		justify-content: center;
