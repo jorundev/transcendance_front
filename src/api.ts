@@ -243,6 +243,11 @@ export interface APIUser extends WhoAmIResponse {
 	is_online: boolean;
 }
 
+export interface TFAInitResponse extends APIResponse {
+	image: string,
+	text: string,
+}
+
 export interface ListChannelsResponse extends APIResponse {
 	data: Array<APIChannel>;
 	count: number;
@@ -521,7 +526,7 @@ async function wsChatDelete(data: WsChatDelete) {
 async function wsChatJoin(data: WsChatJoin) {
 	const loggedUser = get(stLoggedUser);
 	const user = await api.getUserData(data.user);
-	if (user == APIStatus.NoResponse) {
+	if (user === null || user == APIStatus.NoResponse) {
 		return;
 	}
 
@@ -624,30 +629,32 @@ export const api = {
 		stLoggedUser.set(null);
 		push("/login");
 	},
-	getQRCode: async (): Promise<string> => {
-		let ret: string | null = null;
+	getQRCode: async (): Promise<TFAInitResponse> => {
 		await api.whoami();
-		await fetch("/api/auth/2fa", {
+		const res: TFAInitResponse | null = await fetch("/api/auth/2fa", {
 			method: "GET",
 			headers: {
 				"Content-Type": "application/json",
 			},
 		})
-			.then(async (res) => {
-				if (res.status == 202) {
-					ret = await res.text();
-					if (ret == null) {
-						return "/img/frame.png";
-					}
-				} else if (res.status == 401) {
-					return null;
-				}
-			})
-			.catch((e) => {
-				console.error(e);
-			});
-
-		return ret ? ret : "/img/frame.png";
+		.then(async (raw) => {
+			return await raw.json();
+		})
+		.catch((e) => {
+			console.error(e);
+			return null;
+		});
+		
+		if (res === null || res.statusCode === 401) {
+			return {
+				message: res ? res.message : "Bad response",
+				statusCode: res ? res.statusCode : 500,
+				text: "https://getramiel.org",
+				image: "/img/frame.png",
+			};
+		}
+		
+		return res;
 	},
 	changeAvatar: async (file: File) => {
 		let formData = new FormData();
@@ -655,7 +662,7 @@ export const api = {
 		const res = await makeRequest<ChangeAvatarResponse>("/api/users/avatar", "POST", formData, "");
 		await new Promise((resolve) => setTimeout(resolve, 200));
 		if (res !== null && res !== APIStatus.NoResponse && res.statusCode !== 413) {
-			stLoggedUser.update((old) => {
+			stLoggedUser?.update((old) => {
 				old.avatar = res.avatar;
 				return old;
 			});
@@ -756,14 +763,12 @@ export const api = {
 		});
 	},
 	promoteUserInChannel: async (user: string, channel: string) => {
-		return makeRequest("/api/chats/channels/" + channel, "PUT", {
-			action: "PROMOTE",
+		return makeRequest("/api/chats/channels/" + channel + "/moderator", "PUT", {
 			user_uuid: user,
 		});
 	},
 	demoteUserInChannel: async (user: string, channel: string) => {
-		return makeRequest("/api/chats/channels/" + channel, "PUT", {
-			action: "DEMOTE",
+		return makeRequest("/api/chats/channels/" + channel + "/moderator", "DELETE", {
 			user_uuid: user,
 		});
 	},

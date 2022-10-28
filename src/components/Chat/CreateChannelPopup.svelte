@@ -5,6 +5,7 @@
 	import Card from "../Kit/Card.svelte";
 	import { onMount } from "svelte";
 	import ClickOutside from "svelte-click-outside";
+	import { stChannels } from "../../stores";
 
 	let dispatch = createEventDispatcher();
 
@@ -44,12 +45,19 @@
 			password_value.length > 0 ? password_value : undefined
 		);
 
-		if (resp == APIStatus.NoResponse) {
+		if (resp === null || resp == APIStatus.NoResponse) {
 			return null;
 		}
 
 		if (resp.statusCode == 400) {
 			error = resp.message;
+		}
+
+		for (let i = 0; i < 10; ++i) {
+			await new Promise((resolve) => setTimeout(resolve, 150));
+			if ($stChannels[resp.uuid] !== undefined && $stChannels[resp.uuid].joined) {
+				break ;
+			}
 		}
 
 		return resp.uuid;

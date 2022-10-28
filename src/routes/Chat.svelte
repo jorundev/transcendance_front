@@ -18,33 +18,37 @@
 	let create_channel_modal = false;
 
 	let interval;
-	
+
 	let render = true;
-	
+
 	let innerWidth = 0;
 	let oldInnerWidth = 0;
-	
+
 	$: if (current_channel) {
 		render = false;
 		setTimeout(() => (render = true), 1);
 	}
 
 	let join_channel: Channel;
-	
+
 	let mounted = false;
-	
+
 	export let params: { uuid?: string };
 	let current_channel = params?.uuid ? params.uuid : "";
-	
+
 	$: {
 		current_channel = params?.uuid ? params.uuid : "";
 		window.history.replaceState({}, null, "/#/chat/" + current_channel);
 	}
-	
+
 	$: {
-		if (innerWidth <= 800 && oldInnerWidth > 800 && current_channel.length !== 0) {
+		if (
+			innerWidth <= 800 &&
+			oldInnerWidth > 800 &&
+			current_channel.length !== 0
+		) {
 			replace("/chat/group/" + current_channel);
-		}	
+		}
 		oldInnerWidth = innerWidth;
 	}
 
@@ -69,7 +73,7 @@
 	});
 
 	function goToMessages(event: { detail: { channel: Channel } }) {
-		params = { uuid: event.detail.channel.uuid }
+		params = { uuid: event.detail.channel.uuid };
 		if (window.innerWidth <= 800) {
 			push("/chat/group/" + params.uuid);
 		}
@@ -110,7 +114,7 @@
 <svelte:head>
 	<title>Chat - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
-<SideBar active="chat"/>
+<SideBar active="chat" />
 <div class="chat">
 	{#if join_channel_modal}
 		<Modal>
@@ -121,7 +125,7 @@
 						join_channel_modal = false;
 					}}
 					on:join={() => {
-						params = {uuid: join_channel.uuid };
+						params = { uuid: join_channel.uuid };
 						join_channel_modal = false;
 						if (window.innerWidth <= 800) {
 							push("/chat/group/" + params.uuid);
@@ -140,7 +144,7 @@
 					}}
 					on:create={(data) => {
 						create_channel_modal = false;
-						params = {uuid: data.detail.uuid};
+						params = { uuid: data.detail.uuid };
 						if (window.innerWidth <= 800) {
 							push("/chat/group/" + params.uuid);
 						}
@@ -159,7 +163,7 @@
 			</div>
 			<div class="add" on:click={createChannel} />
 		</div>
-		{#if Object.entries($stChannels).length > 0}
+		{#if Object.entries($stChannels).filter(([_, c]) => c.joined).length > 0}
 			<div class="channels">
 				{#each Object.entries($stChannels) as [key, channel] (key)}
 					{#if channel.joined}
@@ -168,14 +172,15 @@
 							on:click={goToMessages}
 							on:join={joinChannel}
 							current={current_channel}
-							joined={!mounted || $stChannels[channel.uuid]?.joined}
+							joined={!mounted ||
+								$stChannels[channel.uuid]?.joined}
 						/>
 					{/if}
-					{/each}
-				</div>
-			{:else}
-				<div class="no-channels">You didn't join any channel</div>
-			{/if}
+				{/each}
+			</div>
+		{:else}
+			<div class="no-channels">You didn't join any channel</div>
+		{/if}
 	</div>
 	<DesktopChatInside channel={current_channel} {render} />
 </div>
@@ -228,7 +233,7 @@
 		overflow-x: hidden;
 		overflow-y: auto;
 	}
-	
+
 	.no-channels {
 		position: absolute;
 		display: grid;

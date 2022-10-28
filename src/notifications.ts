@@ -1,3 +1,6 @@
+import { api, APIStatus } from "./api";
+import { stNotifications } from "./stores";
+
 export enum NotificationType {
     GameInvite,
     FriendRequest,
@@ -7,28 +10,26 @@ export enum NotificationType {
 export interface NotificationData {
     type: NotificationType,
     date: Date,
+    uuid: string,
+    user: string,
 }
 
 export interface GameInviteNotificationData extends NotificationData {
     type: NotificationType.GameInvite,
-    user: string,
     lobby: string,
 }
 
 export interface FriendRequestNotificationData extends NotificationData {
     type: NotificationType.FriendRequest,
-    sender: string,
 }
 
 export interface AcceptedFriendRequestNotificationData extends NotificationData {
     type: NotificationType.AcceptedFriendRequest,
-    sender: string,
 }
 
 export interface NotificationDataDictionary {
     [key: string]: NotificationData
 }
-
 
 export function isGameInviteNotificationData(data: NotificationData): data is GameInviteNotificationData {
     return data.type === NotificationType.GameInvite;
@@ -40,4 +41,59 @@ export function isFriendRequestNotificationData(data: NotificationData): data is
 
 export function isFriendRequestAcceptedNotificationData(data: NotificationData): data is AcceptedFriendRequestNotificationData {
     return data.type === NotificationType.AcceptedFriendRequest;
+}
+
+export async function canUseBrowserNotifications() : Promise<boolean> {
+    if (typeof Notification !== "undefined") {
+        switch (Notification.permission) {
+            case "denied":
+                return false;
+            case "granted":
+                return true;
+            case "default":
+                const newPermission = await Notification.requestPermission();
+                return newPermission === "granted";
+        }
+    }
+    return false;
+}
+
+export async function newNotification(data: NotificationData)
+{
+    const canUseNotificationAPI = canUseBrowserNotifications();
+
+    stNotifications.update((old) => {
+        old[data.uuid] = data;
+        return old;
+    });
+    
+    if (await canUseNotificationAPI) {
+        let browserNotification: Notification;
+        if (isGameInviteNotificationData(data)) {
+            const user = await api.getUserData(data.user);
+            if (user === null || user === APIStatus.NoResponse) {
+                return ;
+            }
+            browserNotification = new Notification("You have been challenged to a game!", {
+               body: user.username + "#" + user.identifier + " wants to play against you"
+            });
+        } else if (isFriendRequestNotificationData(data)) {
+            const user = await api.getUserData(data.user);
+            if (user === null || user === APIStatus.NoResponse) {
+                return ;
+            }
+            browserNotification = new Notification("You have a friend request!", {
+               body: user.username + "#" + user.identifier + " wants to be your friend"
+            });
+        } else if (isFriendRequestAcceptedNotificationData(data)) {
+            const user = await api.getUserData(data.user);
+            if (user === null || user === APIStatus.NoResponse) {
+                return ;
+            }
+            browserNotification = new Notification("You have a new friend!", {
+               body: user.username + "#" + user.identifier + " accepted your friend request"
+            });
+        }
+    }
+
 }

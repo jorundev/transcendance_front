@@ -9,7 +9,7 @@ import {
 	type WhoAmIResponse,
 } from "./api";
 import type { Channel, ChannelDictionary } from "./channels";
-import { NotificationType, type NotificationDataDictionary } from "./notifications";
+import type { NotificationDataDictionary } from "./notifications";
 import type { LoggedUser, UserDictionary } from "./users";
 
 export const stLoggedUser: Writable<LoggedUser | null> = writable(null);
@@ -18,23 +18,10 @@ export const stUsers: Writable<UserDictionary> = writable({});
 export const stWebsocket: Writable<WebSocket | null> = writable(null);
 export const stChannels: Writable<ChannelDictionary> = writable({});
 export const stHasNotifications: Writable<boolean> = writable(false);
-export const stNotifications: Writable<NotificationDataDictionary> = writable({
-	testnotif0: {
-		type: NotificationType.GameInvite,
-		user: "56e4093e-ed21-4412-8d8c-5d979fd43757",
-		lobby: "logobi gt",
-		date: new Date(),
-	},
-	testnotif1: {
-		type: NotificationType.FriendRequest,
-		date: new Date(),
-		sender: "56e4093e-ed21-4412-8d8c-5d979fd43757",
-	},
-	testnotif2: {
-		type: NotificationType.AcceptedFriendRequest,
-		date: new Date(),
-		sender: "56e4093e-ed21-4412-8d8c-5d979fd43757",
-	}
+export const stNotifications: Writable<NotificationDataDictionary> = writable({});
+
+stNotifications.subscribe((notifications) => {
+	stHasNotifications.set(Object.entries(notifications).length > 0);
 });
 
 export async function tryToLog() {

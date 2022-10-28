@@ -18,8 +18,6 @@
 		setTimeout(() => {
 			notransition = false;
 		}, 100);
-		
-		$stHasNotifications = true;
 	});
 	
 	$: bigDisplay = innerWidth >= 1948;
@@ -108,6 +106,16 @@
 				background-image: url("/img/bell.png");
 			}
 			
+			@keyframes flash {
+				from {
+					transform: scale(1.35);
+					background: white;
+				}
+				to {
+					background: red;
+				}
+			}
+			
 			&.has-notif::after {
 					content: "";
 					text-align: center;
@@ -118,6 +126,7 @@
 					left: 28px;
 					top: 12px;
 					background: red;
+					animation: flash 1s ease-out infinite;
 					border-radius: 100%;
 					border: 1px solid rgb(18, 18, 18);
 				}

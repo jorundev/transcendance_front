@@ -135,8 +135,9 @@
 
 		.before {
 			flex-shrink: 0;
-			background-size: 30px;
+			background-size: cover;
 			background-repeat: no-repeat;
+			background-position: center;
 			border-radius: 100%;
 			margin-right: 8px;
 			width: 30px;

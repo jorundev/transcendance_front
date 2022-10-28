@@ -32,7 +32,7 @@
 				"image/jpeg",
 				"image.apng",
 				"image/gif",
-				"image.webp",
+				"image/webp",
 			].includes(file.type)
 		) {
 			return;
@@ -213,6 +213,7 @@
 			height: 120px;
 			border-radius: 100%;
 			background-size: cover;
+			background-position: center;
 
 			&:hover:not(.loading)::after {
 				content: "";

@@ -5,6 +5,7 @@
 	import Card from "../Kit/Card.svelte";
 	import type { Channel } from "../../channels";
 	import ClickOutside from "svelte-click-outside";
+	import { stChannels } from "../../stores";
 	
 	export let channel: Channel;
 
@@ -30,6 +31,12 @@
 		if (resp?.statusCode == 400 || resp?.statusCode == 404) {
 			error = resp.message;
 			return false;
+		}
+		for (let i = 0; i < 10; ++i) {
+			await new Promise((resolve) => setTimeout(resolve, 150));
+			if ($stChannels[channel.uuid] !== undefined && $stChannels[channel.uuid].joined) {
+				break ;
+			}
 		}
 		return true;
 	}

@@ -6,13 +6,36 @@
 	import { stLoggedUser } from "../stores";
 
     let qrLinkPromise = api.getQRCode();
+    let tip = false;
     
     let value = "";
     let playWiggle = false;
     
+    let errorText = "";
+    
     $: {
         if (value.length === 6) {
             validate();
+        }
+    }
+    
+    function onClick(ev: Event)
+    {
+        if (navigator.clipboard.write !== undefined) {
+            const text = (ev.target as any).innerText;
+            if (tip) {
+                return ;
+            }
+            const type = "text/plain";
+            const blob = new Blob([text], { type });
+            const data = [new ClipboardItem({ [type]: blob })];
+            
+            navigator.clipboard.write(data).then(
+                () => {
+                    tip = true;
+                    setTimeout(() => tip = false, 1000);
+                }
+            );
         }
     }
     
@@ -29,16 +52,10 @@
             body: JSON.stringify(req),
         })
             .then((res) => {
-                if (res.status == 500) {
-                    playWiggle = true;
-                    setTimeout(() => {
-                        playWiggle = false;
-                    }, 300);
-                    value = "";
+                if (res.status == 403) {
+                    errorText = "Timeout. QR code regenerated";
                     qrLinkPromise = api.getQRCode();
-                    // TODO: timeout
-                } else if (res.status == 403) {
-                    replace("/");
+                    return ;
                 } else if (res.status == 200) {
                     stLoggedUser.update((old) => {
                         if (old) {
@@ -67,12 +84,17 @@
     <Card>
         <div class="inner">
             {#await qrLinkPromise}
-                <div class="qr" style={"background: white;"}/>
-            {:then link} 
-                <div class="qr" style={"background-image: url('" + link + "')"}/>
+            <div class="qr" style={"background: white;"}/>
+            {:then response} 
+            <div class="qr" style={"background-image: url('" + response.image + "')"}/>
+                {#if errorText.length > 0}
+                    <div style="color: red; padding-bottom: 10px;">{errorText}</div>
+                {/if}
+                <div class="desc">Scan this QR code with your 2FA application</div>
+                <div class="desc">or copy and paste this text in it</div>
+                <div class="qr-text" class:tip on:click={onClick}>{response.text}</div>
+                <div class="desc">Then enter the 6-digit code below</div>
             {/await}
-            <div class="desc">Scan this code with your 2FA application</div>
-            <div class="desc">Then enter the 6-digit code below</div>
             <div class="input" class:playWiggle>
                 <SvelteSegmentedInput bind:value length={6} style={{textColor: "white", borderColor: "gray"}}></SvelteSegmentedInput>
             </div>
@@ -110,16 +132,51 @@
 	}
 
     .inner {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        max-width: 600px;
+        
         .qr {
-            margin-left: auto;
-            margin-right: auto;
             margin-bottom: 16px;
             width: 400px;
             height: 400px;
             background-size: cover;
         }
         
+        .qr-text {
+            user-select: all;
+            -webkit-user-select: all;
+            margin-top: 6px;
+            margin-bottom: 6px;
+            word-break: break-all;
+            background-color: #2f2f2f;
+            border-radius: 10px;
+            padding: 10px;
+            font-weight: bold;
+            font-size: 12px;
+            line-height: 16px;
+            position: relative;
+            
+            &.tip::after {
+                content: "Copied!";
+                font-size: 2em;
+                background-color: rgba(0, 0, 0, 0.763);
+                display: grid;
+                place-items: center;
+                position: absolute;
+                border-radius: 10px;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+            }
+        }
+        
         .input {
+            width: 100%;
+            max-width: 420px;
             margin-top: 10px;
             padding: 10px;
             border-radius: 20px;

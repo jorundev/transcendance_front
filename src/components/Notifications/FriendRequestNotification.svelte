@@ -5,7 +5,7 @@
     
     export let data: FriendRequestNotificationData;
     let user: User = undefined;
-    $: api.getUserData(data.sender).then((data) => {
+    $: api.getUserData(data.user).then((data) => {
         if (data != APIStatus.NoResponse) {
             user = data;
         }

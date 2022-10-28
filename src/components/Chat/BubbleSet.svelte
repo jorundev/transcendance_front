@@ -127,6 +127,7 @@
 	}
 
 	.profile-picture {
+		background-position: center;
 		position: absolute;
 		flex-shrink: 0;
 		width: 40px;
