@@ -11,18 +11,16 @@
 			? "/pictures/" + $stLoggedUser.avatar
 			: "/img/default.jpg";
 	}
-	
+
 	function getProfilePictureLinkFrom(from: string | null): string {
-		return from
-			? "/pictures/" + from
-			: "/img/default.jpg";
+		return from ? "/pictures/" + from : "/img/default.jpg";
 	}
 
 	let avatarPromise = Promise.resolve(getProfilePictureLink());
 	let currentAvatar = "";
-	
-	$: avatarPromise.then((img) => currentAvatar = img);
-	
+
+	$: avatarPromise.then((img) => (currentAvatar = img));
+
 	let drag = false;
 
 	async function uploadFile(file: File) {
@@ -37,7 +35,7 @@
 		) {
 			return;
 		}
-		
+
 		const pm = api.changeAvatar(file);
 		avatarPromise = pm.then((obj) => {
 			if (obj !== null && obj !== APIStatus.NoResponse) {
@@ -46,11 +44,11 @@
 		});
 		const res = await pm;
 		if (res === null || res === APIStatus.NoResponse) {
-			return ;
+			return;
 		}
 		if (res.statusCode === 413) {
 			avatarPromise = Promise.resolve(getProfilePictureLink());
-			return ;
+			return;
 		}
 	}
 </script>
@@ -76,38 +74,41 @@
 			<div class="category">Avatar</div>
 			<div class="avatar">
 				{#await avatarPromise}
-					<div class="loading" style={"background-image: url('" + currentAvatar + "');"} />
-				{:then data} 
-				<div
-					class="inner"
-					class:drag
-					style={"background-image: url('" +
-						data +
-						"')"}
-					on:click={() => {
-						let input = document.createElement("input");
-						input.type = "file";
-						input.click();
+					<div
+						class="loading"
+						style={"background-image: url('" +
+							currentAvatar +
+							"');"}
+					/>
+				{:then data}
+					<div
+						class="inner"
+						class:drag
+						style={"background-image: url('" + data + "')"}
+						on:click={() => {
+							let input = document.createElement("input");
+							input.type = "file";
+							input.click();
 
-						input.onchange = (e) => {
-							e.preventDefault();
-							if (input.files?.length === 1) {
-								uploadFile(input.files[0]);
+							input.onchange = (e) => {
+								e.preventDefault();
+								if (input.files?.length === 1) {
+									uploadFile(input.files[0]);
+								}
+							};
+						}}
+						on:dragenter={() => (drag = true)}
+						on:dragexit={() => (drag = false)}
+						on:dragover|preventDefault={() => {}}
+						on:drop|preventDefault={(e) => {
+							if (e.dataTransfer?.items?.length === 1) {
+								uploadFile(e.dataTransfer.items[0].getAsFile());
 							}
-						};
-					}}
-					on:dragenter={() => (drag = true)}
-					on:dragexit={() => (drag = false)}
-					on:dragover|preventDefault={() => {}}
-					on:drop|preventDefault={(e) => {
-						if (e.dataTransfer?.items?.length === 1) {
-							uploadFile(e.dataTransfer.items[0].getAsFile());
-						}
 
-						drag = false;
-					}}
-					on:change={(e) => console.log(e)}
-				/>
+							drag = false;
+						}}
+						on:change={(e) => console.log(e)}
+					/>
 				{/await}
 			</div>
 			<div class="category">Username</div>
@@ -130,7 +131,7 @@
 			opacity: 0.6;
 		}
 	}
-	
+
 	.s {
 		display: flex;
 		justify-content: center;
@@ -187,14 +188,6 @@
 		text-transform: uppercase;
 	}
 
-	.modal {
-		width: 100%;
-		height: 100%;
-		display: grid;
-		place-items: center;
-		position: absolute;
-	}
-
 	.avatar {
 		width: 100%;
 		display: flex;
@@ -202,11 +195,18 @@
 		margin-top: 18px;
 		margin-bottom: 18px;
 
-		.inner, .loading {
-			&.loading {
-				animation: pulse 1.2s 0.3s ease-in-out infinite;
+		.loading {
+			animation: pulse 1.2s 0.3s ease-in-out infinite;
+		}
+
+		.inner {
+			&.drag {
+				outline: 5px dashed rgb(255, 255, 255);
 			}
-			
+		}
+
+		.inner,
+		.loading {
 			position: relative;
 			flex-shrink: 0;
 			width: 120px;
@@ -228,21 +228,7 @@
 				background-size: 40%;
 				border-radius: 100%;
 			}
-
-			&.drag {
-				outline: 5px dashed rgb(255, 255, 255);
-			}
 		}
-	}
-
-	.change-avatar {
-		.title {
-			text-align: left;
-			font-size: 20px;
-			padding-bottom: 10px;
-		}
-
-		min-width: 200px;
 	}
 
 	.input {

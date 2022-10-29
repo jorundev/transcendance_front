@@ -5,16 +5,16 @@
 	import SideBar from "../components/SideBar.svelte";
 	import Button from "../components/Kit/Button.svelte";
 	import { api, APIStatus } from "../api";
-	
+
 	let innerWidth = 0;
 	let errorTextTop = "";
 	let errorTextBottom = "";
 	let successText = "";
-	
+
 	let currentPassword = "";
 	let newPassword = "";
 	let newPasswordConfirm = "";
-	
+
 	async function validate() {
 		errorTextTop = "";
 		errorTextBottom = "";
@@ -36,36 +36,40 @@
 			retEarly = true;
 		}
 		if (newPassword === currentPassword) {
-			errorTextBottom = "New password cannot be identical to old password";
+			errorTextBottom =
+				"New password cannot be identical to old password";
 			newPassword = "";
 			newPasswordConfirm = "";
 			retEarly = true;
 		}
 		if (retEarly) {
-			return ;
+			return;
 		}
-		
-		const res = await api.changePassword(currentPassword, newPassword, newPasswordConfirm);
+
+		const res = await api.changePassword(
+			currentPassword,
+			newPassword,
+			newPasswordConfirm
+		);
 		if (res === null || res === APIStatus.NoResponse) {
 			errorTextTop = "Invalid response from the server";
-			return ;
+			return;
 		}
 		if (res.statusCode === 200) {
 			currentPassword = "";
 			newPassword = "";
 			newPasswordConfirm = "";
 			successText = "Password changed successfuly";
-			return ;
+			return;
 		}
 		switch (res.message) {
 			case "Password mismatch":
 				errorTextTop = "Invalid password";
-				break ;
+				break;
 			default:
 				errorTextBottom = res.message;
-				break ;
+				break;
 		}
-		
 	}
 </script>
 
@@ -74,7 +78,7 @@
 	<title>Password - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
 {#if $stLoggedUser != null}
-	<SideBar active="settings"/>
+	<SideBar active="settings" />
 	<div class="s">
 		<div class="settings">
 			<div class="top">
@@ -89,13 +93,26 @@
 			</div>
 			<div class="category">Change password</div>
 			<div class="change">
-				<input class="current" type="password" placeholder="Current password" bind:value={currentPassword}>
+				<input
+					class="current"
+					type="password"
+					placeholder="Current password"
+					bind:value={currentPassword}
+				/>
 				{#if errorTextTop.length !== 0}
 					<div style="color: red;">{errorTextTop}</div>
 				{/if}
 				<div class="sep" />
-				<input type="password" placeholder="New password" bind:value={newPassword}>
-				<input type="password" placeholder="Confirm new password" bind:value={newPasswordConfirm}>
+				<input
+					type="password"
+					placeholder="New password"
+					bind:value={newPassword}
+				/>
+				<input
+					type="password"
+					placeholder="Confirm new password"
+					bind:value={newPasswordConfirm}
+				/>
 				{#if errorTextBottom.length !== 0}
 					<div style="color: red;">{errorTextBottom}</div>
 				{/if}
@@ -103,7 +120,13 @@
 					<div style="color: green;">{successText}</div>
 				{/if}
 				<div class="button">
-					<Button on:click={validate} active={currentPassword.length > 0 && newPassword.length > 0 && newPasswordConfirm.length > 0}>Change password</Button>
+					<Button
+						on:click={validate}
+						active={currentPassword.length > 0 &&
+							newPassword.length > 0 &&
+							newPasswordConfirm.length > 0}
+						>Change password</Button
+					>
 				</div>
 			</div>
 		</div>
@@ -167,53 +190,20 @@
 		text-transform: uppercase;
 	}
 
-	.setting {
-		cursor: pointer;
-		margin-left: 10px;
-		margin-right: 10px;
-		display: flex;
-		align-items: center;
-		padding-top: 16px;
-		padding-bottom: 16px;
-		transform: translateX(-16px);
-		padding-left: 16px;
-		width: 100%;
-
-		.before {
-			flex-shrink: 0;
-			background-size: 30px;
-			background-repeat: no-repeat;
-			border-radius: 100%;
-			margin-right: 8px;
-			width: 30px;
-			height: 30px;
-		}
-
-		&.profile {
-			padding-top: 9px;
-			padding-bottom: 9px;
-		}
-
-		&:hover {
-			background-color: #202020;
-		}
-	}
-	
 	.change {
 		position: relative;
 		padding: 16px;
 		display: flex;
 		flex-direction: column;
 		gap: 16px;
-		
+
 		.sep {
 			margin-left: 24px;
 			margin-right: 24px;
 			border-bottom: 1px solid rgb(57, 57, 57);
 		}
 	}
-	
-	input[type="text"],
+
 	input[type="password"] {
 		font-size: 14px;
 		width: calc(100% - 40px);
@@ -247,7 +237,7 @@
 			}
 		}
 	}
-	
+
 	@media screen and (min-width: 800px) {
 		.settings {
 			padding-left: 59px;
@@ -271,19 +261,12 @@
 			color: white;
 			font-size: 24px;
 		}
-		.setting {
-			font-size: 18px;
-			
-			&:hover {
-				background-color: rgb(22, 24, 28);
-			}
-		}
 		.top {
 			display: flex;
 			justify-content: left;
 			align-items: center;
 		}
-		
+
 		.change {
 			max-width: 400px;
 			padding-top: 0;

@@ -98,20 +98,4 @@
 			font-size: large;
 		}
 	}
-
-	input[type="number"] {
-		background-color: rgb(33, 33, 33);
-		color: white;
-		border: none;
-		width: 100%;
-		padding: 10px;
-		box-sizing: border-box;
-		border-radius: 10px;
-		margin-top: 10px;
-		margin-bottom: 10px;
-
-		&:focus {
-			outline: none;
-		}
-	}
 </style>
