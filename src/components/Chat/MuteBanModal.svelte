@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from "svelte";
-	import type { Channel, ChannelUser } from "../../channels";
+	import type { Channel } from "../../channels";
 	import Button from "../Kit/Button.svelte";
 	import Card from "../Kit/Card.svelte";
 	import DurationPicker from "../Kit/DurationPicker.svelte";
@@ -20,9 +20,6 @@
 	let title = "";
 	$: title = mode[0].toUpperCase() + mode.substring(1);
 
-	let channelUser: ChannelUser;
-	$: channelUser = channel.users.find((usr) => usr.uuid == userUUID);
-
 	let user: User;
 	$: {
 		api.getUserData(userUUID).then((u) => {
@@ -36,6 +33,9 @@
 
 	function takeEffect() {
 		if (mode === "ban") {
+			api.banUserFromChannel(userUUID, channel.uuid, time);
+			console.log("Banned user for " + time + " seconds");
+			dispatch("ban");
 		}
 	}
 

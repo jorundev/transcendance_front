@@ -13,17 +13,19 @@ export enum WsNamespace {
  */
 
 export enum ChatAction {
-	Create = "CREATE",
-	Join = "JOIN",
-	Leave = "LEAVE",
-	Send = "SEND",
-	Delete = "DELETE",
-	Promote = "PROMOTE",
-	Demote = "DEMOTE",
-	Mute = "MUTE",
-	Unmute = "UNMUTE",
-	Avatar = "AVATAR",
-	Remove = "REMOVE",
+	Create = 'CREATE',
+	Join = 'JOIN',
+	Leave = 'LEAVE',
+	Remove = 'REMOVE',
+	Send = 'SEND',
+	Delete = 'DELETE',
+	Promote = 'PROMOTE',
+	Demote = 'DEMOTE',
+	Ban = 'BAN',
+	Unban = 'UNBAN',
+	Mute = 'MUTE',
+	Unmute = 'UNMUTE',
+	Avatar = 'AVATAR'
 }
 
 export interface WsChat {
@@ -94,15 +96,29 @@ export interface WsChatAvatar extends WsChat {
 	path: string;
 }
 
+export interface WsChatBan extends WsChat {
+	action: ChatAction.Ban;
+	user: string;
+	expiration: Date | null;
+}
+
+export interface WsChatUnban extends WsChat {
+	action: ChatAction.Unban;
+	user: string;
+}
+
 /**
  * User
  */
 
 export enum UserAction {
-	Invite = "INVITE",
-	Block = "BLOCK",
-	Unblock = "UNBLOCK",
-	Refresh = "REFRESH",
+	Block = 'BLOCK',
+	Unblock = 'UNBLOCK',
+	Refresh = 'REFRESH',
+	Expired = 'EXPIRED',
+	Avatar = 'AVATAR',
+	Session = 'SESSION',
+	Notification = 'NOTIFICATION'
 }
 
 export interface WsUser {

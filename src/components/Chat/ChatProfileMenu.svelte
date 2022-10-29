@@ -8,6 +8,8 @@
 	export let user: { is_moderator: boolean; is_administrator: boolean };
 	export let offsetY: number;
 	export let is_in_channel: boolean;
+	export let banned: boolean;
+	export let muted: boolean;
 
 	let pxOffset = "0px";
 
@@ -55,9 +57,21 @@
 			>
 				Kick
 			</div>
-			<div class="entry red" on:click={() => dispatch("ban", { uuid })}>
-				Ban
-			</div>
+			{#if banned}
+				<div
+					class="entry red"
+					on:click={() => dispatch("unban", { uuid })}
+				>
+					Unban
+				</div>
+			{:else}
+				<div
+					class="entry red"
+					on:click={() => dispatch("ban", { uuid })}
+				>
+					Ban
+				</div>
+			{/if}
 		{/if}
 		{#if administrator}
 			<div class="title red noselect">Administrator options</div>

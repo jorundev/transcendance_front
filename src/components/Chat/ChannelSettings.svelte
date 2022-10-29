@@ -37,6 +37,16 @@
 		$stChannels[channel.uuid].has_password = password.length != 0;
 		password = "";
 	}
+
+	function destroyChannel() {
+		if (destroyChannelText === "Destroy channel") {
+			destroyChannelText = "Are you sure ?";
+			return;
+		}
+		api.deleteChannel(channel.uuid);
+	}
+
+	let destroyChannelText = "Destroy channel";
 </script>
 
 <ClickOutside
@@ -48,16 +58,29 @@
 		<div class="settings">
 			<div class="title">Settings for {channel.name}</div>
 			<div class="category">
-				<div class="category-name">Members</div>
-				<div class="members">
-					{#each channel.users as user}
-						<ChannelSettingsProfile
-							{user}
-							is_in_channel={channel.users
-								.map((u) => u.uuid)
-								.includes(user.uuid)}
-						/>
-					{/each}
+				<div class="member-lists">
+					<div class="members">
+						<div class="category-name">Members</div>
+						{#each channel.users as user}
+							<ChannelSettingsProfile
+								{user}
+								is_in_channel={channel.users
+									.map((u) => u.uuid)
+									.includes(user.uuid)}
+							/>
+						{/each}
+					</div>
+					<div class="members">
+						<div class="category-name">Blacklist</div>
+						{#each channel.banned_users as banned}
+							<ChannelSettingsProfile
+								user={banned.user}
+								is_in_channel={channel.users
+									.map((u) => u.uuid)
+									.includes(banned.user.uuid)}
+							/>
+						{/each}
+					</div>
 				</div>
 			</div>
 			<div class="category">
@@ -113,8 +136,11 @@
 				</div>
 				<div class="category">
 					<div class="category-name">Administrator</div>
-					<Button red timeoutVisible timeout={2000}
-						>Destroy channel</Button
+					<Button
+						red
+						timeoutVisible
+						timeout={2000}
+						on:click={destroyChannel}>{destroyChannelText}</Button
 					>
 				</div>
 			{/if}
@@ -161,7 +187,11 @@
 		}
 	}
 
-	input[type="text"],
+	.member-lists {
+		display: flex;
+		gap: 10px;
+	}
+
 	input[type="password"] {
 		font-size: 14px;
 		width: calc(100% - 40px);

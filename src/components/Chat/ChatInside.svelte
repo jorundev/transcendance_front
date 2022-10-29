@@ -28,10 +28,10 @@
 	export let params: { uuid: string };
 	export let render: boolean = true;
 	export let desktop = false;
-	
+
 	let innerWidth = 0;
 	let oldInnerWidth = 0;
-	
+
 	$: {
 		if (!desktop && innerWidth >= 1600 && innerWidth !== oldInnerWidth) {
 			replace("/chat/" + params.uuid);
@@ -61,7 +61,7 @@
 		joined = $stChannels[params.uuid]?.joined;
 		if (!joined) {
 			replace("/chat");
-		}	
+		}
 	}
 	$: if (params.uuid) {
 		info = l_channels[params.uuid];
@@ -292,6 +292,8 @@
 			{:else if show_muteban_modal}
 				<MuteBanModal
 					on:back={() => (show_muteban_modal = false)}
+					on:ban={() => (show_muteban_modal = false)}
+					on:unban={() => (show_muteban_modal = false)}
 					userUUID={selectedUser}
 					channel={info}
 					mode={muteban_mode}
@@ -330,6 +332,12 @@
 								selectedUser = ev.detail.uuid;
 								muteban_mode = "ban";
 								show_muteban_modal = true;
+							}}
+							on:unban={(ev) => {
+								api.unbanUserFromChannel(
+									ev.detail.uuid,
+									info.uuid
+								);
 							}}
 							side={set.side}
 							messages={set.messages}
@@ -388,9 +396,7 @@
 		}
 	}
 	.bubbles {
-		//padding-top: 10px;
 		overflow: auto;
-		//height: calc(100% - var(--scrollbar-height) - 162px);
 		height: 100vh;
 		width: 100%;
 		transform: translateX(-16px);

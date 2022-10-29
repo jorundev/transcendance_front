@@ -3,7 +3,12 @@
 
 	import Router, { replace } from "svelte-spa-router";
 	import routes from "./App.routes";
-	import { stServerDown, stWebsocket } from "./stores";
+	import {
+		stChannels,
+		stLoggedUser,
+		stServerDown,
+		stWebsocket,
+	} from "./stores";
 
 	onMount(async () => {
 		document.documentElement.style.setProperty(
@@ -20,6 +25,45 @@
 				$stWebsocket.send("");
 			}
 		}, 20000);
+
+		/* Handle ban and mute timeouts */
+		setInterval(() => {
+			const now = new Date();
+			if ($stLoggedUser && !$stServerDown) {
+				for (const [_, channel] of Object.entries($stChannels)) {
+					for (const banned_user of channel.banned_users) {
+						if (banned_user.expiration.getTime() <= now.getTime()) {
+							console.log(
+								"Unbanned " +
+									banned_user.user.uuid +
+									" from " +
+									channel.uuid
+							);
+							stChannels.update((channels) => {
+								channels[channel.uuid].banned_users = channels[
+									channel.uuid
+								].banned_users.filter(
+									(u) => u.user.uuid !== banned_user.user.uuid
+								);
+								return channels;
+							});
+						}
+					}
+					for (const muted_user of channel.muted_users) {
+						if (muted_user.expiration.getTime() <= now.getTime()) {
+							stChannels.update((channels) => {
+								channels[channel.uuid].muted_users = channels[
+									channel.uuid
+								].muted_users.filter(
+									(u) => u.user.uuid !== muted_user.user.uuid
+								);
+								return channels;
+							});
+						}
+					}
+				}
+			}
+		}, 5000);
 	});
 
 	function conditionsFailed(event) {
@@ -59,10 +103,8 @@
 		box-sizing: border-box;
 		overflow: hidden;
 		max-width: 1600px;
-		//border-right: 1px solid rgb(37, 37, 37);
-		//border-left: 1px solid rgb(37, 37, 37);
 	}
-	
+
 	@media screen and (max-width: 799px) {
 		div {
 			user-select: none;

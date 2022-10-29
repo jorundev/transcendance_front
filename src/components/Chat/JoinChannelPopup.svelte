@@ -6,18 +6,18 @@
 	import type { Channel } from "../../channels";
 	import ClickOutside from "svelte-click-outside";
 	import { stChannels } from "../../stores";
-	
+
 	export let channel: Channel;
 
 	let dispatch = createEventDispatcher();
 	let password: string;
 
 	let error = "";
-	
+
 	let canClickOutside = false;
-	
+
 	onMount(() => {
-		setTimeout(() => canClickOutside = true, 200);
+		setTimeout(() => (canClickOutside = true), 200);
 	});
 
 	async function joinChannel(): Promise<boolean> {
@@ -32,10 +32,17 @@
 			error = resp.message;
 			return false;
 		}
+		if (resp?.statusCode === 403) {
+			error = "You have been banned from this channel";
+			return false;
+		}
 		for (let i = 0; i < 10; ++i) {
 			await new Promise((resolve) => setTimeout(resolve, 150));
-			if ($stChannels[channel.uuid] !== undefined && $stChannels[channel.uuid].joined) {
-				break ;
+			if (
+				$stChannels[channel.uuid] !== undefined &&
+				$stChannels[channel.uuid].joined
+			) {
+				break;
 			}
 		}
 		return true;
@@ -43,53 +50,57 @@
 </script>
 
 <div class="jcp">
-	<ClickOutside on:clickoutside={() => {
-		if (canClickOutside) dispatch("back");
-	}}>
-	<Card>
-		<div class="join">
-			{#if channel}
-				<p class="title">
-					Join channel {channel.name}<b class="id">#{channel.id}</b>
-					?
-				</p>
-				<p class="body">
-					You will be able to leave the channel at any time
-				</p>
-				{#if channel.has_password}
-					<div class="input">
-						<input
-							placeholder="Channel password"
-							type="password"
-							bind:value={password}
+	<ClickOutside
+		on:clickoutside={() => {
+			if (canClickOutside) dispatch("back");
+		}}
+	>
+		<Card>
+			<div class="join">
+				{#if channel}
+					<p class="title">
+						Join channel {channel.name}<b class="id"
+							>#{channel.id}</b
+						>
+						?
+					</p>
+					<p class="body">
+						You will be able to leave the channel at any time
+					</p>
+					{#if channel.has_password}
+						<div class="input">
+							<input
+								placeholder="Channel password"
+								type="password"
+								bind:value={password}
+							/>
+						</div>
+					{/if}
+					{#if error.length != 0}
+						<div class="error">{error}</div>
+					{/if}
+					<div class="buttons">
+						<Button
+							highlight={false}
+							text="Back"
+							on:click={() => {
+								dispatch("back");
+							}}
+						/>
+						<Button
+							text="Join"
+							on:click={async () => {
+								if (await joinChannel()) {
+									dispatch("join");
+								}
+							}}
+							timeoutVisible
+							timeout={2000}
 						/>
 					</div>
 				{/if}
-				{#if error.length != 0}
-					<div class="error">{error}</div>
-				{/if}
-				<div class="buttons">
-					<Button
-						highlight={false}
-						text="Back"
-						on:click={() => {
-							dispatch("back");
-						}}
-					/>
-					<Button
-						text="Join"
-						on:click={async () => {
-							if (await joinChannel()) {
-								dispatch("join");
-							}
-						}}
-						timeoutVisible
-						timeout={2000}
-					/>
-				</div>
-			{/if}
-		</div>
-	</Card>
+			</div>
+		</Card>
 	</ClickOutside>
 </div>
 

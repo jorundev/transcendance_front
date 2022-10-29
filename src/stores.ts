@@ -2,6 +2,7 @@ import { get, writable, type Writable } from "svelte/store";
 import {
 	api,
 	APIStatus,
+	chatPageSize,
 	getUsersFromUUIDs,
 	type APIChannel,
 	type ChannelMessagesResponse,
@@ -26,7 +27,7 @@ stNotifications.subscribe((notifications) => {
 
 export async function tryToLog() {
 	let response: WhoAmIResponse | APIStatus;
-	for (;;) {
+	for (; ;) {
 		response = await api.whoami();
 		if (response == null) {
 			return;
@@ -49,7 +50,7 @@ export async function tryToLog() {
 
 	stServerDown.set(false);
 	api.ws.connect();
-	await initChannelsNew();
+	await initChannels();
 }
 
 /* Removes duplicates channels (that are public AND joined) */
@@ -67,7 +68,7 @@ function getChannelsData(
 }
 
 export function lastPage(channel: APIChannel): number {
-	let page = channel.message_count / 10;
+	let page = channel.message_count / chatPageSize;
 	if (page != Math.floor(page)) {
 		page = Math.floor(page) + 1;
 	}
@@ -79,6 +80,48 @@ async function channelFromAPIChannel(
 	joined: boolean
 ): Promise<Channel> {
 	const users = await getUsersFromUUIDs(channel);
+
+	let banned_users = [];
+	let muted_users = [];
+
+	if (channel.moderators.includes(get(stLoggedUser)?.uuid) || channel.administrator === get(stLoggedUser)?.uuid) {
+		const blacklist = await api.getBlacklist(channel.uuid);
+		if (blacklist !== null && blacklist !== APIStatus.NoResponse) {
+			for (const listInfo of blacklist.banned) {
+				const info = await api.getUserData(listInfo.user);
+				if (info !== null && info !== APIStatus.NoResponse) {
+					banned_users.push({
+						expiration: new Date(listInfo.expiration),
+						user: {
+							uuid: listInfo.user,
+							name: info.username,
+							id: parseInt(info.identifier),
+							avatar: info.avatar,
+							is_moderator: false,
+							is_administrator: false
+						}
+					});
+				}
+			}
+			for (const listInfo of blacklist.muted) {
+				const info = await api.getUserData(listInfo.user);
+				if (info !== null && info !== APIStatus.NoResponse) {
+					muted_users.push({
+						expiration: new Date(listInfo.expiration),
+						user: {
+							uuid: listInfo.user,
+							name: info.username,
+							id: parseInt(info.identifier),
+							avatar: info.avatar,
+							is_moderator: false,
+							is_administrator: false
+						}
+					});
+				}
+			}
+		}
+	}
+
 	if (users)
 		return {
 			has_password: channel.password,
@@ -93,10 +136,12 @@ async function channelFromAPIChannel(
 			last_loaded_page: lastPage(channel),
 			moderators: channel.moderators,
 			administrator: channel.administrator,
+			banned_users,
+			muted_users,
 		};
 }
 
-async function initChannelsNew() {
+async function initChannels() {
 	const promises = {
 		publicChannels: api.listChannels(),
 		joinedChannels: api.getJoinedChannels(),
@@ -178,7 +223,7 @@ export async function initPrivChannel(channelUUID: string) {
 
 export async function tryLoggingIn(): Promise<boolean> {
 	if (!isLogged()) {
-		await tryToLog();		
+		await tryToLog();
 	}
 	return isLogged();
 }

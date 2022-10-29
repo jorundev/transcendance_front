@@ -41,7 +41,7 @@
 
 <div
 	class="bubble {side}"
-	class:last
+	class:last={!last}
 	class:one-above={one_above}
 	class:pending={!message.confirmed}
 	class:red={display_options}

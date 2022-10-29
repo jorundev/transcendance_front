@@ -41,6 +41,14 @@ export interface Channel {
 	administrator: string;
 	last_loaded_page: number;
 	reload?: boolean;
+	banned_users: Array<{
+		user: ChannelUser,
+		expiration: Date,
+	}>;
+	muted_users: Array<{
+		user: ChannelUser,
+		expiration: Date,
+	}>;
 }
 
 export interface ChatMessage {

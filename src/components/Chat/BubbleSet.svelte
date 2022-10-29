@@ -60,6 +60,12 @@
 					<ChatProfileMenu
 						{offsetY}
 						uuid={message.sender}
+						banned={$stChannels[channel].banned_users
+							.map((u) => u.user.uuid)
+							.includes(message.sender)}
+						muted={$stChannels[channel].muted_users
+							.map((u) => u.user.uuid)
+							.includes(message.sender)}
 						on:back={() => (showProfileMenu = false)}
 						{moderator}
 						{administrator}
@@ -76,6 +82,7 @@
 							api.demoteUserInChannel(ev.detail.uuid, channel);
 						}}
 						on:ban
+						on:unban
 						is_in_channel={$stChannels[channel]?.users
 							.map((u) => u.uuid)
 							.includes(message.sender)}
@@ -100,10 +107,10 @@
 		flex-wrap: nowrap;
 
 		&.last {
-			margin-bottom: 20px;
+			padding-bottom: 6px;
 			&::after {
 				position: absolute;
-				bottom: -18px;
+				bottom: -8px;
 				content: attr(data-username) attr(data-date);
 				color: gray;
 				font-size: 14px;
@@ -137,6 +144,6 @@
 		height: 40px;
 		border-radius: 100%;
 		background-size: cover;
-		bottom: 2px;
+		bottom: 10px;
 	}
 </style>

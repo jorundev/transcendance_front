@@ -16,6 +16,7 @@ import {
 	UserAction,
 	WsNamespace,
 	type WsChat,
+	type WsChatBan,
 	type WsChatDelete,
 	type WsChatDemote,
 	type WsChatJoin,
@@ -23,6 +24,7 @@ import {
 	type WsChatPromote,
 	type WsChatRemove,
 	type WsChatSend,
+	type WsChatUnban,
 	type WsUser,
 } from "./websocket/types";
 
@@ -102,7 +104,7 @@ interface RefreshTokenCache {
 }
 
 const refresh_token_cache: RefreshTokenCache = {
-	refresh_tolerance: 10,
+	refresh_tolerance: 3,
 };
 
 async function refreshToken(): Promise<boolean> {
@@ -256,6 +258,11 @@ export interface ListChannelsResponse extends APIResponse {
 	page_count: number;
 }
 
+export interface APIBlacklist extends APIResponse {
+	banned: Array<{ user: string, expiration: string }>,
+	muted: Array<{ user: string, expiration: string }>,
+}
+
 export interface APIChannel {
 	type: ChannelType;
 	uuid: string;
@@ -363,7 +370,7 @@ export async function loadNextPage(uuid: string, n?: number) {
 
 	const promises = [];
 	let i = channel.last_loaded_page - 1;
-	//console.log("total: ", i - (channel.last_loaded_page - n - 1));
+
 	while (i >= 1 && i >= channel.last_loaded_page - n - 1) {
 		promises.push(api.getChannelMessages(uuid, i));
 		i -= 1;
@@ -403,6 +410,7 @@ export async function loadNextPage(uuid: string, n?: number) {
 	});
 }
 
+export const chatPageSize = 50;
 const wsChatMessageLock = new Mutex();
 async function wsChatMessage(data: WsChat) {
 	const release = await wsChatMessageLock.acquire();
@@ -415,9 +423,53 @@ async function wsChatMessage(data: WsChat) {
 		}
 		const users = await getUsersFromUUIDs(channel_data);
 
-		let page = channel_data.message_count / 10;
+		let page = channel_data.message_count / chatPageSize;
 		if (page != Math.floor(page)) {
 			page = Math.floor(page) + 1;
+		}
+
+		const isModerator = channel_data.moderators.includes(get(stLoggedUser).uuid)
+			|| channel_data.administrator === get(stLoggedUser).uuid;
+
+		let banned_users = [];
+		let muted_users = [];
+
+		if (isModerator) {
+			const blacklist = await api.getBlacklist(data.channel);
+			if (blacklist !== null && blacklist !== APIStatus.NoResponse) {
+				for (const listInfo of blacklist.banned) {
+					const info = await api.getUserData(listInfo.user);
+					if (info !== null && info !== APIStatus.NoResponse) {
+						banned_users.push({
+							expiration: new Date(listInfo.expiration),
+							user: {
+								uuid: listInfo.user,
+								name: info.username,
+								id: parseInt(info.identifier),
+								avatar: info.avatar,
+								is_moderator: false,
+								is_administrator: false
+							}
+						});
+					}
+				}
+				for (const listInfo of blacklist.muted) {
+					const info = await api.getUserData(listInfo.user);
+					if (info !== null && info !== APIStatus.NoResponse) {
+						muted_users.push({
+							expiration: new Date(listInfo.expiration),
+							user: {
+								uuid: listInfo.user,
+								name: info.username,
+								id: parseInt(info.identifier),
+								avatar: info.avatar,
+								is_moderator: false,
+								is_administrator: false
+							}
+						});
+					}
+				}
+			}
 		}
 
 		stChannels.update((channels) => {
@@ -434,6 +486,8 @@ async function wsChatMessage(data: WsChat) {
 				last_loaded_page: page,
 				moderators: channel_data.moderators,
 				administrator: channel_data.administrator,
+				banned_users,
+				muted_users,
 			};
 			return channels;
 		});
@@ -465,6 +519,13 @@ async function wsChatMessage(data: WsChat) {
 		case ChatAction.Demote:
 			wsChatDemote(data as WsChatDemote);
 			break;
+		case ChatAction.Ban:
+			wsChatLeave(data as WsChatLeave);
+			wsChatBan(data as WsChatBan);
+			break;
+		case ChatAction.Unban:
+			wsChatUnban(data as WsChatUnban);
+			break;
 	}
 }
 
@@ -478,10 +539,54 @@ async function wsUserMessage(data: WsUser) {
 }
 
 async function wsChatPromote(data: WsChatPromote) {
+	let banned_users = [];
+	let muted_users = [];
+	if (data.user === get(stLoggedUser).uuid) {
+		const blacklist = await api.getBlacklist(data.channel);
+		if (blacklist !== null && blacklist !== APIStatus.NoResponse) {
+			for (const listInfo of blacklist.banned) {
+				const info = await api.getUserData(listInfo.user);
+				if (info !== null && info !== APIStatus.NoResponse) {
+					banned_users.push({
+						expiration: new Date(listInfo.expiration),
+						user: {
+							uuid: listInfo.user,
+							name: info.username,
+							id: parseInt(info.identifier),
+							avatar: info.avatar,
+							is_moderator: false,
+							is_administrator: false
+						}
+					});
+				}
+			}
+			for (const listInfo of blacklist.muted) {
+				const info = await api.getUserData(listInfo.user);
+				if (info !== null && info !== APIStatus.NoResponse) {
+					muted_users.push({
+						expiration: new Date(listInfo.expiration),
+						user: {
+							uuid: listInfo.user,
+							name: info.username,
+							id: parseInt(info.identifier),
+							avatar: info.avatar,
+							is_moderator: false,
+							is_administrator: false
+						}
+					});
+				}
+			}
+		}
+	}
 	stChannels.update((channels) => {
 		channels[data.channel].users.find(
 			(usr) => usr.uuid == data.user
 		).is_moderator = true;
+		channels[data.channel].banned_users = banned_users;
+		channels[data.channel].muted_users = muted_users;
+		if (!channels[data.channel].moderators.includes(data.user)) {
+			channels[data.channel].moderators.push(data.user);
+		}
 		return channels;
 	});
 }
@@ -491,6 +596,11 @@ async function wsChatDemote(data: WsChatDemote) {
 		channels[data.channel].users.find(
 			(usr) => usr.uuid == data.user
 		).is_moderator = false;
+		if (data.user === get(stLoggedUser).uuid) {
+			channels[data.channel].banned_users = [];
+			channels[data.channel].muted_users = [];
+		}
+		channels[data.channel].moderators = channels[data.channel].moderators.filter((usr) => usr !== data.user);
 		return channels;
 	});
 }
@@ -606,7 +716,7 @@ async function wsChatLeave(data: WsChatLeave) {
 			channels[data.channel].joined = false;
 		}
 		channels[data.channel].users = channels[data.channel].users.filter(
-			(user) => user.uuid != data.user
+			(user) => user.uuid !== data.user
 		);
 		return channels;
 	});
@@ -615,6 +725,38 @@ async function wsChatLeave(data: WsChatLeave) {
 async function wsChatRemove(data: WsChatRemove) {
 	stChannels.update((channels) => {
 		delete channels[data.channel];
+		return channels;
+	});
+}
+
+async function wsChatBan(data: WsChatBan) {
+	const info = await api.getUserData(data.user);
+	if (info === null || info === APIStatus.NoResponse) {
+		return;
+	}
+	stChannels.update((channels) => {
+		if (!channels[data.channel].banned_users.map((u) => u.user.uuid).includes(data.user)) {
+			channels[data.channel].banned_users.push({
+				expiration: new Date(data.expiration),
+				user: {
+					uuid: data.user,
+					name: info.username,
+					id: parseInt(info.identifier),
+					avatar: info.avatar,
+					is_moderator: false,
+					is_administrator: false
+				}
+			});
+			return channels;
+		}
+	});
+}
+
+async function wsChatUnban(data: WsChatUnban) {
+	stChannels.update((channels) => {
+		channels[data.channel].banned_users = channels[data.channel].banned_users.filter((banned) => {
+			banned.user.uuid !== data.user;
+		});
 		return channels;
 	});
 }
@@ -685,7 +827,7 @@ export const api = {
 			"/messages" +
 			"?page=" +
 			page +
-			"&limit=10",
+			"&limit=" + chatPageSize,
 			"GET"
 		);
 	},
@@ -751,6 +893,11 @@ export const api = {
 			}
 		);
 	},
+	deleteChannel: async (channel: string) => {
+		return makeRequest("/api/chats/channels/" + channel, "DELETE", {
+			action: "REMOVE"
+		});
+	},
 	leaveChannel: async (uuid: string) => {
 		return makeRequest("/api/chats/channels/" + uuid, "DELETE", {
 			action: "LEAVE",
@@ -775,25 +922,31 @@ export const api = {
 			user_uuid: user,
 		});
 	},
+	getBlacklist: async (channel: string) => {
+		return makeRequest<APIBlacklist>("api/chats/channels/" + channel + "/blacklist", "GET");
+	},
 	banUserFromChannel: async (
 		user: string,
 		channel: string,
 		duration: number
 	) => {
-		const ts = new Date().getSeconds() + duration;
-		const expirationDate = new Date(ts * 1000);
-		/* Todo: bad design from the backend */
-		return makeRequest("/api/chats/channels/" + channel, "PUT", {
-			action: "BAN",
+		return makeRequest("/api/chats/channels/" + channel + "/ban", "PUT", {
 			user_uuid: user,
-			expiration: 0,
+			expiration: duration,
+		});
+	},
+	unbanUserFromChannel: async (
+		user: string,
+		channel: string
+	) => {
+		return makeRequest("/api/chats/channels/" + channel + "/unban", "DELETE", {
+			user_uuid: user,
 		});
 	},
 	setChannelPassword: async (channel: string, password?: string) => {
 		if (password === undefined) {
 			password = null;
 		}
-		console.log(password);
 		return makeRequest("/api/chats/channels/" + channel, "PATCH", {
 			password,
 		});
@@ -839,6 +992,9 @@ export const api = {
 					console.log(
 						"Could not connect to WebSocket. Retrying in 2 seconds"
 					);
+					ws.onerror = undefined;
+					ws.onopen = undefined;
+					ws.onclose = undefined;
 					stWebsocket.set(null);
 					api.ws.connect();
 				};
@@ -848,9 +1004,12 @@ export const api = {
 				};
 
 				ws.onclose = () => {
-					/*console.log("Websocket got closed");
+					console.log("Websocket got closed");
+					ws.onerror = undefined;
+					ws.onopen = undefined;
+					ws.onclose = undefined;
 					stWebsocket.set(null);
-					api.ws.connect();*/
+					api.ws.connect();
 				};
 
 				ws.onmessage = async (message) => {
