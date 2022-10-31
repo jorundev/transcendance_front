@@ -3,9 +3,23 @@
 	import { onMount } from "svelte";
 	import { push, replace } from "svelte-spa-router";
 
-	onMount(() => {
+	let availableConnexionMethods: Array<string> = [];
+
+	function isError(obj: Response | string): obj is string {
+		return obj === "error";
+	}
+
+	onMount(async () => {
 		if ($stLoggedUser != null) {
 			replace("/");
+			return;
+		}
+
+		const res = await fetch("/api/auth/available").catch(() => {
+			return "error";
+		});
+		if (!isError(res)) {
+			availableConnexionMethods = await res.json();
 		}
 	});
 </script>
@@ -14,39 +28,58 @@
 	<div class="sub">
 		<h1>Hello.</h1>
 		<div class="login-squares">
-			<div
-				class="login-square blue"
-				on:click={() => {
-					window.location.href = "/api/auth/oauth2/42";
-				}}
-			>
-				<div class="spinning">
-					<div class="inner logo42" />
+			{#if availableConnexionMethods.includes("Intra42")}
+				<div
+					class="login-square blue"
+					on:click={() => {
+						window.location.href = "/api/auth/oauth2/42";
+					}}
+				>
+					<div class="spinning">
+						<div class="inner logo42" />
+					</div>
+					<div class="text">Log in with <b>42</b></div>
 				</div>
-				<div class="text">Log in with <b>42</b></div>
-			</div>
-			<div
-				class="login-square discordblue"
-				on:click={() => {
-					window.location.href = "/api/auth/oauth2/discord";
-				}}
-			>
-				<div class="spinning">
-					<div class="inner logodiscord" />
+			{/if}
+			{#if availableConnexionMethods.includes("Discord")}
+				<div
+					class="login-square discordblue"
+					on:click={() => {
+						window.location.href = "/api/auth/oauth2/discord";
+					}}
+				>
+					<div class="spinning">
+						<div class="inner logodiscord" />
+					</div>
+					<div class="text">Log in with <b>Discord</b></div>
 				</div>
-				<div class="text">Log in with <b>Discord</b></div>
-			</div>
-			<div
-				class="login-square red"
-				on:click={() => {
-					push("/login/email");
-				}}
-			>
-				<div class="spinning">
-					<div class="inner logoemail" />
+			{/if}
+			{#if availableConnexionMethods.includes("Twitter")}
+				<div
+					class="login-square twitterblue"
+					on:click={() => {
+						window.location.href = "/api/auth/oauth2/twitter";
+					}}
+				>
+					<div class="spinning">
+						<div class="inner logotwitter" />
+					</div>
+					<div class="text">Log in with <b>Twitter</b></div>
 				</div>
-				<div class="text">Log in with <b>e-mail</b></div>
-			</div>
+			{/if}
+			{#if availableConnexionMethods.includes("Email")}
+				<div
+					class="login-square red"
+					on:click={() => {
+						push("/login/email");
+					}}
+				>
+					<div class="spinning">
+						<div class="inner logoemail" />
+					</div>
+					<div class="text">Log in with <b>e-mail</b></div>
+				</div>
+			{/if}
 		</div>
 	</div>
 </div>
@@ -103,6 +136,11 @@
 			background: rgb(104, 118, 228);
 		}
 
+		&.twitterblue {
+			letter-spacing: -0.2px;
+			background: rgb(79, 171, 241);
+		}
+
 		@keyframes spinning {
 			from {
 				transform: translateY(-10px);
@@ -137,15 +175,19 @@
 				background-size: 100%;
 
 				&.logo42 {
-					background-image: url("/img/42.png");
+					background-image: url("/img/oauth/42.png");
 				}
 
 				&.logoemail {
-					background-image: url("/img/mail.png");
+					background-image: url("/img/oauth/mail.png");
 				}
 
 				&.logodiscord {
-					background-image: url("/img/discord.svg");
+					background-image: url("/img/oauth/discord.svg");
+				}
+
+				&.logotwitter {
+					background-image: url("/img/oauth/twitter.svg");
 				}
 			}
 		}

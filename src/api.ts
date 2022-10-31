@@ -579,9 +579,12 @@ async function wsChatPromote(data: WsChatPromote) {
 		}
 	}
 	stChannels.update((channels) => {
-		channels[data.channel].users.find(
+		const user = channels[data.channel].users.find(
 			(usr) => usr.uuid == data.user
-		).is_moderator = true;
+		);
+		if (user !== undefined) {
+			user.is_moderator = true;
+		}
 		channels[data.channel].banned_users = banned_users;
 		channels[data.channel].muted_users = muted_users;
 		if (!channels[data.channel].moderators.includes(data.user)) {

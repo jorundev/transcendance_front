@@ -21,7 +21,7 @@
 <svelte:head>
 	<title>Home - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
-<SideBar active="home"/>
+<SideBar active="home" />
 <div class="home">
 	<div class="column">
 		<Card>
@@ -174,7 +174,7 @@
 		flex-shrink: 0;
 	}
 
-	@media screen and (max-width: 800px) {
+	@media screen and (max-width: 799px) {
 		.column {
 			width: 100%;
 			padding: 16px;

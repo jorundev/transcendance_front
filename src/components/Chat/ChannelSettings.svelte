@@ -14,6 +14,12 @@
 	let require_password = channel.has_password;
 	let password: string = "";
 
+	let blacklisted_users = [];
+
+	$: blacklisted_users = [
+		...new Set([...channel.banned_users, ...channel.muted_users]),
+	];
+
 	$: if (!require_password) password = "";
 
 	let dispatch = createEventDispatcher();
@@ -67,20 +73,39 @@
 								is_in_channel={channel.users
 									.map((u) => u.uuid)
 									.includes(user.uuid)}
+								{is_moderator}
+								{is_administrator}
 							/>
 						{/each}
 					</div>
-					<div class="members">
-						<div class="category-name">Blacklist</div>
-						{#each channel.banned_users as banned}
-							<ChannelSettingsProfile
-								user={banned.user}
-								is_in_channel={channel.users
-									.map((u) => u.uuid)
-									.includes(banned.user.uuid)}
-							/>
-						{/each}
-					</div>
+					{#if is_moderator || is_administrator}
+						<div class="members">
+							<div class="category-name">Blacklist</div>
+							{#if blacklisted_users?.length > 0}
+								{#each channel.banned_users as blacklisted}
+									<ChannelSettingsProfile
+										user={blacklisted.user}
+										blacklist
+										is_in_channel={channel.users
+											.map((u) => u.uuid)
+											.includes(blacklisted.user.uuid)}
+										{is_moderator}
+										{is_administrator}
+										banned={channel.banned_users
+											.map((u) => u.user.uuid)
+											.includes(blacklisted.user.uuid)}
+										muted={channel.muted_users
+											.map((u) => u.user.uuid)
+											.includes(blacklisted.user.uuid)}
+									/>
+								{/each}
+							{:else}
+								<div class="no-blacklist">
+									No users were banned or muted
+								</div>
+							{/if}
+						</div>
+					{/if}
 				</div>
 			</div>
 			<div class="category">
@@ -171,7 +196,20 @@
 		margin-bottom: 16px;
 	}
 
+	.no-blacklist {
+		font-size: 14px;
+		width: 220px;
+		padding: 10px;
+		display: grid;
+		place-items: center;
+		height: 100%;
+		background: rgb(18, 18, 18);
+		border-radius: 18px;
+	}
+
 	.members {
+		width: 100%;
+		max-width: 340px;
 		max-height: 500px;
 		display: flex;
 		flex-direction: column;
@@ -190,6 +228,8 @@
 	.member-lists {
 		display: flex;
 		gap: 10px;
+		flex-wrap: wrap;
+		justify-content: center;
 	}
 
 	input[type="password"] {

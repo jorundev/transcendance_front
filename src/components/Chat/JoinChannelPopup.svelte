@@ -6,6 +6,7 @@
 	import type { Channel } from "../../channels";
 	import ClickOutside from "svelte-click-outside";
 	import { stChannels } from "../../stores";
+	import { padIdentifier } from "../../utils";
 
 	export let channel: Channel;
 
@@ -13,6 +14,9 @@
 	let password: string;
 
 	let error = "";
+
+	let channelID = "";
+	$: channelID = padIdentifier(channel.id);
 
 	let canClickOutside = false;
 
@@ -59,8 +63,7 @@
 			<div class="join">
 				{#if channel}
 					<p class="title">
-						Join channel {channel.name}<b class="id"
-							>#{channel.id}</b
+						Join channel {channel.name}<b class="id">#{channelID}</b
 						>
 						?
 					</p>
