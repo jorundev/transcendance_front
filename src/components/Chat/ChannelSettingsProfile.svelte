@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { padIdentifier } from "../../utils";
-	import { getUserProfilePictureLink } from "../../api";
+	import { api, getUserProfilePictureLink } from "../../api";
 	import HoverableTooltip from "../Kit/HoverableTooltip.svelte";
+	import Button from "../Kit/Button.svelte";
+	import ClickOutside from "svelte-click-outside";
+	import { stLoggedUser } from "../../stores";
 
 	export let user: {
 		uuid: string;
@@ -11,6 +14,8 @@
 		is_moderator: boolean;
 		is_administrator: boolean;
 	};
+
+	export let channel: string;
 
 	export let blacklist = false;
 
@@ -27,6 +32,8 @@
 	// true if the logged user is the administrator of the channel
 	export let is_administrator: boolean;
 
+	let drawer = false;
+
 	let grade = "";
 
 	$: {
@@ -37,51 +44,102 @@
 		}
 	}
 
+	function onClick() {
+		if (user.uuid === $stLoggedUser.uuid) {
+			return;
+		}
+		drawer = !drawer;
+	}
+
 	let innerWidth;
+
+	function kick() {
+		api.kickFromChannel(user.uuid, channel);
+	}
+
+	function unban() {
+		api.unbanUserFromChannel(user.uuid, channel);
+	}
 </script>
 
 <svelte:window bind:innerWidth />
-<div class="profile">
-	<div
-		class="profile-picture"
-		style={"background-image: url('" +
-			getUserProfilePictureLink(user.uuid) +
-			"')"}
-	/>
-	<div class="name">
-		{user.name}<span class="gray">#{fullID}</span>
-	</div>
-	<HoverableTooltip tooltip={grade}>
-		<div
-			class="star"
-			class:moderator={user.is_moderator}
-			class:administrator={user.is_administrator}
-		/>
-	</HoverableTooltip>
-	{#if is_moderator || is_administrator}
-		<div class="actions">
-			<HoverableTooltip tooltip="Kick">
-				<div class="star kick" class:active={is_in_channel} />
-			</HoverableTooltip>
-			<HoverableTooltip tooltip={banned ? "Ban" : "Unban"}>
-				<div class="star ban" class:positive={banned} />
-			</HoverableTooltip>
-			<HoverableTooltip tooltip={muted ? "Mute" : "Unmute"}>
-				<div class="star mute" class:positive={banned} />
-			</HoverableTooltip>
+<ClickOutside
+	on:clickoutside={() => {
+		drawer = false;
+	}}
+>
+	<div class="a">
+		<div class="profile" on:click|preventDefault={onClick}>
+			<div class="info">
+				<div
+					class="profile-picture"
+					style={"background-image: url('" +
+						getUserProfilePictureLink(user.uuid) +
+						"')"}
+				/>
+				<div class="name">
+					{user.name}<span class="gray">#{fullID}</span>
+				</div>
+				<HoverableTooltip tooltip={grade}>
+					<div
+						class="star"
+						class:moderator={user.is_moderator}
+						class:administrator={user.is_administrator}
+					/>
+				</HoverableTooltip>
+			</div>
 		</div>
-	{/if}
-</div>
+		{#if (is_moderator || is_administrator) && drawer}
+			<div class="actions" class:active={drawer}>
+				<div class="inner">
+					<Button
+						active={is_in_channel}
+						timeout={1000}
+						timeoutVisible
+						padding={"8px"}
+						on:click={kick}
+						red>Kick</Button
+					>
+					{#if banned}
+						<Button
+							padding={"8px"}
+							timeout={1000}
+							timeoutVisible
+							on:click={unban}>Unban</Button
+						>{:else}
+						<Button
+							padding={"8px"}
+							timeout={1000}
+							timeoutVisible
+							red>Ban</Button
+						>
+					{/if}
+
+					<Button timeout={1000} timeoutVisible padding={"8px"} red
+						>Mute</Button
+					>
+				</div>
+			</div>
+		{/if}
+	</div>
+</ClickOutside>
 
 <style lang="scss">
 	.profile {
+		user-select: none;
+		-webkit-user-select: none;
 		display: flex;
-		justify-content: space-between;
-		height: 70px;
+		flex-direction: column;
 		flex-shrink: 0;
 
-		align-items: center;
-		gap: 10px;
+		.info {
+			display: flex;
+			justify-content: space-between;
+			height: 60px;
+			align-items: center;
+			gap: 10px;
+		}
+
 		background: rgb(18, 18, 18);
 		border-radius: 18px;
 		padding-left: 30px;
@@ -109,27 +167,53 @@
 				margin-right: 20px;
 				background-image: url("/img/star.png");
 			}
-			&.kick {
-				background-image: url("/img/kick.png");
-				cursor: pointer;
-			}
-			&.ban {
-				background-image: url("/img/ban.png");
-				cursor: pointer;
-			}
-			&.mute {
-				background-image: url("/img/mute.png");
-				cursor: pointer;
-			}
+		}
+	}
+
+	@keyframes fadein {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
 		}
 	}
 
 	.actions {
 		display: flex;
-		gap: 10px;
+		width: 100%;
+		height: 100%;
+		position: absolute;
+		align-items: center;
+		top: 0;
+		animation: fadein 0.1s ease-in-out;
+
+		opacity: 1;
+
+		.inner {
+			display: none;
+			gap: 10px;
+			margin-left: 20px;
+			margin-right: 20px;
+			content: "";
+			width: 100%;
+			height: 40px;
+			background: rgba(0, 0, 0, 0.566);
+			border-radius: 20px;
+		}
+
+		&.active {
+			.inner {
+				display: flex;
+			}
+		}
 	}
 
 	.gray {
 		color: rgb(99, 99, 99);
+	}
+
+	.a {
+		position: relative;
 	}
 </style>

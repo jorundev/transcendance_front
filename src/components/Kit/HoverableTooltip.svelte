@@ -43,6 +43,8 @@
 		margin: 0;
 		&.selected::after {
 			content: attr(data-id);
+			display: inline-block;
+			z-index: 100;
 			user-select: none;
 			-webkit-user-select: none;
 			font-size: 12px;

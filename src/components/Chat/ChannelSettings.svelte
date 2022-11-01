@@ -60,122 +60,133 @@
 		if (canClickOutside) dispatch("back");
 	}}
 >
-	<Card>
-		<div class="settings">
-			<div class="title">Settings for {channel.name}</div>
-			<div class="category">
-				<div class="member-lists">
-					<div class="members">
-						<div class="category-name">Members</div>
-						{#each channel.users as user}
-							<ChannelSettingsProfile
-								{user}
-								is_in_channel={channel.users
-									.map((u) => u.uuid)
-									.includes(user.uuid)}
-								{is_moderator}
-								{is_administrator}
-							/>
-						{/each}
-					</div>
-					{#if is_moderator || is_administrator}
+	<div class="card">
+		<Card>
+			<div class="settings">
+				<div class="title">Settings for {channel.name}</div>
+				<div class="category">
+					<div class="member-lists">
 						<div class="members">
-							<div class="category-name">Blacklist</div>
-							{#if blacklisted_users?.length > 0}
-								{#each channel.banned_users as blacklisted}
-									<ChannelSettingsProfile
-										user={blacklisted.user}
-										blacklist
-										is_in_channel={channel.users
-											.map((u) => u.uuid)
-											.includes(blacklisted.user.uuid)}
-										{is_moderator}
-										{is_administrator}
-										banned={channel.banned_users
-											.map((u) => u.user.uuid)
-											.includes(blacklisted.user.uuid)}
-										muted={channel.muted_users
-											.map((u) => u.user.uuid)
-											.includes(blacklisted.user.uuid)}
-									/>
-								{/each}
-							{:else}
-								<div class="no-blacklist">
-									No users were banned or muted
-								</div>
-							{/if}
+							<div class="category-name">Members</div>
+							{#each channel.users as user}
+								<ChannelSettingsProfile
+									{user}
+									channel={channel.uuid}
+									is_in_channel={channel.users
+										.map((u) => u.uuid)
+										.includes(user.uuid)}
+									{is_moderator}
+									{is_administrator}
+								/>
+							{/each}
 						</div>
-					{/if}
-				</div>
-			</div>
-			<div class="category">
-				<div class="category-name">General</div>
-				<Button
-					red
-					timeoutVisible
-					timeout={2000}
-					on:click={async () => {
-						await api.leaveChannel(channel.uuid);
-						if (channel.type === ChannelType.Private) {
-							stChannels.update((channels) => {
-								delete channels[channel.uuid];
-								return channels;
-							});
-						}
-						if (window.innerWidth <= 800) {
-							pop();
-							return;
-						}
-						dispatch("back");
-					}}
-				>
-					{#if channel.users.length == 1}
-						Leave and destroy channel
-					{:else}
-						Leave channel
-					{/if}
-				</Button>
-			</div>
-			{#if is_administrator}
-				<div class="category">
-					<div class="category-name">Password</div>
-					<div class="require-password">
-						<input
-							bind:checked={require_password}
-							type="checkbox"
-							disabled={channel.type === ChannelType.Private}
-						/>
-						<label for="checkbox">Require password</label>
+						{#if is_moderator || is_administrator}
+							<div class="members">
+								<div class="category-name">Blacklist</div>
+								{#if blacklisted_users?.length > 0}
+									{#each channel.banned_users as blacklisted}
+										<ChannelSettingsProfile
+											user={blacklisted.user}
+											blacklist
+											channel={channel.uuid}
+											is_in_channel={channel.users
+												.map((u) => u.uuid)
+												.includes(
+													blacklisted.user.uuid
+												)}
+											{is_moderator}
+											{is_administrator}
+											banned={channel.banned_users
+												.map((u) => u.user.uuid)
+												.includes(
+													blacklisted.user.uuid
+												)}
+											muted={channel.muted_users
+												.map((u) => u.user.uuid)
+												.includes(
+													blacklisted.user.uuid
+												)}
+										/>
+									{/each}
+								{:else}
+									<div class="no-blacklist">
+										No users were banned or muted
+									</div>
+								{/if}
+							</div>
+						{/if}
 					</div>
-					<input
-						bind:value={password}
-						type="password"
-						disabled={!require_password}
-						placeholder="Channel password"
-					/>
-					{#if password?.length != 0 || (!require_password && channel.has_password)}
-						<Button on:click={changePassword}
-							>Change password</Button
-						>
-					{/if}
 				</div>
 				<div class="category">
-					<div class="category-name">Administrator</div>
+					<div class="category-name">General</div>
 					<Button
 						red
 						timeoutVisible
 						timeout={2000}
-						on:click={destroyChannel}>{destroyChannelText}</Button
+						on:click={async () => {
+							await api.leaveChannel(channel.uuid);
+							if (channel.type === ChannelType.Private) {
+								stChannels.update((channels) => {
+									delete channels[channel.uuid];
+									return channels;
+								});
+							}
+							if (window.innerWidth <= 800) {
+								pop();
+								return;
+							}
+							dispatch("back");
+						}}
 					>
+						{#if channel.users.length == 1}
+							Leave and destroy channel
+						{:else}
+							Leave channel
+						{/if}
+					</Button>
 				</div>
-			{/if}
-			<Button
-				on:click={() => {
-					dispatch("back");
-				}}>Back</Button
-			>
-		</div>
-	</Card>
+				{#if is_administrator}
+					<div class="category">
+						<div class="category-name">Password</div>
+						<div class="require-password">
+							<input
+								bind:checked={require_password}
+								type="checkbox"
+								disabled={channel.type === ChannelType.Private}
+							/>
+							<label for="checkbox">Require password</label>
+						</div>
+						<input
+							bind:value={password}
+							type="password"
+							disabled={!require_password}
+							placeholder="Channel password"
+						/>
+						{#if password?.length != 0 || (!require_password && channel.has_password)}
+							<Button on:click={changePassword}
+								>Change password</Button
+							>
+						{/if}
+					</div>
+					<div class="category">
+						<div class="category-name">Administrator</div>
+						<Button
+							red
+							timeoutVisible
+							timeout={2000}
+							on:click={destroyChannel}
+							>{destroyChannelText}</Button
+						>
+					</div>
+				{/if}
+				<Button
+					on:click={() => {
+						dispatch("back");
+					}}>Back</Button
+				>
+			</div>
+		</Card>
+	</div>
 </ClickOutside>
 
 <style lang="scss">
@@ -192,29 +203,34 @@
 	.category {
 		display: flex;
 		flex-direction: column;
+		justify-content: left;
 		gap: 10px;
 		margin-bottom: 16px;
 	}
 
 	.no-blacklist {
 		font-size: 14px;
-		width: 220px;
+		min-height: 60px;
+		width: 100%;
 		padding: 10px;
+		padding-left: 20px;
+		padding-right: 20px;
 		display: grid;
 		place-items: center;
 		height: 100%;
 		background: rgb(18, 18, 18);
 		border-radius: 18px;
+		box-sizing: border-box;
 	}
 
 	.members {
-		width: 100%;
-		max-width: 340px;
+		width: auto;
+		flex-shrink: 0;
+		flex-grow: 1;
 		max-height: 500px;
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
-		overflow-y: auto;
 
 		@media screen and (max-height: 800px) {
 			max-height: 300px;
@@ -223,6 +239,10 @@
 		@media screen and (max-height: 600px) {
 			max-height: 100px;
 		}
+	}
+
+	.card {
+		margin: 20px;
 	}
 
 	.member-lists {

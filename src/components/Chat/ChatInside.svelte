@@ -505,6 +505,7 @@
 		background: rgba(0, 0, 0, 0.679);
 		padding-bottom: 4px;
 		padding-top: 4px;
+		transform: translateX(-16px);
 	}
 
 	.settings-button {

@@ -5,6 +5,7 @@
 	export let active: boolean = true;
 	export let red = false;
 	export let highlight = true;
+	export let padding = "12px";
 
 	export let timeout = 0;
 	export let timeoutVisible = true;
@@ -25,6 +26,7 @@
 </script>
 
 <button
+	style="padding: {padding};"
 	class:active
 	class:red
 	class:timeout={!canClick && timeoutVisible}
@@ -40,13 +42,16 @@
 
 <style lang="scss">
 	button {
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		font-size: 16px;
 		width: 100%;
 		color: #868686;
 		background: #4b4b4b;
 		border: none;
 		border-radius: 12px;
-		padding: 12px;
+
 		margin-left: auto;
 		margin-right: auto;
 

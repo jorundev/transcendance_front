@@ -180,7 +180,7 @@ async function makeRequest<T>(
 		switch (response.status) {
 			// TODO: 500
 			case 502:
-				console.error("A terrible error happened: ", response);
+				// console.error("A terrible error happened: ", response);
 				stServerDown.set(true);
 				return APIStatus.NoResponse;
 			case 200:
