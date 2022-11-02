@@ -21,10 +21,12 @@ import {
 	type WsChatDemote,
 	type WsChatJoin,
 	type WsChatLeave,
+	type WsChatMute,
 	type WsChatPromote,
 	type WsChatRemove,
 	type WsChatSend,
 	type WsChatUnban,
+	type WsChatUnmute,
 	type WsUser,
 } from "./websocket/types";
 
@@ -526,6 +528,12 @@ async function wsChatMessage(data: WsChat) {
 		case ChatAction.Unban:
 			wsChatUnban(data as WsChatUnban);
 			break;
+		case ChatAction.Mute:
+			wsChatMute(data as WsChatMute);
+			break;
+		case ChatAction.Unmute:
+			wsChatUnmute(data as WsChatUnmute);
+			break;
 	}
 }
 
@@ -755,10 +763,42 @@ async function wsChatBan(data: WsChatBan) {
 	});
 }
 
+async function wsChatMute(data: WsChatMute) {
+	const info = await api.getUserData(data.user);
+	if (info === null || info === APIStatus.NoResponse) {
+		return;
+	}
+	stChannels.update((channels) => {
+		if (!channels[data.channel].muted_users.map((u) => u.user.uuid).includes(data.user)) {
+			channels[data.channel].muted_users.push({
+				expiration: new Date(data.expiration),
+				user: {
+					uuid: data.user,
+					name: info.username,
+					id: parseInt(info.identifier),
+					avatar: info.avatar,
+					is_moderator: false,
+					is_administrator: false
+				}
+			});
+			return channels;
+		}
+	});
+}
+
 async function wsChatUnban(data: WsChatUnban) {
 	stChannels.update((channels) => {
 		channels[data.channel].banned_users = channels[data.channel].banned_users.filter((banned) => {
 			banned.user.uuid !== data.user;
+		});
+		return channels;
+	});
+}
+
+async function wsChatUnmute(data: WsChatUnmute) {
+	stChannels.update((channels) => {
+		channels[data.channel].muted_users = channels[data.channel].muted_users.filter((muted) => {
+			muted.user.uuid !== data.user;
 		});
 		return channels;
 	});
@@ -859,7 +899,7 @@ export const api = {
 	},
 	sendMessage: async (channel: string, message: string) => {
 		try {
-			await makeRequest(
+			return await makeRequest<APIResponse>(
 				"/api/chats/channels/" + channel + "/messages",
 				"POST",
 				{ message }
@@ -938,11 +978,29 @@ export const api = {
 			expiration: duration,
 		});
 	},
+	muteUserFromChannel: async (
+		user: string,
+		channel: string,
+		duration: number
+	) => {
+		return makeRequest("/api/chats/channels/" + channel + "/mute", "PUT", {
+			user_uuid: user,
+			expiration: duration,
+		});
+	},
 	unbanUserFromChannel: async (
 		user: string,
 		channel: string
 	) => {
 		return makeRequest("/api/chats/channels/" + channel + "/unban", "DELETE", {
+			user_uuid: user,
+		});
+	},
+	unmuteUserFromChannel: async (
+		user: string,
+		channel: string
+	) => {
+		return makeRequest("/api/chats/channels/" + channel + "/unmute", "DELETE", {
 			user_uuid: user,
 		});
 	},

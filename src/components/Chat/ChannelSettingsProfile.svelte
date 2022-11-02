@@ -5,6 +5,7 @@
 	import Button from "../Kit/Button.svelte";
 	import ClickOutside from "svelte-click-outside";
 	import { stLoggedUser } from "../../stores";
+	import { createEventDispatcher } from "svelte";
 
 	export let user: {
 		uuid: string;
@@ -20,6 +21,8 @@
 	export let blacklist = false;
 
 	export let is_in_channel: boolean;
+
+	let dispatch = createEventDispatcher();
 
 	let fullId = "";
 	$: fullID = padIdentifier(user.id);
@@ -59,6 +62,10 @@
 
 	function unban() {
 		api.unbanUserFromChannel(user.uuid, channel);
+	}
+
+	function unmute() {
+		api.unmuteUserFromChannel(user.uuid, channel);
 	}
 </script>
 
@@ -108,16 +115,30 @@
 							on:click={unban}>Unban</Button
 						>{:else}
 						<Button
+							on:click={() =>
+								dispatch("ban", { uuid: user.uuid })}
 							padding={"8px"}
 							timeout={1000}
 							timeoutVisible
 							red>Ban</Button
 						>
 					{/if}
-
-					<Button timeout={1000} timeoutVisible padding={"8px"} red
-						>Mute</Button
-					>
+					{#if muted}
+						<Button
+							padding={"8px"}
+							timeout={1000}
+							timeoutVisible
+							on:click={unmute}>Unmute</Button
+						>{:else}
+						<Button
+							on:click={() =>
+								dispatch("mute", { uuid: user.uuid })}
+							padding={"8px"}
+							timeout={1000}
+							timeoutVisible
+							red>Mute</Button
+						>
+					{/if}
 				</div>
 			</div>
 		{/if}
@@ -192,9 +213,9 @@
 
 		.inner {
 			display: none;
+			justify-content: center;
+			margin: 10px;
 			gap: 10px;
-			margin-left: 20px;
-			margin-right: 20px;
 			content: "";
 			width: 100%;
 			height: 40px;

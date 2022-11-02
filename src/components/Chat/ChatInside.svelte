@@ -29,6 +29,10 @@
 	export let render: boolean = true;
 	export let desktop = false;
 
+	let showMutedInfo = false;
+
+	let backToSettings = false;
+
 	let innerWidth = 0;
 	let oldInnerWidth = 0;
 
@@ -228,25 +232,35 @@
 		}
 	}
 
-	function sendMessage() {
+	async function sendMessage() {
 		const value = textArea.value.trim();
 		textArea.value = "";
 		if (value == "") {
 			return;
 		}
 
-		messages.push({
-			sender: $stLoggedUser?.uuid,
-			value,
-			date: "Sending...",
-			confirmed: false,
-			username: "You",
-			id: last_message_id + last_message_id_offset,
-		});
+		// messages.push({
+		// 	sender: $stLoggedUser?.uuid,
+		// 	value,
+		// 	date: "Sending...",
+		// 	confirmed: false,
+		// 	username: "You",
+		// 	id: last_message_id + last_message_id_offset,
+		// });
 
-		last_message_id_offset += 1;
+		// last_message_id_offset += 1;
 
-		api.sendMessage(info.uuid, value);
+		const resp = await api.sendMessage(info.uuid, value);
+
+		if (resp !== null && resp !== APIStatus.NoResponse) {
+			if (resp.statusCode === 403) {
+				showMutedInfo = true;
+				setTimeout(() => {
+					showMutedInfo = false;
+				}, 1000);
+				return;
+			}
+		}
 
 		updateMessages();
 	}
@@ -284,16 +298,58 @@
 						<ChannelSettings
 							channel={info}
 							on:back={() => {
+								backToSettings = false;
 								show_channel_settings_modal = false;
+							}}
+							on:ban={(ev) => {
+								backToSettings = true;
+								show_channel_settings_modal = false;
+								selectedUser = ev.detail.uuid;
+								muteban_mode = "ban";
+								show_muteban_modal = true;
+							}}
+							on:mute={(ev) => {
+								backToSettings = true;
+								show_channel_settings_modal = false;
+								selectedUser = ev.detail.uuid;
+								muteban_mode = "mute";
+								show_muteban_modal = true;
 							}}
 						/>
 					</div>
 				</Modal>
 			{:else if show_muteban_modal}
 				<MuteBanModal
-					on:back={() => (show_muteban_modal = false)}
-					on:ban={() => (show_muteban_modal = false)}
-					on:unban={() => (show_muteban_modal = false)}
+					on:back={() => {
+						show_muteban_modal = false;
+						if (backToSettings) {
+							show_channel_settings_modal = true;
+						}
+					}}
+					on:ban={() => {
+						show_muteban_modal = false;
+						if (backToSettings) {
+							show_channel_settings_modal = true;
+						}
+					}}
+					on:unban={() => {
+						show_muteban_modal = false;
+						if (backToSettings) {
+							show_channel_settings_modal = true;
+						}
+					}}
+					on:mute={() => {
+						show_muteban_modal = false;
+						if (backToSettings) {
+							show_channel_settings_modal = true;
+						}
+					}}
+					on:unmute={() => {
+						show_muteban_modal = false;
+						if (backToSettings) {
+							show_channel_settings_modal = true;
+						}
+					}}
 					userUUID={selectedUser}
 					channel={info}
 					mode={muteban_mode}
@@ -339,6 +395,17 @@
 									info.uuid
 								);
 							}}
+							on:mute={(ev) => {
+								selectedUser = ev.detail.uuid;
+								muteban_mode = "mute";
+								show_muteban_modal = true;
+							}}
+							on:unmute={(ev) => {
+								api.unmuteUserFromChannel(
+									ev.detail.uuid,
+									info.uuid
+								);
+							}}
 							side={set.side}
 							messages={set.messages}
 							channel={params.uuid}
@@ -352,6 +419,7 @@
 			</div>
 			<div
 				class="response-bar"
+				class:muted={showMutedInfo}
 				style="height: {text_area_height}"
 				class:mobile={!desktop}
 			>
@@ -434,6 +502,17 @@
 			&.mobile {
 				padding-left: 68px;
 			}
+		}
+
+		&.muted::after {
+			display: grid;
+			place-items: center;
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			background: black;
+			color: red;
+			content: "Error: You got muted from this channel";
 		}
 	}
 

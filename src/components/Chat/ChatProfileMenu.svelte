@@ -43,9 +43,21 @@
 		<div class="entry">Invite to casual game</div>
 		{#if (administrator || moderator) && !user?.is_administrator}
 			<div class="title noselect">Moderator options</div>
-			<div class="entry red" on:click={() => dispatch("mute", { uuid })}>
-				Mute
-			</div>
+			{#if muted}
+				<div
+					class="entry red"
+					on:click={() => dispatch("unmute", { uuid })}
+				>
+					Unmute
+				</div>
+			{:else}
+				<div
+					class="entry red"
+					on:click={() => dispatch("mute", { uuid })}
+				>
+					Mute
+				</div>
+			{/if}
 			<div
 				class="entry red"
 				class:disabled={!is_in_channel}

@@ -16,9 +16,18 @@
 
 	let blacklisted_users = [];
 
-	$: blacklisted_users = [
-		...new Set([...channel.banned_users, ...channel.muted_users]),
-	];
+	$: {
+		blacklisted_users = [...channel.banned_users];
+		for (const muted of channel.muted_users) {
+			if (
+				!blacklisted_users
+					.map((u) => u.user.uuid)
+					.includes(muted.user.uuid)
+			) {
+				blacklisted_users.push(muted);
+			}
+		}
+	}
 
 	$: if (!require_password) password = "";
 
@@ -77,6 +86,8 @@
 										.includes(user.uuid)}
 									{is_moderator}
 									{is_administrator}
+									on:ban
+									on:mute
 								/>
 							{/each}
 						</div>
@@ -84,7 +95,7 @@
 							<div class="members">
 								<div class="category-name">Blacklist</div>
 								{#if blacklisted_users?.length > 0}
-									{#each channel.banned_users as blacklisted}
+									{#each blacklisted_users as blacklisted}
 										<ChannelSettingsProfile
 											user={blacklisted.user}
 											blacklist
@@ -106,6 +117,8 @@
 												.includes(
 													blacklisted.user.uuid
 												)}
+											on:ban
+											on:mute
 										/>
 									{/each}
 								{:else}

@@ -83,6 +83,8 @@
 						}}
 						on:ban
 						on:unban
+						on:mute
+						on:unmute
 						is_in_channel={$stChannels[channel]?.users
 							.map((u) => u.uuid)
 							.includes(message.sender)}

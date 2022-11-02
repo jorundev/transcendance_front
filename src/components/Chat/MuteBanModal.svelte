@@ -31,11 +31,15 @@
 
 	let dispatch = createEventDispatcher();
 
-	function takeEffect() {
+	async function takeEffect() {
 		if (mode === "ban") {
-			api.banUserFromChannel(userUUID, channel.uuid, time);
+			await api.banUserFromChannel(userUUID, channel.uuid, time);
 			console.log("Banned user for " + time + " seconds");
 			dispatch("ban");
+		} else if (mode === "mute") {
+			await api.muteUserFromChannel(userUUID, channel.uuid, time);
+			console.log("Muted user for " + time + " seconds");
+			dispatch("mute");
 		}
 	}
 
