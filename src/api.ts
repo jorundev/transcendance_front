@@ -16,6 +16,7 @@ import {
 	UserAction,
 	WsNamespace,
 	type WsChat,
+	type WsChatAvatar,
 	type WsChatBan,
 	type WsChatDelete,
 	type WsChatDemote,
@@ -28,6 +29,7 @@ import {
 	type WsChatUnban,
 	type WsChatUnmute,
 	type WsUser,
+	type WsUserAvatar,
 } from "./websocket/types";
 
 export enum APIStatus {
@@ -275,6 +277,7 @@ export interface APIChannel {
 	users: Array<string>;
 	moderators: Array<string>;
 	administrator: string;
+	avatar: string;
 }
 
 export interface CreateChannelResponse extends APIResponse {
@@ -294,6 +297,10 @@ export interface ChannelMessagesResponse extends APIResponse {
 		message: string;
 		user: string;
 	}>;
+}
+
+export interface CreateDirectMessageResponse extends APIResponse {
+	uuid: string;
 }
 
 interface WebsocketMessage {
@@ -331,27 +338,22 @@ export async function getUsersFromUUIDs(channel: APIChannel): Promise<
 		users_promises.push(api.getUserData(user));
 	}
 	let i = 0;
-	Promise.all(users_promises)
-		.then((values) => {
-			for (const data of values) {
-				if (data == APIStatus.NoResponse) {
-					continue;
-				}
-				users.push({
-					name: data.username,
-					id: data.identifier,
-					avatar: data.avatar,
-					uuid: channel.users[i],
-					is_moderator: channel.moderators.includes(channel.users[i]),
-					is_administrator:
-						channel.administrator === channel.users[i],
-				});
-				i += 1;
-			}
-		})
-		.catch((e) => {
-			console.log("Critical Error: ", e);
+	const values = await Promise.all(users_promises);
+	for (const data of values) {
+		if (data == APIStatus.NoResponse) {
+			continue;
+		}
+		users.push({
+			name: data.username,
+			id: data.identifier,
+			avatar: data.avatar,
+			uuid: channel.users[i],
+			is_moderator: channel.moderators.includes(channel.users[i]),
+			is_administrator:
+				channel.administrator === channel.users[i],
 		});
+		i += 1;
+	}
 	return users;
 }
 
@@ -430,6 +432,10 @@ async function wsChatMessage(data: WsChat) {
 			page = Math.floor(page) + 1;
 		}
 
+		if (channel_data.moderators === undefined) {
+			channel_data.moderators = [];
+		}
+
 		const isModerator = channel_data.moderators.includes(get(stLoggedUser).uuid)
 			|| channel_data.administrator === get(stLoggedUser).uuid;
 
@@ -490,6 +496,7 @@ async function wsChatMessage(data: WsChat) {
 				administrator: channel_data.administrator,
 				banned_users,
 				muted_users,
+				avatar: channel_data.avatar,
 			};
 			return channels;
 		});
@@ -498,51 +505,45 @@ async function wsChatMessage(data: WsChat) {
 
 	switch (data.action) {
 		case ChatAction.Send:
-			wsChatSend(data as WsChatSend);
+			await wsChatSend(data as WsChatSend);
 		case ChatAction.Join:
-			wsChatJoin(data as WsChatJoin);
+			await wsChatJoin(data as WsChatJoin);
 			break;
 		case ChatAction.Create:
 			// This has already been done
 			break;
 		case ChatAction.Delete:
-			wsChatDelete(data as WsChatDelete);
+			await wsChatDelete(data as WsChatDelete);
 			break;
 		case ChatAction.Leave:
-			wsChatLeave(data as WsChatLeave);
+			await wsChatLeave(data as WsChatLeave);
 			break;
 		case ChatAction.Remove:
-			wsChatLeave(data as WsChatLeave);
-			wsChatRemove(data as WsChatRemove);
+			await wsChatLeave(data as WsChatLeave);
+			await wsChatRemove(data as WsChatRemove);
 			break;
 		case ChatAction.Promote:
-			wsChatPromote(data as WsChatPromote);
+			await wsChatPromote(data as WsChatPromote);
 			break;
 		case ChatAction.Demote:
-			wsChatDemote(data as WsChatDemote);
+			await wsChatDemote(data as WsChatDemote);
 			break;
 		case ChatAction.Ban:
-			wsChatLeave(data as WsChatLeave);
-			wsChatBan(data as WsChatBan);
+			await wsChatLeave(data as WsChatLeave);
+			await wsChatBan(data as WsChatBan);
 			break;
 		case ChatAction.Unban:
-			wsChatUnban(data as WsChatUnban);
+			await wsChatUnban(data as WsChatUnban);
 			break;
 		case ChatAction.Mute:
-			wsChatMute(data as WsChatMute);
+			await wsChatMute(data as WsChatMute);
 			break;
 		case ChatAction.Unmute:
-			wsChatUnmute(data as WsChatUnmute);
+			await wsChatUnmute(data as WsChatUnmute);
 			break;
-	}
-}
-
-async function wsUserMessage(data: WsUser) {
-	switch (data.action) {
-		case UserAction.Refresh:
-			if (!(await refreshToken())) {
-				api.logout();
-			}
+		case ChatAction.Avatar:
+			await wsChatAvatar(data as WsChatAvatar);
+			break;
 	}
 }
 
@@ -629,7 +630,6 @@ async function wsChatSend(data: WsChatSend) {
 }
 
 async function wsChatDelete(data: WsChatDelete) {
-	// TODO: This is O(log n) but could probably be faster
 	stChannels.update((channels) => {
 		channels[data.channel].reload = true;
 		for (const message of [
@@ -804,6 +804,37 @@ async function wsChatUnmute(data: WsChatUnmute) {
 	});
 }
 
+async function wsChatAvatar(data: WsChatAvatar) {
+	if (get(stChannels)[data.channel]) {
+		stChannels.update((channels) => {
+			channels[data.channel].avatar = data.avatar;
+			return channels;
+		});
+	}
+}
+
+async function wsUserMessage(data: WsUser) {
+	switch (data.action) {
+		case UserAction.Refresh:
+			if (!(await refreshToken())) {
+				api.logout();
+			}
+			break;
+		case UserAction.Avatar:
+			await wsUserAvatar(data as WsUserAvatar);
+			break;
+	}
+}
+
+async function wsUserAvatar(data: WsUserAvatar) {
+	if (get(stUsers)[data.user]) {
+		stUsers.update((users) => {
+			users[data.user].avatar = data.avatar;
+			return users;
+		});
+	}
+}
+
 export const api = {
 	whoami: async (): Promise<WhoAmIResponse | APIStatus.NoResponse | null> => {
 		const res = makeRequest<WhoAmIResponse>("/api/users/whoami", "GET");
@@ -845,6 +876,19 @@ export const api = {
 		let formData = new FormData();
 		formData.append("avatar", file);
 		const res = await makeRequest<ChangeAvatarResponse>("/api/users/avatar", "POST", formData, "");
+		await new Promise((resolve) => setTimeout(resolve, 200));
+		if (res !== null && res !== APIStatus.NoResponse && res.statusCode !== 413) {
+			stLoggedUser?.update((old) => {
+				old.avatar = res.avatar;
+				return old;
+			});
+		}
+		return res;
+	},
+	changeChannelAvatar: async (file: File, channel: string) => {
+		let formData = new FormData();
+		formData.append("avatar", file);
+		const res = await makeRequest<ChangeAvatarResponse>("/api/chats/channels/" + channel + "/avatar", "POST", formData, "");
 		await new Promise((resolve) => setTimeout(resolve, 200));
 		if (res !== null && res !== APIStatus.NoResponse && res.statusCode !== 413) {
 			stLoggedUser?.update((old) => {
@@ -1040,6 +1084,11 @@ export const api = {
 			current_password: oldPassword,
 			new_password: newPassword,
 			confirm: confirmNewPassword,
+		});
+	},
+	createDirectMessage: async (user: string) => {
+		return makeRequest<CreateDirectMessageResponse>("/api/chats/channels", "POST", {
+			user_uuid: user
 		});
 	},
 	ws: {

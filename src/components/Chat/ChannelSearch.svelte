@@ -60,6 +60,7 @@
 
 		let privChannel: PrivateChannelData;
 		let privChannelListed = true;
+
 		if (number !== undefined) {
 			privChannel = await api.getPrivateChannelData(name, number);
 			privChannelListed = false;
@@ -127,6 +128,7 @@
 					password
 					displayName={priv.name}
 					channelID={padIdentifier(priv.identifier)}
+					avatarLink={priv.avatar}
 				/>
 			{/each}
 			{#each pubs as pub}
@@ -139,6 +141,7 @@
 					password={pub.has_password}
 					displayName={pub.name}
 					channelID={padIdentifier(pub.id)}
+					avatarLink={pub.avatar}
 				/>
 			{/each}
 		</div>

@@ -20,6 +20,7 @@
 	let interval;
 
 	let render = true;
+	let direct = false;
 
 	let innerWidth = 0;
 	let oldInnerWidth = 0;
@@ -47,7 +48,7 @@
 			oldInnerWidth > 800 &&
 			current_channel.length !== 0
 		) {
-			replace("/chat/group/" + current_channel);
+			replace("/chat/inner/" + current_channel);
 		}
 		oldInnerWidth = innerWidth;
 	}
@@ -75,7 +76,7 @@
 	function goToMessages(event: { detail: { channel: Channel } }) {
 		params = { uuid: event.detail.channel.uuid };
 		if (window.innerWidth <= 800) {
-			push("/chat/group/" + params.uuid);
+			push("/chat/inner/" + params.uuid);
 		}
 	}
 
@@ -100,6 +101,9 @@
 			loaded_messages: [],
 			last_loaded_page: -1,
 			last_message: null,
+			avatar: null,
+			banned_users: [],
+			muted_users: [],
 		};
 		join_channel = tmpChannel;
 		join_channel_modal = true;
@@ -128,7 +132,7 @@
 						params = { uuid: join_channel.uuid };
 						join_channel_modal = false;
 						if (window.innerWidth <= 800) {
-							push("/chat/group/" + params.uuid);
+							push("/inner/group/" + params.uuid);
 						}
 					}}
 				/>
@@ -146,7 +150,7 @@
 						create_channel_modal = false;
 						params = { uuid: data.detail.uuid };
 						if (window.innerWidth <= 800) {
-							push("/chat/group/" + params.uuid);
+							push("/inner/group/" + params.uuid);
 						}
 					}}
 				/>
@@ -182,7 +186,14 @@
 			<div class="no-channels">You didn't join any channel</div>
 		{/if}
 	</div>
-	<DesktopChatInside channel={current_channel} {render} />
+	<DesktopChatInside
+		channel={current_channel}
+		{render}
+		on:direct={(data) => {
+			params.uuid = data.detail.uuid;
+			direct = true;
+		}}
+	/>
 </div>
 
 <style lang="scss">

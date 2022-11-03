@@ -7,7 +7,7 @@
 
 <div class="chat-inside">
 	{#if channel.length != 0}
-		<ChatInside desktop {render} params={{ uuid: channel }} />
+		<ChatInside desktop {render} params={{ uuid: channel }} on:direct />
 	{:else}
 		<div class="select">Select a channel to begin chatting</div>
 	{/if}

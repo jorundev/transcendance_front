@@ -7,6 +7,7 @@
 	export let direct = false;
 	export let displayName: string;
 	export let channelID: string;
+	export let avatarLink: string;
 
 	let dispatch = createEventDispatcher();
 </script>
@@ -14,7 +15,12 @@
 <div class="entry" on:click={() => dispatch("click")}>
 	<div class="title">
 		<div class="avatar">
-			<ChannelAvatar {displayName} id={channelID} fontSize="14px" />
+			<ChannelAvatar
+				{displayName}
+				id={channelID}
+				{avatarLink}
+				fontSize="14px"
+			/>
 		</div>
 		<div class="display">
 			<div class="name">{displayName}</div>

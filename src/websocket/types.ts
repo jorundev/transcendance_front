@@ -93,7 +93,7 @@ export interface WsChatUnmute extends WsChat {
 
 export interface WsChatAvatar extends WsChat {
 	action: ChatAction.Avatar;
-	path: string;
+	avatar: string;
 }
 
 export interface WsChatBan extends WsChat {
@@ -124,6 +124,12 @@ export enum UserAction {
 export interface WsUser {
 	namespace: WsNamespace.User;
 	action: UserAction;
+}
+
+export interface WsUserAvatar extends WsUser {
+	action: UserAction.Avatar;
+	user: string;
+	avatar: string;
 }
 
 export interface WsUserRefresh extends WsUser {

@@ -16,8 +16,16 @@
 	let truncated_msg: string = "";
 
 	let channelID = "";
+	$: channelID =
+		info.id !== undefined
+			? padIdentifier(info.id)
+			: padIdentifier(getDirectMessageIdentifier());
 
-	$: channelID = padIdentifier(info?.id);
+	let directMessageUsername = getDirectMessageUser();
+	$: if (info) directMessageUsername = getDirectMessageUser();
+
+	let directMessageAvatar = getDirectMessageAvatar();
+	$: if (info.avatar) directMessageAvatar = getDirectMessageAvatar();
 
 	$: {
 		truncated_msg = info?.last_message?.value;
@@ -96,6 +104,30 @@
 		});
 	}
 
+	function getDirectMessageUser() {
+		const otherUserArray = info.users.filter((user) => {
+			return user.uuid !== $stLoggedUser.uuid;
+		});
+
+		return !!otherUserArray[0] ? otherUserArray[0].name : "Direct message";
+	}
+
+	function getDirectMessageAvatar() {
+		const otherUserArray = info.users.filter((user) => {
+			return user.uuid !== $stLoggedUser.uuid;
+		});
+
+		return otherUserArray[0] ? otherUserArray[0].avatar : null;
+	}
+
+	function getDirectMessageIdentifier() {
+		const otherUserArray = info.users.filter((user) => {
+			return user.uuid !== $stLoggedUser.uuid;
+		});
+
+		return otherUserArray[0] ? otherUserArray[0].id : null;
+	}
+
 	let dispatch = createEventDispatcher();
 </script>
 
@@ -106,20 +138,25 @@
 		class:current={current == info?.uuid}
 	>
 		<div class="profile-picture">
-			<ChannelAvatar displayName={info?.name} id={channelID} />
+			<ChannelAvatar
+				displayName={info?.name ? info.name : directMessageUsername}
+				id={channelID}
+				avatarLink={info.type === ChannelType.Direct
+					? directMessageAvatar
+					: info.avatar}
+				direct={info.type === ChannelType.Direct}
+			/>
 		</div>
 		<!--<div class="profile-picture" />-->
 		<div class="data-line">
 			<div class="username">
 				{#if info?.type == ChannelType.Direct}
-					<!-- TODO -->
-					{$stUsers[info?.id]?.username}#{$stUsers[info?.id]
-						?.identifier}
+					{directMessageUsername}#{channelID}
 				{:else}
 					{info?.name}<span class="id">#{channelID}</span>
-					{#if info?.last_message != null}
-						· {time_str}
-					{/if}
+				{/if}
+				{#if info?.last_message != null}
+					· {time_str}
 				{/if}
 			</div>
 			{#if info?.last_message != null}

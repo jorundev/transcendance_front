@@ -1,6 +1,9 @@
 <script lang="ts">
+	import { ChannelType } from "../../channels";
+	import { stChannels } from "../../stores";
 	import { createEventDispatcher } from "svelte";
 	import ClickOutside from "svelte-click-outside";
+	import { api, APIStatus } from "../../api";
 
 	export let uuid: string;
 	export let moderator: boolean;
@@ -28,6 +31,27 @@
 	let height = 0;
 
 	let dispatch = createEventDispatcher();
+
+	async function directMessage() {
+		const channel = Object.entries($stChannels)
+			.map(([_, channel]) => channel)
+			.filter((channel) => channel.type === ChannelType.Direct)
+			.filter((channel) =>
+				channel.users.map((user) => user.uuid).includes(uuid)
+			);
+		if (channel.length === 1) {
+			dispatch("direct", {
+				uuid: channel[0].uuid,
+			});
+		} else if (channel.length === 0) {
+			const resp = await api.createDirectMessage(uuid);
+			if (resp !== null && resp !== APIStatus.NoResponse) {
+				dispatch("direct", {
+					uuid: resp.uuid,
+				});
+			}
+		}
+	}
 </script>
 
 <ClickOutside on:clickoutside={() => dispatch("back")}>
@@ -40,6 +64,7 @@
 			<div class="title noselect">User options</div>
 		{/if}
 		<div class="entry">Go to profile</div>
+		<div class="entry" on:click={directMessage}>Send a direct message</div>
 		<div class="entry">Invite to casual game</div>
 		{#if (administrator || moderator) && !user?.is_administrator}
 			<div class="title noselect">Moderator options</div>

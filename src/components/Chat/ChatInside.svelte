@@ -9,10 +9,11 @@
 	import ChatSkeleton from "./ChatSkeleton.svelte";
 	import MuteBanModal from "./MuteBanModal.svelte";
 	import ChannelAvatar from "./ChannelAvatar.svelte";
-	import type {
-		Channel,
-		ChannelDictionary,
-		ChatMessage,
+	import {
+		ChannelType,
+		type Channel,
+		type ChannelDictionary,
+		type ChatMessage,
 	} from "../../channels";
 	import { padIdentifier } from "../../utils";
 	import SideBar from "../SideBar.svelte";
@@ -43,9 +44,35 @@
 		oldInnerWidth = innerWidth;
 	}
 
-	let channelID = "";
+	function getDirectMessageUser() {
+		const otherUserArray = info.users.filter((user) => {
+			return user.uuid !== $stLoggedUser.uuid;
+		});
 
-	$: channelID = padIdentifier(info?.id);
+		return !!otherUserArray[0] ? otherUserArray[0].name : "Direct message";
+	}
+
+	function getDirectMessageAvatar() {
+		const otherUserArray = info.users.filter((user) => {
+			return user.uuid !== $stLoggedUser.uuid;
+		});
+
+		return otherUserArray[0] ? otherUserArray[0].avatar : null;
+	}
+
+	function getDirectMessageIdentifier() {
+		const otherUserArray = info.users.filter((user) => {
+			return user.uuid !== $stLoggedUser.uuid;
+		});
+
+		return otherUserArray[0] ? otherUserArray[0].id : null;
+	}
+
+	let channelID = "";
+	$: channelID =
+		info.id !== undefined
+			? padIdentifier(info.id)
+			: padIdentifier(getDirectMessageIdentifier());
 
 	async function loadPages(n: number) {
 		await loadNextPage(params.uuid, n);
@@ -292,7 +319,7 @@
 {:then}
 	{#if joined}
 		<div class="chat" class:mobile={!desktop}>
-			{#if show_channel_settings_modal}
+			{#if show_channel_settings_modal && info.type !== ChannelType.Direct}
 				<Modal>
 					<div class="channel-settings">
 						<ChannelSettings
@@ -318,7 +345,7 @@
 						/>
 					</div>
 				</Modal>
-			{:else if show_muteban_modal}
+			{:else if show_muteban_modal && info.type !== ChannelType.Direct}
 				<MuteBanModal
 					on:back={() => {
 						show_muteban_modal = false;
@@ -360,18 +387,33 @@
 					<div class="back" on:click={() => replace("/chat")} />
 				{/if}
 				<div class="profile-picture">
-					<ChannelAvatar
-						displayName={$stChannels[params.uuid]?.name}
-						id={channelID}
-					/>
+					{#if info.type !== ChannelType.Direct}
+						<ChannelAvatar
+							displayName={$stChannels[params.uuid]?.name}
+							id={channelID}
+							avatarLink={$stChannels[params.uuid]?.avatar}
+							direct={$stChannels[params.uuid]?.type ===
+								ChannelType.Direct}
+						/>
+					{:else}
+						<ChannelAvatar
+							displayName={$stChannels[params.uuid]?.name}
+							id={channelID}
+							avatarLink={$stChannels[params.uuid]?.avatar}
+							direct={$stChannels[params.uuid]?.type ===
+								ChannelType.Direct}
+						/>
+					{/if}
 				</div>
 				<div class="name">{$stChannels[params.uuid]?.name}</div>
-				<div
-					class="settings-button"
-					on:click={() => {
-						show_channel_settings_modal = true;
-					}}
-				/>
+				{#if info.type !== ChannelType.Direct}
+					<div
+						class="settings-button"
+						on:click={() => {
+							show_channel_settings_modal = true;
+						}}
+					/>
+				{/if}
 			</div>
 
 			<div
@@ -406,6 +448,7 @@
 									info.uuid
 								);
 							}}
+							on:direct
 							side={set.side}
 							messages={set.messages}
 							channel={params.uuid}

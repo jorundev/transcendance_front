@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { api } from "../../api";
+	import { api, APIStatus } from "../../api";
 	import { createEventDispatcher, onMount } from "svelte";
 	import { stChannels, stLoggedUser } from "../../stores";
 	import ChannelSettingsProfile from "./ChannelSettingsProfile.svelte";
@@ -13,6 +13,13 @@
 
 	let require_password = channel.has_password;
 	let password: string = "";
+
+	let avatarPromise = Promise.resolve(
+		getProfilePictureLinkFrom(channel.avatar)
+	);
+	let currentAvatar = "";
+
+	let drag = false;
 
 	let blacklisted_users = [];
 
@@ -36,6 +43,41 @@
 	let is_administrator = false;
 
 	let canClickOutside = false;
+
+	function getProfilePictureLinkFrom(from: string | null): string {
+		return from ? "/pictures/" + from : "/img/default.jpg";
+	}
+
+	async function uploadFile(file: File) {
+		if (
+			![
+				"image/png",
+				"image/jpeg",
+				"image.apng",
+				"image/gif",
+				"image/webp",
+			].includes(file.type)
+		) {
+			return;
+		}
+
+		const pm = api.changeChannelAvatar(file, channel.uuid);
+		avatarPromise = pm.then((obj) => {
+			if (obj !== null && obj !== APIStatus.NoResponse) {
+				return getProfilePictureLinkFrom(obj.avatar);
+			}
+		});
+		const res = await pm;
+		if (res === null || res === APIStatus.NoResponse) {
+			return;
+		}
+		if (res.statusCode === 413) {
+			avatarPromise = Promise.resolve(
+				getProfilePictureLinkFrom(channel.avatar)
+			);
+			return;
+		}
+	}
 
 	onMount(() => {
 		setTimeout(() => (canClickOutside = true), 200);
@@ -77,50 +119,54 @@
 					<div class="member-lists">
 						<div class="members">
 							<div class="category-name">Members</div>
-							{#each channel.users as user}
-								<ChannelSettingsProfile
-									{user}
-									channel={channel.uuid}
-									is_in_channel={channel.users
-										.map((u) => u.uuid)
-										.includes(user.uuid)}
-									{is_moderator}
-									{is_administrator}
-									on:ban
-									on:mute
-								/>
-							{/each}
+							<div class="profiles">
+								{#each channel.users as user}
+									<ChannelSettingsProfile
+										{user}
+										channel={channel.uuid}
+										is_in_channel={channel.users
+											.map((u) => u.uuid)
+											.includes(user.uuid)}
+										{is_moderator}
+										{is_administrator}
+										on:ban
+										on:mute
+									/>
+								{/each}
+							</div>
 						</div>
 						{#if is_moderator || is_administrator}
 							<div class="members">
 								<div class="category-name">Blacklist</div>
 								{#if blacklisted_users?.length > 0}
-									{#each blacklisted_users as blacklisted}
-										<ChannelSettingsProfile
-											user={blacklisted.user}
-											blacklist
-											channel={channel.uuid}
-											is_in_channel={channel.users
-												.map((u) => u.uuid)
-												.includes(
-													blacklisted.user.uuid
-												)}
-											{is_moderator}
-											{is_administrator}
-											banned={channel.banned_users
-												.map((u) => u.user.uuid)
-												.includes(
-													blacklisted.user.uuid
-												)}
-											muted={channel.muted_users
-												.map((u) => u.user.uuid)
-												.includes(
-													blacklisted.user.uuid
-												)}
-											on:ban
-											on:mute
-										/>
-									{/each}
+									<div class="profiles">
+										{#each blacklisted_users as blacklisted}
+											<ChannelSettingsProfile
+												user={blacklisted.user}
+												blacklist
+												channel={channel.uuid}
+												is_in_channel={channel.users
+													.map((u) => u.uuid)
+													.includes(
+														blacklisted.user.uuid
+													)}
+												{is_moderator}
+												{is_administrator}
+												banned={channel.banned_users
+													.map((u) => u.user.uuid)
+													.includes(
+														blacklisted.user.uuid
+													)}
+												muted={channel.muted_users
+													.map((u) => u.user.uuid)
+													.includes(
+														blacklisted.user.uuid
+													)}
+												on:ban
+												on:mute
+											/>
+										{/each}
+									</div>
 								{:else}
 									<div class="no-blacklist">
 										No users were banned or muted
@@ -182,6 +228,55 @@
 						{/if}
 					</div>
 					<div class="category">
+						<div class="category-name">Channel Avatar</div>
+						<div class="avatar">
+							{#await avatarPromise}
+								<div
+									class="loading"
+									style={"background-image: url('" +
+										currentAvatar +
+										"');"}
+								/>
+							{:then data}
+								<div
+									class="inner"
+									class:drag
+									style={"background-image: url('" +
+										data +
+										"')"}
+									on:click={() => {
+										let input =
+											document.createElement("input");
+										input.type = "file";
+										input.click();
+
+										input.onchange = (e) => {
+											e.preventDefault();
+											if (input.files?.length === 1) {
+												uploadFile(input.files[0]);
+											}
+										};
+									}}
+									on:dragenter={() => (drag = true)}
+									on:dragexit={() => (drag = false)}
+									on:dragover|preventDefault={() => {}}
+									on:drop|preventDefault={(e) => {
+										if (
+											e.dataTransfer?.items?.length === 1
+										) {
+											uploadFile(
+												e.dataTransfer.items[0].getAsFile()
+											);
+										}
+
+										drag = false;
+									}}
+									on:change={(e) => console.log(e)}
+								/>
+							{/await}
+						</div>
+					</div>
+					<div class="category">
 						<div class="category-name">Administrator</div>
 						<Button
 							red
@@ -203,6 +298,18 @@
 </ClickOutside>
 
 <style lang="scss">
+	@keyframes pulse {
+		0% {
+			opacity: 0.6;
+		}
+		50% {
+			opacity: 1;
+		}
+		100% {
+			opacity: 0.6;
+		}
+	}
+
 	.settings {
 		min-width: 250px;
 		display: inline-block;
@@ -236,6 +343,13 @@
 		box-sizing: border-box;
 	}
 
+	.profiles {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		overflow-y: auto;
+	}
+
 	.members {
 		width: auto;
 		flex-shrink: 0;
@@ -245,11 +359,15 @@
 		flex-direction: column;
 		gap: 10px;
 
+		@media screen and (max-height: 1000px) {
+			max-height: 300px;
+		}
+
 		@media screen and (max-height: 800px) {
 			max-height: 300px;
 		}
 
-		@media screen and (max-height: 600px) {
+		@media screen and (max-height: 760px) {
 			max-height: 100px;
 		}
 	}
@@ -330,6 +448,49 @@
 		&:disabled,
 		&:disabled + label {
 			opacity: 0.5;
+		}
+	}
+
+	.avatar {
+		width: 100%;
+		display: flex;
+		justify-content: center;
+		margin-top: 18px;
+		margin-bottom: 18px;
+
+		.loading {
+			animation: pulse 1.2s 0.3s ease-in-out infinite;
+		}
+
+		.inner {
+			&.drag {
+				outline: 5px dashed rgb(255, 255, 255);
+			}
+		}
+
+		.inner,
+		.loading {
+			position: relative;
+			flex-shrink: 0;
+			width: 120px;
+			height: 120px;
+			border-radius: 100%;
+			background-size: cover;
+			background-position: center;
+
+			&:hover:not(.loading)::after {
+				content: "";
+				cursor: pointer;
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				background-color: rgba(0, 0, 0, 0.4);
+				background-image: url("/img/photo.png");
+				background-position: center;
+				background-repeat: no-repeat;
+				background-size: 40%;
+				border-radius: 100%;
+			}
 		}
 	}
 </style>

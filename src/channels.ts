@@ -22,6 +22,7 @@ export interface Channel {
 	uuid: string;
 	id: number;
 	name: string;
+	avatar: string;
 	last_message: {
 		sender: string | null;
 		value: string;

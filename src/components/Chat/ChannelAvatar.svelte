@@ -4,20 +4,29 @@
 	export let displayName: string;
 	export let id: string;
 	export let avatarLink = undefined;
+	export let direct = false;
 
 	export let fontSize: string = "22px";
 
 	let bg = "#FFFFFF";
 
-	$: bg = avatarLink
-		? "url('" + avatarLink + "')"
-		: colorFromString(displayName + "#" + id);
+	$: {
+		if (avatarLink) {
+			bg = "background-image: url('/pictures/" + avatarLink + "')";
+		} else {
+			bg = direct
+				? "background-image: url('/img/default.jpg')"
+				: "background-color: " +
+				  colorFromString(displayName + "#" + id);
+		}
+	}
 </script>
 
 <div
 	class="avatar"
-	style="background: {bg}; font-size: {fontSize}"
-	data-char={avatarLink ? "" : displayName[0].toUpperCase()}
+	style="{bg}; font-size: {fontSize}"
+	data-char={avatarLink || direct ? "" : displayName[0].toUpperCase()}
+	class:direct
 />
 
 <style lang="scss">
@@ -37,6 +46,10 @@
 			position: absolute;
 			font-weight: lighter;
 			transform: translateY(-0px);
+		}
+
+		&.direct {
+			outline: 3px solid rgb(255, 255, 255);
 		}
 	}
 </style>

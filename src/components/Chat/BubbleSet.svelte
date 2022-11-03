@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { stChannels, stLoggedUser } from "../../stores";
+	import { stChannels, stLoggedUser, stUsers } from "../../stores";
 	import { createEventDispatcher } from "svelte";
 	import { api, getUserProfilePictureLink } from "../../api";
 	import ChatProfileMenu from "./ChatProfileMenu.svelte";
@@ -36,6 +36,13 @@
 	}
 
 	let dispatch = createEventDispatcher();
+
+	let sender = messages[0] ? messages[0].sender : null;
+	$: sender = messages[0] ? messages[0].sender : null;
+
+	let avatarLink = getUserProfilePictureLink(sender);
+	$: if ($stUsers[sender].avatar)
+		avatarLink = getUserProfilePictureLink(sender);
 </script>
 
 {#each messagesRev as message, i (message.id)}
@@ -51,9 +58,7 @@
 				class:menu={showProfileMenu}
 				on:contextmenu|preventDefault={(e) => profileMenu(e, message)}
 				style={i == 0
-					? `background-image: url("${getUserProfilePictureLink(
-							message.sender
-					  )}")`
+					? "background-image: url('" + avatarLink + "');"
 					: ""}
 			>
 				{#if showProfileMenu && selected === message.id}
@@ -85,6 +90,7 @@
 						on:unban
 						on:mute
 						on:unmute
+						on:direct
 						is_in_channel={$stChannels[channel]?.users
 							.map((u) => u.uuid)
 							.includes(message.sender)}

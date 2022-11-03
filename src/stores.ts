@@ -79,10 +79,14 @@ async function channelFromAPIChannel(
 	channel: APIChannel,
 	joined: boolean
 ): Promise<Channel> {
-	const users = await getUsersFromUUIDs(channel);
+	const usersPromise = getUsersFromUUIDs(channel);
 
 	let banned_users = [];
 	let muted_users = [];
+
+	if (!channel.moderators) {
+		channel.moderators = [];
+	}
 
 	if (channel.moderators.includes(get(stLoggedUser)?.uuid) || channel.administrator === get(stLoggedUser)?.uuid) {
 		const blacklist = await api.getBlacklist(channel.uuid);
@@ -122,12 +126,14 @@ async function channelFromAPIChannel(
 		}
 	}
 
-	if (users)
+	const users = await usersPromise;
+	if (usersPromise)
 		return {
 			has_password: channel.password,
 			uuid: channel.uuid,
 			id: channel.identifier,
 			name: channel.name,
+			avatar: channel.avatar,
 			type: channel.type,
 			last_message: null,
 			loaded_messages: [],
