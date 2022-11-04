@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from "svelte";
+	import { onDestroy, onMount } from "svelte";
 
 	import Router, { replace } from "svelte-spa-router";
 	import routes from "./App.routes";
@@ -10,7 +10,10 @@
 		stWebsocket,
 	} from "./stores";
 
+	let interval = null;
+
 	onMount(async () => {
+		clearInterval(interval);
 		document.documentElement.style.setProperty(
 			"--scrollbar-width",
 			window.innerWidth - document.documentElement.clientWidth + "px"
@@ -20,7 +23,7 @@
 			window.innerHeight - document.documentElement.clientHeight + "px"
 		);
 
-		setInterval(() => {
+		interval = setInterval(() => {
 			if ($stWebsocket) {
 				$stWebsocket.send("");
 			}
@@ -64,6 +67,10 @@
 				}
 			}
 		}, 5000);
+	});
+
+	onDestroy(() => {
+		clearInterval(interval);
 	});
 
 	function conditionsFailed(event) {

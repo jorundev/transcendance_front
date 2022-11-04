@@ -846,6 +846,8 @@ export const api = {
 	logout: async () => {
 		await fetchPOST("/api/auth/logout", {});
 		stLoggedUser.set(null);
+		get(stWebsocket)?.close()
+		stWebsocket.set(null)
 		push("/login");
 	},
 	getQRCode: async (): Promise<TFAInitResponse> => {
@@ -1101,7 +1103,8 @@ export const api = {
 				const ws = new WebSocket(
 					protocol + "://" + window.location.hostname + "/api/streaming"
 				);
-				ws.onerror = async () => {
+
+				ws.onerror = () => {
 					console.log(
 						"Could not connect to WebSocket. Retrying in 2 seconds"
 					);
@@ -1109,20 +1112,29 @@ export const api = {
 					ws.onopen = undefined;
 					ws.onclose = undefined;
 					stWebsocket.set(null);
-					api.ws.connect();
+					setTimeout(() => {
+						api.ws.connect();
+					}, 2000);
 				};
+
 				ws.onopen = () => {
 					console.log("Successfully connected to websocket");
 					stWebsocket.set(ws);
 				};
 
-				ws.onclose = () => {
+				ws.onclose = (e) => {
+					if (e.wasClean) {
+						console.log("Websocket closed");
+						return;
+					}
 					console.log("Websocket got closed");
 					ws.onerror = undefined;
 					ws.onopen = undefined;
 					ws.onclose = undefined;
 					stWebsocket.set(null);
-					api.ws.connect();
+					setTimeout(() => {
+						api.ws.connect();
+					}, 2000);
 				};
 
 				ws.onmessage = async (message) => {
@@ -1136,12 +1148,6 @@ export const api = {
 							break;
 					}
 				};
-
-				setTimeout(() => {
-					if (get(stWebsocket) == null) {
-						ws.close();
-					}
-				}, 2000);
 			}
 		},
 	},
