@@ -1,12 +1,19 @@
 <script lang="ts">
 	import { stLoggedUser } from "../stores";
-	import { getUserProfilePictureLink } from "../api";
+	import { api, getUserProfilePictureLink } from "../api";
 	import Card from "../components/Kit/Card.svelte";
 	import SideBar from "../components/SideBar.svelte";
 	import { padIdentifier } from "../utils";
 	import FriendListHorizontal from "../components/Friends/FriendListHorizontal.svelte";
 	import MatchHistory from "../components/MatchHistory.svelte";
 	import NotificationList from "../components/Notifications/NotificationList.svelte";
+	import Button from "../components/Kit/Button.svelte";
+	import {
+		newNotification,
+		NotificationType,
+		type NotificationData,
+	} from "../notifications";
+	import NotificationModal from "../components/Notifications/NotificationModal.svelte";
 
 	let id = "";
 
@@ -16,11 +23,21 @@
 	$: avatarLink = getUserProfilePictureLink($stLoggedUser?.uuid);
 
 	let levelPercentage = 50;
+	let modalData: NotificationData;
+
+	function invite(data) {
+		modalData = data.detail;
+	}
+
+	function acceptInvite(data) {}
 </script>
 
 <svelte:head>
 	<title>Home - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
+{#if modalData !== undefined}
+	<NotificationModal {modalData} on:back={() => (modalData = undefined)} />
+{/if}
 <SideBar active="home" />
 <div class="home">
 	<div class="column">
@@ -66,9 +83,34 @@
 			<Card>
 				<div class="home-div">
 					<div class="title">Notifications</div>
-					<NotificationList />
+					<NotificationList
+						on:invite-click={invite}
+						on:accept-invite-click={invite}
+					/>
 				</div>
 			</Card>
+			<Button
+				on:click={() => {
+					newNotification({
+						type: NotificationType.FriendRequest,
+						date: new Date(),
+						uuid: "1",
+						user: $stLoggedUser.uuid,
+					});
+					newNotification({
+						type: NotificationType.AcceptedFriendRequest,
+						date: new Date(),
+						uuid: "2",
+						user: $stLoggedUser.uuid,
+					});
+					newNotification({
+						type: NotificationType.GameInvite,
+						date: new Date(),
+						uuid: "3",
+						user: $stLoggedUser.uuid,
+					});
+				}}>New Notification</Button
+			>
 		</div>
 	</div>
 	<div class="s-column nomobile">

@@ -1,4 +1,4 @@
-import { get, writable, type Writable } from "svelte/store";
+import { derived, get, writable, type Writable } from "svelte/store";
 import {
 	api,
 	APIStatus,
@@ -18,12 +18,8 @@ export const stServerDown: Writable<boolean> = writable(false);
 export const stUsers: Writable<UserDictionary> = writable({});
 export const stWebsocket: Writable<WebSocket | null> = writable(null);
 export const stChannels: Writable<ChannelDictionary> = writable({});
-export const stHasNotifications: Writable<boolean> = writable(false);
 export const stNotifications: Writable<NotificationDataDictionary> = writable({});
-
-stNotifications.subscribe((notifications) => {
-	stHasNotifications.set(Object.entries(notifications).length > 0);
-});
+export const stHasNotifications = derived(stNotifications, $stNotifications => Object.entries($stNotifications).length > 0);
 
 export async function tryToLog() {
 	let response: WhoAmIResponse | APIStatus;

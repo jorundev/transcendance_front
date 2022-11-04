@@ -79,8 +79,8 @@
 
 <style lang="scss">
 	.bubble {
-		user-select: text;
-		-webkit-user-select: text;
+		user-select: none;
+		-webkit-user-select: none;
 		word-break: break-word;
 		word-wrap: break-word;
 		white-space: pre-wrap;

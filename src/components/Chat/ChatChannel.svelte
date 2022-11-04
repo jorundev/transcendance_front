@@ -212,6 +212,8 @@
 		}
 	}
 	.channel {
+		user-select: none;
+		-webkit-user-select: none;
 		display: flex;
 		gap: 18px;
 		align-items: center;
