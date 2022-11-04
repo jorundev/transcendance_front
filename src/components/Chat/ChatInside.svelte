@@ -45,32 +45,53 @@
 	}
 
 	function getDirectMessageUser() {
-		const otherUserArray = info.users.filter((user) => {
+		if (!info) {
+			return null;
+		}
+		const otherUserArray = info?.users.filter((user) => {
 			return user.uuid !== $stLoggedUser.uuid;
 		});
 
-		return !!otherUserArray[0] ? otherUserArray[0].name : "Direct message";
+		return otherUserArray && otherUserArray[0]
+			? otherUserArray[0].name
+			: "Direct message";
 	}
+
+	let user = "";
+	$: if (info) user = getDirectMessageUser();
 
 	function getDirectMessageAvatar() {
-		const otherUserArray = info.users.filter((user) => {
+		if (!info) {
+			return null;
+		}
+		const otherUserArray = info?.users.filter((user) => {
 			return user.uuid !== $stLoggedUser.uuid;
 		});
 
-		return otherUserArray[0] ? otherUserArray[0].avatar : null;
+		return otherUserArray && otherUserArray[0]
+			? otherUserArray[0].avatar
+			: null;
 	}
 
+	let avatar = null;
+	$: if (info) avatar = getDirectMessageAvatar();
+
 	function getDirectMessageIdentifier() {
-		const otherUserArray = info.users.filter((user) => {
+		if (!info) {
+			return null;
+		}
+		const otherUserArray = info?.users.filter((user) => {
 			return user.uuid !== $stLoggedUser.uuid;
 		});
 
-		return otherUserArray[0] ? otherUserArray[0].id : null;
+		return otherUserArray && otherUserArray[0]
+			? otherUserArray[0].id
+			: null;
 	}
 
 	let channelID = "";
 	$: channelID =
-		info.id !== undefined
+		info?.id !== undefined
 			? padIdentifier(info.id)
 			: padIdentifier(getDirectMessageIdentifier());
 
@@ -387,13 +408,14 @@
 					<div class="back" on:click={() => replace("/chat")} />
 				{/if}
 				<div class="profile-picture">
-					{#if info.type !== ChannelType.Direct}
+					{#if info.type === ChannelType.Direct}
 						<ChannelAvatar
-							displayName={$stChannels[params.uuid]?.name}
+							displayName={user}
 							id={channelID}
-							avatarLink={$stChannels[params.uuid]?.avatar}
+							avatarLink={avatar}
 							direct={$stChannels[params.uuid]?.type ===
 								ChannelType.Direct}
+							outline={false}
 						/>
 					{:else}
 						<ChannelAvatar
@@ -405,14 +427,16 @@
 						/>
 					{/if}
 				</div>
-				<div class="name">{$stChannels[params.uuid]?.name}</div>
 				{#if info.type !== ChannelType.Direct}
+					<div class="name">{$stChannels[params.uuid]?.name}</div>
 					<div
 						class="settings-button"
 						on:click={() => {
 							show_channel_settings_modal = true;
 						}}
 					/>
+				{:else}
+					<div class="name">{user}</div>
 				{/if}
 			</div>
 

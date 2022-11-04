@@ -5,6 +5,7 @@
 	export let id: string;
 	export let avatarLink = undefined;
 	export let direct = false;
+	export let outline = true;
 
 	export let fontSize: string = "22px";
 
@@ -26,7 +27,7 @@
 	class="avatar"
 	style="{bg}; font-size: {fontSize}"
 	data-char={avatarLink || direct ? "" : displayName[0].toUpperCase()}
-	class:direct
+	class:direct={direct && outline}
 />
 
 <style lang="scss">

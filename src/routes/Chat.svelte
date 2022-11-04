@@ -34,6 +34,13 @@
 
 	let mounted = false;
 
+	let hasJoinedChannels = false;
+	$: hasJoinedChannels =
+		Object.entries($stChannels).filter(([_, c]) => c.joined).length > 0;
+
+	let channelEntries;
+	$: channelEntries = Object.entries($stChannels);
+
 	export let params: { uuid?: string };
 	let current_channel = params?.uuid ? params.uuid : "";
 
@@ -167,9 +174,9 @@
 			</div>
 			<div class="add" on:click={createChannel} />
 		</div>
-		{#if Object.entries($stChannels).filter(([_, c]) => c.joined).length > 0}
+		{#if hasJoinedChannels}
 			<div class="channels">
-				{#each Object.entries($stChannels) as [key, channel] (key)}
+				{#each channelEntries as [key, channel] (key)}
 					{#if channel.joined}
 						<ChatChannel
 							info={channel}

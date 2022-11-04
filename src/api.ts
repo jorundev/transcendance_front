@@ -343,6 +343,9 @@ export async function getUsersFromUUIDs(channel: APIChannel): Promise<
 		if (data == APIStatus.NoResponse) {
 			continue;
 		}
+		if (channel.moderators === undefined) {
+			channel.moderators = [];
+		}
 		users.push({
 			name: data.username,
 			id: data.identifier,
@@ -488,7 +491,7 @@ async function wsChatMessage(data: WsChat) {
 				name: channel_data.name,
 				last_message: null,
 				loaded_messages: [],
-				joined: false,
+				joined: channel_data.type === ChannelType.Direct,
 				has_password: channel_data.password,
 				users: users,
 				last_loaded_page: page,
