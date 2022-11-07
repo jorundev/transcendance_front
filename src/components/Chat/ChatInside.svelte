@@ -18,6 +18,7 @@
 	import { padIdentifier } from "../../utils";
 	import SideBar from "../SideBar.svelte";
 	import { replace } from "svelte-spa-router";
+	import VirtualList from "@sveltejs/svelte-virtual-list";
 
 	let textArea: HTMLInputElement;
 	let chatDiv: HTMLDivElement;
@@ -180,6 +181,8 @@
 		side: "left" | "right";
 		id: number;
 		messages: Array<ChatMessage>;
+		one_above: boolean;
+		one_below: boolean;
 	}
 
 	function format_date(date: number) {
@@ -247,7 +250,10 @@
 		let i = 0;
 		let previous: ChatMessage | null = null;
 		for (const message of messages) {
-			if (previous?.sender == message.sender) {
+			if (
+				previous?.sender == message.sender &&
+				groups[groups.length - 1].messages.length < 10
+			) {
 				groups[groups.length - 1].messages.push({
 					value: message.value,
 					date: message.date,
@@ -273,7 +279,17 @@
 						},
 					],
 					id: i,
+					one_above: false,
+					one_below: false,
 				});
+				if (
+					groups.length != 1 &&
+					groups[groups.length - 2].side ===
+						groups[groups.length - 1].side
+				) {
+					groups[groups.length - 2].one_below = true;
+					groups[groups.length - 1].one_above = true;
+				}
 				i += 1;
 			}
 			previous = message;
@@ -448,7 +464,8 @@
 			>
 				<div class="pad" />
 				{#if render}
-					{#each groupsRev as set (set.id)}
+					<VirtualList items={groups} let:item={set}>
+						<!-- {#each groupsRev as set, i (set.id)} -->
 						<BubbleSet
 							on:ban={(ev) => {
 								selectedUser = ev.detail.uuid;
@@ -478,8 +495,11 @@
 							channel={params.uuid}
 							on:select={(ev) => selectProfile(ev)}
 							selected={selectedUUID}
+							one_above={set.one_above}
+							one_below={set.one_below}
 						/>
-					{/each}
+						<!-- {/each} -->
+					</VirtualList>
 				{:else}
 					<ChatSkeleton />
 				{/if}

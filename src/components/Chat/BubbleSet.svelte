@@ -5,12 +5,13 @@
 	import ChatProfileMenu from "./ChatProfileMenu.svelte";
 	import Bubble from "../Kit/Bubble.svelte";
 	import type { ChatMessage } from "../../channels";
-	// import VirtualList from "@sveltejs/svelte-virtual-list";
 
 	export let messages: Array<ChatMessage>;
 	export let side: "left" | "right";
 	export let channel: string;
 	export let selected: string;
+	export let one_above: boolean;
+	export let one_below: boolean;
 
 	let offsetY = 0;
 
@@ -41,31 +42,23 @@
 	let avatarLink = getUserProfilePictureLink(sender);
 	$: if ($stUsers[sender].avatar)
 		avatarLink = getUserProfilePictureLink(sender);
-
-	// Svelte Virtual List has a perfect pull request to avoid this, but it hasn't been merged in about two years
-	// https://github.com/sveltejs/svelte-virtual-list/pull/40
-	// let items;
-	// $: items = messages.map((v, i) => {
-	// 	return { ...v, index: i };
-	// });
 </script>
 
 <div class="set">
-	<!-- <VirtualList {items} let:item={message}> -->
 	{#each messages as message, i (message.uuid)}
 		<div
 			class="bubble-wrapper {side}"
-			class:last={i + 1 === messages.length}
+			class:last={i + 1 === messages.length && !one_below}
 			data-date={message.date}
 			data-username={side == "left" ? message.username + " · " : ""}
 		>
 			{#if side == "left"}
 				<div
-					class="profile-picture"
+					class:profile-picture={true}
 					class:menu={showProfileMenu}
 					on:contextmenu|preventDefault={(e) =>
 						profileMenu(e, message)}
-					style={i == 0
+					style={i + 1 === messages.length && !one_below
 						? "background-image: url('" + avatarLink + "');"
 						: ""}
 				>
@@ -115,12 +108,11 @@
 			<Bubble
 				{message}
 				{side}
-				last={i + 1 === messages.length}
-				one_above={i !== 0}
+				last={i + 1 === messages.length && !one_below}
+				one_above={i !== 0 || one_above}
 				{channel}
 			/>
 		</div>
-		<!-- </VirtualList> -->
 	{/each}
 </div>
 
