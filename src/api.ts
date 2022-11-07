@@ -292,7 +292,7 @@ export enum ChannelVisibility {
 
 export interface ChannelMessagesResponse extends APIResponse {
 	data: Array<{
-		id: number;
+		uuid: string;
 		creation_date: string;
 		message: string;
 		user: string;
@@ -312,7 +312,7 @@ export interface SessionsResponse extends APIResponse {
 }
 
 export interface Session {
-	id: number,
+	uuid: string,
 	platform: string,
 	creation_date: string,
 	active: boolean,
@@ -393,11 +393,11 @@ export async function loadNextPage(uuid: string, n?: number) {
 			/* Avoid duplicates */
 			if (
 				!channel.loaded_messages
-					.map((msg) => msg.id)
-					.includes(message.id)
+					.map((msg) => msg.uuid)
+					.includes(message.uuid)
 			) {
 				channel.loaded_messages.push({
-					id: message.id,
+					uuid: message.uuid,
 					value: message.message,
 					sender: message.user,
 					date: Date.parse(message.creation_date),
@@ -406,7 +406,7 @@ export async function loadNextPage(uuid: string, n?: number) {
 		}
 	}
 	channel.loaded_messages.sort((a, b) => {
-		return a.id - b.id;
+		return a.date - b.date;
 	});
 
 	channel.last_loaded_page = i + 1;
@@ -625,7 +625,7 @@ async function wsChatSend(data: WsChatSend) {
 		channels[data.channel].loaded_messages.push({
 			sender: data.user,
 			value: data.message.text,
-			id: data.message.id,
+			uuid: data.message.uuid,
 			date: Date.parse(data.message.time),
 		});
 		return channels;
@@ -635,10 +635,11 @@ async function wsChatSend(data: WsChatSend) {
 async function wsChatDelete(data: WsChatDelete) {
 	stChannels.update((channels) => {
 		channels[data.channel].reload = true;
-		for (const message of [
+		const loaded_messages_copy = [
 			...channels[data.channel].loaded_messages,
-		].reverse()) {
-			if (message.id == data.id) {
+		].reverse();
+		for (const message of loaded_messages_copy) {
+			if (message.uuid == data.uuid) {
 				message.value = null;
 				break;
 			}
@@ -655,7 +656,7 @@ async function wsChatJoin(data: WsChatJoin) {
 	}
 
 	let addendum: {
-		id: number;
+		uuid: string;
 		creation_date: string;
 		message: string;
 		user: string;
@@ -685,7 +686,7 @@ async function wsChatJoin(data: WsChatJoin) {
 						sender: raw.user,
 						value: raw.message,
 						date: Date.parse(raw.creation_date),
-						id: raw.id,
+						uuid: raw.uuid,
 					};
 				});
 			}
@@ -955,12 +956,12 @@ export const api = {
 			);
 		} catch (_e) { }
 	},
-	deleteMessage: async (channel: string, id: number) => {
+	deleteMessage: async (channel: string, uuid: string) => {
 		return makeRequest(
 			"/api/chats/channels/" + channel + "/messages",
 			"DELETE",
 			{
-				id,
+				uuid,
 			}
 		);
 	},
@@ -1081,8 +1082,8 @@ export const api = {
 	getSessions: async () => {
 		return makeRequest<SessionsResponse>("/api/users/sessions", "GET");
 	},
-	killSession: async (id: number) => {
-		return makeRequest<APIResponse>("/api/users/sessions/" + id, "DELETE");
+	killSession: async (uuid: string) => {
+		return makeRequest<APIResponse>("/api/users/sessions/" + uuid, "DELETE");
 	},
 	changePassword: async (oldPassword: string, newPassword: string, confirmNewPassword: string) => {
 		return makeRequest<APIResponse>("/api/users", "PATCH", {
@@ -1103,6 +1104,7 @@ export const api = {
 				const ws = new WebSocket(
 					protocol + "://" + window.location.hostname + "/api/streaming"
 				);
+				stWebsocket.set(ws);
 
 				ws.onerror = () => {
 					console.log(
@@ -1119,12 +1121,12 @@ export const api = {
 
 				ws.onopen = () => {
 					console.log("Successfully connected to websocket");
-					stWebsocket.set(ws);
 				};
 
 				ws.onclose = (e) => {
 					if (e.wasClean) {
 						console.log("Websocket closed");
+						stWebsocket.set(null);
 						return;
 					}
 					console.log("Websocket got closed");

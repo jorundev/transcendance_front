@@ -5,16 +5,14 @@
 	import ChatProfileMenu from "./ChatProfileMenu.svelte";
 	import Bubble from "../Kit/Bubble.svelte";
 	import type { ChatMessage } from "../../channels";
+	// import VirtualList from "@sveltejs/svelte-virtual-list";
 
 	export let messages: Array<ChatMessage>;
 	export let side: "left" | "right";
 	export let channel: string;
-	export let selected: number;
+	export let selected: string;
 
 	let offsetY = 0;
-
-	let messagesRev: Array<ChatMessage>;
-	$: messagesRev = [...messages].reverse();
 
 	let moderator = false;
 	let administrator = false;
@@ -29,10 +27,10 @@
 
 	let showProfileMenu = false;
 
-	function profileMenu(e: MouseEvent, message: { id: number }) {
+	function profileMenu(e: MouseEvent, message: { uuid: string }) {
 		offsetY = e.clientY;
 		showProfileMenu = true;
-		dispatch("select", { id: message.id });
+		dispatch("select", { uuid: message.uuid });
 	}
 
 	let dispatch = createEventDispatcher();
@@ -43,70 +41,88 @@
 	let avatarLink = getUserProfilePictureLink(sender);
 	$: if ($stUsers[sender].avatar)
 		avatarLink = getUserProfilePictureLink(sender);
+
+	// Svelte Virtual List has a perfect pull request to avoid this, but it hasn't been merged in about two years
+	// https://github.com/sveltejs/svelte-virtual-list/pull/40
+	// let items;
+	// $: items = messages.map((v, i) => {
+	// 	return { ...v, index: i };
+	// });
 </script>
 
-{#each messagesRev as message, i (message.id)}
-	<div
-		class="bubble-wrapper {side}"
-		class:last={i == 0}
-		data-date={message.date}
-		data-username={side == "left" ? message.username + " · " : ""}
-	>
-		{#if side == "left"}
-			<div
-				class="profile-picture"
-				class:menu={showProfileMenu}
-				on:contextmenu|preventDefault={(e) => profileMenu(e, message)}
-				style={i == 0
-					? "background-image: url('" + avatarLink + "');"
-					: ""}
-			>
-				{#if showProfileMenu && selected === message.id}
-					<ChatProfileMenu
-						{offsetY}
-						uuid={message.sender}
-						banned={$stChannels[channel].banned_users
-							.map((u) => u.user.uuid)
-							.includes(message.sender)}
-						muted={$stChannels[channel].muted_users
-							.map((u) => u.user.uuid)
-							.includes(message.sender)}
-						on:back={() => (showProfileMenu = false)}
-						{moderator}
-						{administrator}
-						user={$stChannels[channel]?.users.find(
-							(usr) => usr.uuid === message.sender
-						)}
-						on:kick={(ev) => {
-							api.kickFromChannel(ev.detail.uuid, channel);
-						}}
-						on:promote={(ev) => {
-							api.promoteUserInChannel(ev.detail.uuid, channel);
-						}}
-						on:demote={(ev) => {
-							api.demoteUserInChannel(ev.detail.uuid, channel);
-						}}
-						on:ban
-						on:unban
-						on:mute
-						on:unmute
-						on:direct
-						is_in_channel={$stChannels[channel]?.users
-							.map((u) => u.uuid)
-							.includes(message.sender)}
-					/>
-				{/if}
-			</div>
-		{/if}
-		<Bubble
-			{message}
-			{side}
-			last={i != 0}
-			one_above={i + 1 != messages.length}
-			{channel}
-		/>
-	</div>
-{/each}
+<div class="set">
+	<!-- <VirtualList {items} let:item={message}> -->
+	{#each messages as message, i (message.uuid)}
+		<div
+			class="bubble-wrapper {side}"
+			class:last={i + 1 === messages.length}
+			data-date={message.date}
+			data-username={side == "left" ? message.username + " · " : ""}
+		>
+			{#if side == "left"}
+				<div
+					class="profile-picture"
+					class:menu={showProfileMenu}
+					on:contextmenu|preventDefault={(e) =>
+						profileMenu(e, message)}
+					style={i == 0
+						? "background-image: url('" + avatarLink + "');"
+						: ""}
+				>
+					{#if showProfileMenu && selected === message.uuid}
+						<ChatProfileMenu
+							{offsetY}
+							uuid={message.sender}
+							banned={$stChannels[channel].banned_users
+								.map((u) => u.user.uuid)
+								.includes(message.sender)}
+							muted={$stChannels[channel].muted_users
+								.map((u) => u.user.uuid)
+								.includes(message.sender)}
+							on:back={() => (showProfileMenu = false)}
+							{moderator}
+							{administrator}
+							user={$stChannels[channel]?.users.find(
+								(usr) => usr.uuid === message.sender
+							)}
+							on:kick={(ev) => {
+								api.kickFromChannel(ev.detail.uuid, channel);
+							}}
+							on:promote={(ev) => {
+								api.promoteUserInChannel(
+									ev.detail.uuid,
+									channel
+								);
+							}}
+							on:demote={(ev) => {
+								api.demoteUserInChannel(
+									ev.detail.uuid,
+									channel
+								);
+							}}
+							on:ban
+							on:unban
+							on:mute
+							on:unmute
+							on:direct
+							is_in_channel={$stChannels[channel]?.users
+								.map((u) => u.uuid)
+								.includes(message.sender)}
+						/>
+					{/if}
+				</div>
+			{/if}
+			<Bubble
+				{message}
+				{side}
+				last={i + 1 === messages.length}
+				one_above={i !== 0}
+				{channel}
+			/>
+		</div>
+		<!-- </VirtualList> -->
+	{/each}
+</div>
 
 <style lang="scss">
 	.bubble-wrapper {

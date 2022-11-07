@@ -7,12 +7,10 @@
 	import Card from "../Kit/Card.svelte";
 	import ClickOutside from "svelte-click-outside";
 	import Modal from "../Kit/Modal.svelte";
-	import FriendRequestNotification from "./FriendRequestNotification.svelte";
 	import { createEventDispatcher } from "svelte";
 	import { onMount } from "svelte";
 	import { api, APIStatus } from "../../api";
 	import type { User } from "../../users";
-	import Notification from "./Notification.svelte";
 
 	let canGoBack = false;
 

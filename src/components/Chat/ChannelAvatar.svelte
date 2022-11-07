@@ -41,6 +41,7 @@
 		background-position: center;
 		background-size: cover;
 		background-repeat: no-repeat;
+		transform-style: preserve-3d;
 
 		&::after {
 			content: attr(data-char);
@@ -49,8 +50,24 @@
 			transform: translateY(-0px);
 		}
 
-		&.direct {
-			outline: 3px solid rgb(255, 255, 255);
+		&.direct::before {
+			content: "";
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translateX(-50%) + translateY(-50%) + translateZ(-1px);
+			width: 110%;
+			height: 110%;
+			border-radius: 100%;
+			background: rgb(60, 179, 221);
+			background: linear-gradient(
+				0deg,
+				rgba(60, 179, 221, 1) 0%,
+				rgba(255, 88, 148, 1) 20%,
+				rgba(255, 255, 255, 1) 45%,
+				rgba(255, 88, 148, 1) 71%,
+				rgba(60, 220, 221, 1) 100%
+			);
 		}
 	}
 </style>

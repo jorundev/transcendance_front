@@ -33,7 +33,7 @@ export interface Channel {
 		sender: string;
 		value: string;
 		date: number;
-		id: number;
+		uuid: string;
 	}>;
 	users: Array<ChannelUser>;
 	joined: boolean;
@@ -58,5 +58,5 @@ export interface ChatMessage {
 	date: string;
 	username: string;
 	confirmed: boolean;
-	id: number;
+	uuid: string;
 }

@@ -8,9 +8,22 @@
 		stLoggedUser,
 		stServerDown,
 		stWebsocket,
+		tryLoggingIn,
 	} from "./stores";
 
 	let interval = null;
+	let serverDownInterval = null;
+
+	stServerDown.subscribe((isDown) => {
+		if (isDown) {
+			serverDownInterval = setInterval(async () => {
+				await tryLoggingIn();
+			}, 2000);
+		} else {
+			clearInterval(serverDownInterval);
+			serverDownInterval = null;
+		}
+	});
 
 	onMount(async () => {
 		clearInterval(interval);

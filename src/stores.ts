@@ -196,7 +196,7 @@ async function initChannels() {
 		for (const message of messageRaw?.data) {
 			const channel = responses.joinedChannels.data[i];
 			channels[channel.uuid].loaded_messages.push({
-				id: message.id,
+				uuid: message.uuid,
 				value: message.message,
 				sender: message.user,
 				date: Date.parse(message.creation_date),
@@ -224,7 +224,7 @@ export async function initPrivChannel(channelUUID: string) {
 }
 
 export async function tryLoggingIn(): Promise<boolean> {
-	if (!isLogged()) {
+	if (get(stServerDown) || !isLogged()) {
 		await tryToLog();
 	}
 	return isLogged();

@@ -22,7 +22,7 @@
 	let textArea: HTMLInputElement;
 	let chatDiv: HTMLDivElement;
 
-	let selectedId = -1;
+	let selectedUUID = "";
 
 	let selectedUser: string;
 
@@ -126,12 +126,12 @@
 
 	const text_area_height = "80px";
 
-	let last_message_id: number = 0;
+	let last_message_uuid = "";
 	let last_message_id_offset = 1000;
 
 	$: if (info?.loaded_messages.length > 0) {
-		last_message_id =
-			info?.loaded_messages[info.loaded_messages.length - 1].id;
+		last_message_uuid =
+			info?.loaded_messages[info.loaded_messages.length - 1].uuid;
 	}
 
 	// this handles the loading of previous messages on scroll
@@ -225,7 +225,7 @@
 						"#" +
 						identifier.substring(identifier.length - 4),
 					confirmed: true,
-					id: message.id,
+					uuid: message.uuid,
 				});
 			}
 			messages = messagesBuffer;
@@ -254,7 +254,7 @@
 					username: message.username,
 					confirmed: message.confirmed,
 					sender: message.sender,
-					id: message.id,
+					uuid: message.uuid,
 				});
 			} else {
 				groups.push({
@@ -269,7 +269,7 @@
 							username: message.username,
 							confirmed: message.confirmed,
 							sender: message.sender,
-							id: message.id,
+							uuid: message.uuid,
 						},
 					],
 					id: i,
@@ -322,7 +322,7 @@
 	});
 
 	function selectProfile(ev: CustomEvent<any>) {
-		selectedId = ev.detail.id;
+		selectedUUID = ev.detail.uuid;
 	}
 </script>
 
@@ -477,7 +477,7 @@
 							messages={set.messages}
 							channel={params.uuid}
 							on:select={(ev) => selectProfile(ev)}
-							selected={selectedId}
+							selected={selectedUUID}
 						/>
 					{/each}
 				{:else}

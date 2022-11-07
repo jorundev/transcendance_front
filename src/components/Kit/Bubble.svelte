@@ -34,14 +34,14 @@
 
 	async function deleteMessage() {
 		if (message.value != null) {
-			return api.deleteMessage(channel, message.id);
+			return api.deleteMessage(channel, message.uuid);
 		}
 	}
 </script>
 
 <div
 	class="bubble {side}"
-	class:last={!last}
+	class:last
 	class:one-above={one_above}
 	class:pending={!message.confirmed}
 	class:red={display_options}
