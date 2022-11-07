@@ -65,7 +65,7 @@
 					class:menu={showProfileMenu}
 					on:contextmenu|preventDefault={(e) =>
 						profileMenu(e, message)}
-					style={i == 0
+					style={i + 1 === messages.length
 						? "background-image: url('" + avatarLink + "');"
 						: ""}
 				>
