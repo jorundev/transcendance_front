@@ -39,6 +39,7 @@
 	}
 </script>
 
+<!-- on:contextmenu|preventDefault={contextMenu} -->
 <div
 	class="bubble {side}"
 	class:last
@@ -47,22 +48,21 @@
 	class:red={display_options}
 	class:no-pre-wrap={display_options}
 	class:deleted={message.value == null}
-	on:contextmenu|preventDefault={contextMenu}
 >
-	{#if !display_options}
-		<div
-			class="message"
-			class:deleted={message.value == null}
-			bind:clientWidth={defaultWidth}
-			bind:clientHeight={defaultHeight}
-		>
-			{#if message.value != null}
-				{message.value}
-			{:else}
-				{"This message was deleted"}
-			{/if}
-		</div>
-	{:else}
+	<!-- {#if !display_options} -->
+	<div
+		class="message"
+		class:deleted={message.value == null}
+		bind:clientWidth={defaultWidth}
+		bind:clientHeight={defaultHeight}
+	>
+		{#if message.value != null}
+			{message.value}
+		{:else}
+			{"This message was deleted"}
+		{/if}
+	</div>
+	<!-- {:else}
 		<ClickOutside on:clickoutside={removeOptions}>
 			<div
 				class="options"
@@ -74,7 +74,7 @@
 				</div>
 			</div>
 		</ClickOutside>
-	{/if}
+	{/if} -->
 </div>
 
 <style lang="scss">
