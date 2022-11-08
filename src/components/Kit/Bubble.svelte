@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { api } from "../../api";
-	import ClickOutside from "svelte-click-outside";
+	// import ClickOutside from "svelte-click-outside";
 	import type { ChatMessage } from "../../channels";
 	export let message: ChatMessage;
 	export let side: "left" | "right";

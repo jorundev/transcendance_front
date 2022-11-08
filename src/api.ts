@@ -360,6 +360,9 @@ export async function getUsersFromUUIDs(channel: APIChannel): Promise<
 	return users;
 }
 
+// Max number of messages displayed per channel
+const channelMessageLimit = 100;
+
 interface UserCache {
 	[key: string]: Promise<APIStatus | User>;
 }
@@ -372,6 +375,11 @@ export async function loadNextPage(uuid: string, n?: number) {
 	if (n == undefined) n = 1;
 	const channel = get(stChannels)[uuid];
 	if (channel === undefined || channel.last_loaded_page <= 1) {
+		return;
+	}
+
+	// For performance reasons, we limit the numbers of messages
+	if (channel.loaded_messages?.length >= channelMessageLimit) {
 		return;
 	}
 
@@ -389,6 +397,7 @@ export async function loadNextPage(uuid: string, n?: number) {
 		if (messages == APIStatus.NoResponse) {
 			return;
 		}
+		let count = 0;
 		for (const message of messages.data) {
 			/* Avoid duplicates */
 			if (
@@ -402,12 +411,22 @@ export async function loadNextPage(uuid: string, n?: number) {
 					sender: message.user,
 					date: Date.parse(message.creation_date),
 				});
+				count += 1;
+				if (count >= channelMessageLimit) {
+					break;
+				}
 			}
 		}
 	}
+
+
 	channel.loaded_messages.sort((a, b) => {
 		return a.date - b.date;
 	});
+
+	if (channel.loaded_messages.length > channelMessageLimit) {
+		channel.loaded_messages = channel.loaded_messages.slice(channel.loaded_messages.length - channelMessageLimit, channel.loaded_messages.length);
+	}
 
 	channel.last_loaded_page = i + 1;
 
@@ -509,6 +528,7 @@ async function wsChatMessage(data: WsChat) {
 	switch (data.action) {
 		case ChatAction.Send:
 			await wsChatSend(data as WsChatSend);
+			break;
 		case ChatAction.Join:
 			await wsChatJoin(data as WsChatJoin);
 			break;
@@ -628,6 +648,10 @@ async function wsChatSend(data: WsChatSend) {
 			uuid: data.message.uuid,
 			date: Date.parse(data.message.time),
 		});
+		const channel = channels[data.channel];
+		if (channel.loaded_messages.length > channelMessageLimit) {
+			channels[data.channel].loaded_messages = channel.loaded_messages.slice(channel.loaded_messages.length - channelMessageLimit, channel.loaded_messages.length);
+		}
 		return channels;
 	});
 }
