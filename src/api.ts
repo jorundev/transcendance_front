@@ -36,7 +36,11 @@ export enum APIStatus {
 	NoResponse,
 }
 
-async function fetchPOST(url: string, object: any, type = "application/json"): Promise<Response> {
+async function fetchPOST(
+	url: string,
+	object: any,
+	type = "application/json"
+): Promise<Response> {
 	let headers = {};
 	if (type.length !== 0) {
 		headers["Content-Type"] = type;
@@ -48,7 +52,11 @@ async function fetchPOST(url: string, object: any, type = "application/json"): P
 	});
 }
 
-async function fetchPATCH(url: string, object: any, type = "application/json"): Promise<Response> {
+async function fetchPATCH(
+	url: string,
+	object: any,
+	type = "application/json"
+): Promise<Response> {
 	let headers = {};
 	if (type.length !== 0) {
 		headers["Content-Type"] = type;
@@ -60,7 +68,11 @@ async function fetchPATCH(url: string, object: any, type = "application/json"): 
 	});
 }
 
-async function fetchDELETE(url: string, object: any, type = "application/json"): Promise<Response> {
+async function fetchDELETE(
+	url: string,
+	object: any,
+	type = "application/json"
+): Promise<Response> {
 	let headers = {};
 	if (type.length !== 0) {
 		headers["Content-Type"] = type;
@@ -72,7 +84,11 @@ async function fetchDELETE(url: string, object: any, type = "application/json"):
 	});
 }
 
-async function fetchPUT(url: string, object: any, type = "application/json"): Promise<Response> {
+async function fetchPUT(
+	url: string,
+	object: any,
+	type = "application/json"
+): Promise<Response> {
 	let headers = {};
 	if (type.length !== 0) {
 		headers["Content-Type"] = type;
@@ -147,22 +163,38 @@ async function makeRequest<T>(
 ): Promise<T | APIStatus.NoResponse | null> {
 	let promise: Promise<Response>;
 
-	for (; ;) {
+	for (;;) {
 		switch (method) {
 			case "GET":
 				promise = fetchGET(url);
 				break;
 			case "POST":
-				promise = fetchPOST(url, (object !== undefined) ? object : {}, type);
+				promise = fetchPOST(
+					url,
+					object !== undefined ? object : {},
+					type
+				);
 				break;
 			case "DELETE":
-				promise = fetchDELETE(url, (object !== undefined) ? object : {}, type);
+				promise = fetchDELETE(
+					url,
+					object !== undefined ? object : {},
+					type
+				);
 				break;
 			case "PUT":
-				promise = fetchPUT(url, (object !== undefined) ? object : {}, type);
+				promise = fetchPUT(
+					url,
+					object !== undefined ? object : {},
+					type
+				);
 				break;
 			case "PATCH":
-				promise = fetchPATCH(url, (object !== undefined) ? object : {}, type);
+				promise = fetchPATCH(
+					url,
+					object !== undefined ? object : {},
+					type
+				);
 				break;
 		}
 
@@ -190,9 +222,16 @@ async function makeRequest<T>(
 			case 200:
 			case 201:
 				try {
-					return { statusCode: response.status, message: response.statusText, ...JSON.parse(await response.text()) };
+					return {
+						statusCode: response.status,
+						message: response.statusText,
+						...JSON.parse(await response.text()),
+					};
 				} catch (e) {
-					return { statusCode: response.status, message: response.statusText } as any;
+					return {
+						statusCode: response.status,
+						message: response.statusText,
+					} as any;
 				}
 			case 401:
 				console.log(
@@ -214,7 +253,10 @@ async function makeRequest<T>(
 					return await response.json();
 				} catch (e) {
 					// return null;
-					return { statusCode: response.status, message: response.statusText } as any;
+					return {
+						statusCode: response.status,
+						message: response.statusText,
+					} as any;
 				}
 		}
 	}
@@ -250,8 +292,8 @@ export interface APIUser extends WhoAmIResponse {
 }
 
 export interface TFAInitResponse extends APIResponse {
-	image: string,
-	text: string,
+	image: string;
+	text: string;
 }
 
 export interface ListChannelsResponse extends APIResponse {
@@ -263,8 +305,8 @@ export interface ListChannelsResponse extends APIResponse {
 }
 
 export interface APIBlacklist extends APIResponse {
-	banned: Array<{ user: string, expiration: string }>,
-	muted: Array<{ user: string, expiration: string }>,
+	banned: Array<{ user: string; expiration: string }>;
+	muted: Array<{ user: string; expiration: string }>;
 }
 
 export interface APIChannel {
@@ -308,15 +350,15 @@ interface WebsocketMessage {
 }
 
 export interface SessionsResponse extends APIResponse {
-	data: Array<Session>,
+	data: Array<Session>;
 }
 
 export interface Session {
-	uuid: string,
-	platform: string,
-	creation_date: string,
-	active: boolean,
-	current: boolean,
+	uuid: string;
+	platform: string;
+	creation_date: string;
+	active: boolean;
+	current: boolean;
 }
 
 export async function getUsersFromUUIDs(channel: APIChannel): Promise<
@@ -352,8 +394,7 @@ export async function getUsersFromUUIDs(channel: APIChannel): Promise<
 			avatar: data.avatar,
 			uuid: channel.users[i],
 			is_moderator: channel.moderators.includes(channel.users[i]),
-			is_administrator:
-				channel.administrator === channel.users[i],
+			is_administrator: channel.administrator === channel.users[i],
 		});
 		i += 1;
 	}
@@ -361,7 +402,7 @@ export async function getUsersFromUUIDs(channel: APIChannel): Promise<
 }
 
 // Max number of messages displayed per channel
-const channelMessageLimit = 100;
+export const channelMessageLimit = 100;
 
 interface UserCache {
 	[key: string]: Promise<APIStatus | User>;
@@ -419,13 +460,15 @@ export async function loadNextPage(uuid: string, n?: number) {
 		}
 	}
 
-
 	channel.loaded_messages.sort((a, b) => {
 		return a.date - b.date;
 	});
 
 	if (channel.loaded_messages.length > channelMessageLimit) {
-		channel.loaded_messages = channel.loaded_messages.slice(channel.loaded_messages.length - channelMessageLimit, channel.loaded_messages.length);
+		channel.loaded_messages = channel.loaded_messages.slice(
+			channel.loaded_messages.length - channelMessageLimit,
+			channel.loaded_messages.length
+		);
 	}
 
 	channel.last_loaded_page = i + 1;
@@ -458,8 +501,9 @@ async function wsChatMessage(data: WsChat) {
 			channel_data.moderators = [];
 		}
 
-		const isModerator = channel_data.moderators.includes(get(stLoggedUser).uuid)
-			|| channel_data.administrator === get(stLoggedUser).uuid;
+		const isModerator =
+			channel_data.moderators.includes(get(stLoggedUser).uuid) ||
+			channel_data.administrator === get(stLoggedUser).uuid;
 
 		let banned_users = [];
 		let muted_users = [];
@@ -478,8 +522,8 @@ async function wsChatMessage(data: WsChat) {
 								id: parseInt(info.identifier),
 								avatar: info.avatar,
 								is_moderator: false,
-								is_administrator: false
-							}
+								is_administrator: false,
+							},
 						});
 					}
 				}
@@ -494,8 +538,8 @@ async function wsChatMessage(data: WsChat) {
 								id: parseInt(info.identifier),
 								avatar: info.avatar,
 								is_moderator: false,
-								is_administrator: false
-							}
+								is_administrator: false,
+							},
 						});
 					}
 				}
@@ -587,8 +631,8 @@ async function wsChatPromote(data: WsChatPromote) {
 							id: parseInt(info.identifier),
 							avatar: info.avatar,
 							is_moderator: false,
-							is_administrator: false
-						}
+							is_administrator: false,
+						},
 					});
 				}
 			}
@@ -603,8 +647,8 @@ async function wsChatPromote(data: WsChatPromote) {
 							id: parseInt(info.identifier),
 							avatar: info.avatar,
 							is_moderator: false,
-							is_administrator: false
-						}
+							is_administrator: false,
+						},
 					});
 				}
 			}
@@ -635,7 +679,9 @@ async function wsChatDemote(data: WsChatDemote) {
 			channels[data.channel].banned_users = [];
 			channels[data.channel].muted_users = [];
 		}
-		channels[data.channel].moderators = channels[data.channel].moderators.filter((usr) => usr !== data.user);
+		channels[data.channel].moderators = channels[
+			data.channel
+		].moderators.filter((usr) => usr !== data.user);
 		return channels;
 	});
 }
@@ -650,7 +696,8 @@ async function wsChatSend(data: WsChatSend) {
 		});
 		const channel = channels[data.channel];
 		if (channel.loaded_messages.length > channelMessageLimit) {
-			channels[data.channel].loaded_messages = channel.loaded_messages.slice(channel.loaded_messages.length - channelMessageLimit, channel.loaded_messages.length);
+			channels[data.channel].loaded_messages =
+				channel.loaded_messages.slice(-channelMessageLimit);
 		}
 		return channels;
 	});
@@ -739,7 +786,10 @@ async function wsChatLeave(data: WsChatLeave) {
 	const loggedUser = get(stLoggedUser);
 
 	// We do not want to keep private channels that we are not in in stChannels
-	if (data.user === loggedUser.uuid && get(stChannels)[data.channel].type === ChannelType.Private) {
+	if (
+		data.user === loggedUser.uuid &&
+		get(stChannels)[data.channel].type === ChannelType.Private
+	) {
 		stChannels.update((channels) => {
 			if (data.user == loggedUser.uuid) {
 				delete channels[data.channel];
@@ -774,7 +824,11 @@ async function wsChatBan(data: WsChatBan) {
 		return;
 	}
 	stChannels.update((channels) => {
-		if (!channels[data.channel].banned_users.map((u) => u.user.uuid).includes(data.user)) {
+		if (
+			!channels[data.channel].banned_users
+				.map((u) => u.user.uuid)
+				.includes(data.user)
+		) {
 			channels[data.channel].banned_users.push({
 				expiration: new Date(data.expiration),
 				user: {
@@ -783,8 +837,8 @@ async function wsChatBan(data: WsChatBan) {
 					id: parseInt(info.identifier),
 					avatar: info.avatar,
 					is_moderator: false,
-					is_administrator: false
-				}
+					is_administrator: false,
+				},
 			});
 			return channels;
 		}
@@ -797,7 +851,11 @@ async function wsChatMute(data: WsChatMute) {
 		return;
 	}
 	stChannels.update((channels) => {
-		if (!channels[data.channel].muted_users.map((u) => u.user.uuid).includes(data.user)) {
+		if (
+			!channels[data.channel].muted_users
+				.map((u) => u.user.uuid)
+				.includes(data.user)
+		) {
 			channels[data.channel].muted_users.push({
 				expiration: new Date(data.expiration),
 				user: {
@@ -806,8 +864,8 @@ async function wsChatMute(data: WsChatMute) {
 					id: parseInt(info.identifier),
 					avatar: info.avatar,
 					is_moderator: false,
-					is_administrator: false
-				}
+					is_administrator: false,
+				},
 			});
 			return channels;
 		}
@@ -816,7 +874,9 @@ async function wsChatMute(data: WsChatMute) {
 
 async function wsChatUnban(data: WsChatUnban) {
 	stChannels.update((channels) => {
-		channels[data.channel].banned_users = channels[data.channel].banned_users.filter((banned) => {
+		channels[data.channel].banned_users = channels[
+			data.channel
+		].banned_users.filter((banned) => {
 			banned.user.uuid !== data.user;
 		});
 		return channels;
@@ -825,7 +885,9 @@ async function wsChatUnban(data: WsChatUnban) {
 
 async function wsChatUnmute(data: WsChatUnmute) {
 	stChannels.update((channels) => {
-		channels[data.channel].muted_users = channels[data.channel].muted_users.filter((muted) => {
+		channels[data.channel].muted_users = channels[
+			data.channel
+		].muted_users.filter((muted) => {
 			muted.user.uuid !== data.user;
 		});
 		return channels;
@@ -871,8 +933,8 @@ export const api = {
 	logout: async () => {
 		await fetchPOST("/api/auth/logout", {});
 		stLoggedUser.set(null);
-		get(stWebsocket)?.close()
-		stWebsocket.set(null)
+		get(stWebsocket)?.close();
+		stWebsocket.set(null);
 		push("/login");
 	},
 	getQRCode: async (): Promise<TFAInitResponse> => {
@@ -905,9 +967,18 @@ export const api = {
 	changeAvatar: async (file: File) => {
 		let formData = new FormData();
 		formData.append("avatar", file);
-		const res = await makeRequest<ChangeAvatarResponse>("/api/users/avatar", "POST", formData, "");
+		const res = await makeRequest<ChangeAvatarResponse>(
+			"/api/users/avatar",
+			"POST",
+			formData,
+			""
+		);
 		await new Promise((resolve) => setTimeout(resolve, 200));
-		if (res !== null && res !== APIStatus.NoResponse && res.statusCode !== 413) {
+		if (
+			res !== null &&
+			res !== APIStatus.NoResponse &&
+			res.statusCode !== 413
+		) {
 			stLoggedUser?.update((old) => {
 				old.avatar = res.avatar;
 				return old;
@@ -918,9 +989,18 @@ export const api = {
 	changeChannelAvatar: async (file: File, channel: string) => {
 		let formData = new FormData();
 		formData.append("avatar", file);
-		const res = await makeRequest<ChangeAvatarResponse>("/api/chats/channels/" + channel + "/avatar", "POST", formData, "");
+		const res = await makeRequest<ChangeAvatarResponse>(
+			"/api/chats/channels/" + channel + "/avatar",
+			"POST",
+			formData,
+			""
+		);
 		await new Promise((resolve) => setTimeout(resolve, 200));
-		if (res !== null && res !== APIStatus.NoResponse && res.statusCode !== 413) {
+		if (
+			res !== null &&
+			res !== APIStatus.NoResponse &&
+			res.statusCode !== 413
+		) {
 			stLoggedUser?.update((old) => {
 				old.avatar = res.avatar;
 				return old;
@@ -940,11 +1020,12 @@ export const api = {
 	getChannelMessages: async (uuid: string, page: number) => {
 		return makeRequest<ChannelMessagesResponse>(
 			"/api/chats/channels/" +
-			uuid +
-			"/messages" +
-			"?page=" +
-			page +
-			"&limit=" + chatPageSize,
+				uuid +
+				"/messages" +
+				"?page=" +
+				page +
+				"&limit=" +
+				chatPageSize,
 			"GET"
 		);
 	},
@@ -954,7 +1035,10 @@ export const api = {
 			return from_store;
 		}
 		if (userCache[uuid] === undefined) {
-			userCache[uuid] = makeRequest<User>("/api/users/profile/" + uuid, "GET");
+			userCache[uuid] = makeRequest<User>(
+				"/api/users/profile/" + uuid,
+				"GET"
+			);
 		}
 		const user = await userCache[uuid];
 		if (user != APIStatus.NoResponse) {
@@ -978,7 +1062,7 @@ export const api = {
 				"POST",
 				{ message }
 			);
-		} catch (_e) { }
+		} catch (_e) {}
 	},
 	deleteMessage: async (channel: string, uuid: string) => {
 		return makeRequest(
@@ -1012,7 +1096,7 @@ export const api = {
 	},
 	deleteChannel: async (channel: string) => {
 		return makeRequest("/api/chats/channels/" + channel, "DELETE", {
-			action: "REMOVE"
+			action: "REMOVE",
 		});
 	},
 	leaveChannel: async (uuid: string) => {
@@ -1030,17 +1114,28 @@ export const api = {
 		});
 	},
 	promoteUserInChannel: async (user: string, channel: string) => {
-		return makeRequest("/api/chats/channels/" + channel + "/moderator", "PUT", {
-			user_uuid: user,
-		});
+		return makeRequest(
+			"/api/chats/channels/" + channel + "/moderator",
+			"PUT",
+			{
+				user_uuid: user,
+			}
+		);
 	},
 	demoteUserInChannel: async (user: string, channel: string) => {
-		return makeRequest("/api/chats/channels/" + channel + "/moderator", "DELETE", {
-			user_uuid: user,
-		});
+		return makeRequest(
+			"/api/chats/channels/" + channel + "/moderator",
+			"DELETE",
+			{
+				user_uuid: user,
+			}
+		);
 	},
 	getBlacklist: async (channel: string) => {
-		return makeRequest<APIBlacklist>("api/chats/channels/" + channel + "/blacklist", "GET");
+		return makeRequest<APIBlacklist>(
+			"api/chats/channels/" + channel + "/blacklist",
+			"GET"
+		);
 	},
 	banUserFromChannel: async (
 		user: string,
@@ -1062,21 +1157,23 @@ export const api = {
 			expiration: duration,
 		});
 	},
-	unbanUserFromChannel: async (
-		user: string,
-		channel: string
-	) => {
-		return makeRequest("/api/chats/channels/" + channel + "/unban", "DELETE", {
-			user_uuid: user,
-		});
+	unbanUserFromChannel: async (user: string, channel: string) => {
+		return makeRequest(
+			"/api/chats/channels/" + channel + "/unban",
+			"DELETE",
+			{
+				user_uuid: user,
+			}
+		);
 	},
-	unmuteUserFromChannel: async (
-		user: string,
-		channel: string
-	) => {
-		return makeRequest("/api/chats/channels/" + channel + "/unmute", "DELETE", {
-			user_uuid: user,
-		});
+	unmuteUserFromChannel: async (user: string, channel: string) => {
+		return makeRequest(
+			"/api/chats/channels/" + channel + "/unmute",
+			"DELETE",
+			{
+				user_uuid: user,
+			}
+		);
 	},
 	setChannelPassword: async (channel: string, password?: string) => {
 		if (password === undefined) {
@@ -1107,9 +1204,16 @@ export const api = {
 		return makeRequest<SessionsResponse>("/api/users/sessions", "GET");
 	},
 	killSession: async (uuid: string) => {
-		return makeRequest<APIResponse>("/api/users/sessions/" + uuid, "DELETE");
+		return makeRequest<APIResponse>(
+			"/api/users/sessions/" + uuid,
+			"DELETE"
+		);
 	},
-	changePassword: async (oldPassword: string, newPassword: string, confirmNewPassword: string) => {
+	changePassword: async (
+		oldPassword: string,
+		newPassword: string,
+		confirmNewPassword: string
+	) => {
 		return makeRequest<APIResponse>("/api/users", "PATCH", {
 			current_password: oldPassword,
 			new_password: newPassword,
@@ -1117,16 +1221,24 @@ export const api = {
 		});
 	},
 	createDirectMessage: async (user: string) => {
-		return makeRequest<CreateDirectMessageResponse>("/api/chats/channels", "POST", {
-			user_uuid: user
-		});
+		return makeRequest<CreateDirectMessageResponse>(
+			"/api/chats/channels",
+			"POST",
+			{
+				user_uuid: user,
+			}
+		);
 	},
 	ws: {
 		connect: async () => {
 			if (get(stWebsocket) == null) {
-				const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+				const protocol =
+					window.location.protocol === "https:" ? "wss" : "ws";
 				const ws = new WebSocket(
-					protocol + "://" + window.location.hostname + "/api/streaming"
+					protocol +
+						"://" +
+						window.location.hostname +
+						"/api/streaming"
 				);
 				stWebsocket.set(ws);
 

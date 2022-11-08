@@ -2,6 +2,7 @@ import { derived, get, writable, type Writable } from "svelte/store";
 import {
 	api,
 	APIStatus,
+	channelMessageLimit,
 	chatPageSize,
 	getUsersFromUUIDs,
 	type APIChannel,
@@ -18,12 +19,17 @@ export const stServerDown: Writable<boolean> = writable(false);
 export const stUsers: Writable<UserDictionary> = writable({});
 export const stWebsocket: Writable<WebSocket | null> = writable(null);
 export const stChannels: Writable<ChannelDictionary> = writable({});
-export const stNotifications: Writable<NotificationDataDictionary> = writable({});
-export const stHasNotifications = derived(stNotifications, $stNotifications => Object.entries($stNotifications).length > 0);
+export const stNotifications: Writable<NotificationDataDictionary> = writable(
+	{}
+);
+export const stHasNotifications = derived(
+	stNotifications,
+	($stNotifications) => Object.entries($stNotifications).length > 0
+);
 
 export async function tryToLog() {
 	let response: WhoAmIResponse | APIStatus;
-	for (; ;) {
+	for (;;) {
 		response = await api.whoami();
 		if (response == null) {
 			return;
@@ -84,7 +90,10 @@ async function channelFromAPIChannel(
 		channel.moderators = [];
 	}
 
-	if (channel.moderators.includes(get(stLoggedUser)?.uuid) || channel.administrator === get(stLoggedUser)?.uuid) {
+	if (
+		channel.moderators.includes(get(stLoggedUser)?.uuid) ||
+		channel.administrator === get(stLoggedUser)?.uuid
+	) {
 		const blacklist = await api.getBlacklist(channel.uuid);
 		if (blacklist !== null && blacklist !== APIStatus.NoResponse) {
 			for (const listInfo of blacklist.banned) {
@@ -98,8 +107,8 @@ async function channelFromAPIChannel(
 							id: parseInt(info.identifier),
 							avatar: info.avatar,
 							is_moderator: false,
-							is_administrator: false
-						}
+							is_administrator: false,
+						},
 					});
 				}
 			}
@@ -114,8 +123,8 @@ async function channelFromAPIChannel(
 							id: parseInt(info.identifier),
 							avatar: info.avatar,
 							is_moderator: false,
-							is_administrator: false
-						}
+							is_administrator: false,
+						},
 					});
 				}
 			}
@@ -201,9 +210,11 @@ async function initChannels() {
 				sender: message.user,
 				date: Date.parse(message.creation_date),
 			});
+			channels[channel.uuid].loaded_messages = channels[
+				channel.uuid
+			].loaded_messages.slice(-channelMessageLimit);
 		}
 	}
-
 	stChannels.set(channels);
 }
 

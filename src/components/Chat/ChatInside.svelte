@@ -120,7 +120,7 @@
 		onInfoChange();
 	}
 
-	let old_length = 0;
+	let old_last_message_uuid = "";
 	let old_channel_uuid: string;
 	let info: Channel = null;
 
@@ -201,13 +201,17 @@
 		if (info == undefined) {
 			return;
 		}
+		const last_message_uuid =
+			info.loaded_messages.length > 0
+				? info.loaded_messages[info.loaded_messages.length - 1].uuid
+				: "";
 		if (
-			info.loaded_messages.length != old_length ||
+			last_message_uuid != old_last_message_uuid ||
 			info.uuid != old_channel_uuid ||
 			info.reload
 		) {
 			info.reload = undefined;
-			old_length = info.loaded_messages.length;
+			old_last_message_uuid = info.loaded_messages.length;
 			old_channel_uuid = info.uuid;
 			const messagesBuffer = [];
 			for (const message of info.loaded_messages) {
