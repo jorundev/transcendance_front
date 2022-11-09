@@ -1041,7 +1041,7 @@ export const api = {
 			);
 		}
 		const user = await userCache[uuid];
-		if (user != APIStatus.NoResponse) {
+		if (user !== APIStatus.NoResponse) {
 			stUsers.update((u) => {
 				u[uuid] = user;
 				return u;

@@ -20,6 +20,7 @@ import NotFound from "./routes/NotFound.svelte";
 import Chat from "./routes/Chat.svelte";
 import ChatInside from "./components/Chat/ChatInside.svelte";
 import ChooseLobby from "./routes/ChooseLobby.svelte";
+import Profile from "./routes/Profile.svelte";
 
 function requiresLogin(component: typeof SvelteComponentDev): WrappedComponent {
 	return wrap({
@@ -60,6 +61,7 @@ export default {
 	"/chat/:uuid?": requiresLogin(Chat),
 	"/chat/inner/:uuid": requiresLogin(ChatInside),
 	"/notifications": requiresLogin(Notifications),
+	"/profile/:uuid": requiresLogin(Profile),
 	"/play": requiresLogin(ChooseLobby),
 	"/login": requiresNoLogin(Login),
 	"/login/email": requiresNoLogin(LoginByEmail),

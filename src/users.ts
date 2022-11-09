@@ -3,7 +3,7 @@ export interface LoggedUser {
 	id: number;
 	avatar: string | null;
 	uuid: string;
-	tfa: boolean,
+	tfa: boolean;
 }
 
 export interface User {

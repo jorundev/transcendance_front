@@ -4,6 +4,7 @@
 	import { createEventDispatcher } from "svelte";
 	import ClickOutside from "svelte-click-outside";
 	import { api, APIStatus } from "../../api";
+	import { push } from "svelte-spa-router";
 
 	export let uuid: string;
 	export let moderator: boolean;
@@ -52,6 +53,10 @@
 			}
 		}
 	}
+
+	function goToProfile() {
+		push("/profile/" + uuid);
+	}
 </script>
 
 <ClickOutside on:clickoutside={() => dispatch("back")}>
@@ -63,7 +68,7 @@
 		{#if administrator || moderator}
 			<div class="title noselect">User options</div>
 		{/if}
-		<div class="entry">Go to profile</div>
+		<div class="entry" on:click={goToProfile}>Go to profile</div>
 		<div class="entry" on:click={directMessage}>Send a direct message</div>
 		<div class="entry">Invite to casual game</div>
 		{#if (administrator || moderator) && !user?.is_administrator}

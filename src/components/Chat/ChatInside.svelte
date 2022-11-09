@@ -17,7 +17,8 @@
 	} from "../../channels";
 	import { padIdentifier } from "../../utils";
 	import SideBar from "../SideBar.svelte";
-	import { replace } from "svelte-spa-router";
+	import { push, replace } from "svelte-spa-router";
+	import { createEventDispatcher } from "svelte";
 
 	let textArea: HTMLInputElement;
 	let chatDiv: HTMLDivElement;
@@ -31,6 +32,8 @@
 	export let desktop = false;
 
 	let showMutedInfo = false;
+
+	let dispatch = createEventDispatcher();
 
 	let backToSettings = false;
 
@@ -211,7 +214,7 @@
 			info.reload
 		) {
 			info.reload = undefined;
-			old_last_message_uuid = info.loaded_messages.length;
+			old_last_message_uuid = last_message_uuid;
 			old_channel_uuid = info.uuid;
 			const messagesBuffer = [];
 			for (const message of info.loaded_messages) {
@@ -476,7 +479,13 @@
 									info.uuid
 								);
 							}}
-							on:direct
+							on:direct={(data) => {
+								if (desktop) {
+									dispatch("direct", data.detail);
+								} else {
+									push("/chat/inner/" + data.detail.uuid);
+								}
+							}}
 							side={set.side}
 							messages={set.messages}
 							channel={params.uuid}
