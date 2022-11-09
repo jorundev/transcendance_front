@@ -27,7 +27,7 @@ export interface Channel {
 		sender: string | null;
 		value: string;
 		date: number;
-		id: number;
+		uuid: string;
 	} | null;
 	loaded_messages: Array<{
 		sender: string;
@@ -43,12 +43,12 @@ export interface Channel {
 	last_loaded_page: number;
 	reload?: boolean;
 	banned_users: Array<{
-		user: ChannelUser,
-		expiration: Date,
+		user: ChannelUser;
+		expiration: Date;
 	}>;
 	muted_users: Array<{
-		user: ChannelUser,
-		expiration: Date,
+		user: ChannelUser;
+		expiration: Date;
 	}>;
 }
 

@@ -2,6 +2,7 @@
 	import { push } from "svelte-spa-router";
 	import { onMount } from "svelte";
 	import { stHasNotifications } from "../stores";
+	import FriendListVertical from "./Friends/FriendListVertical.svelte";
 
 	let bigDisplay = false;
 	let innerWidth = 0;
@@ -89,6 +90,11 @@
 	>
 		<div class="inner">Settings</div>
 	</div>
+	{#if innerWidth >= 800}
+		<div class="friends">
+			<FriendListVertical />
+		</div>
+	{/if}
 </div>
 
 <svelte:window bind:innerWidth />
@@ -216,7 +222,8 @@
 			padding-top: 50px;
 			border-right: 1px solid rgb(37, 37, 37);
 			position: fixed;
-			height: 100%;
+			height: 100vh;
+			box-sizing: border-box;
 			width: 52px;
 			flex-direction: column;
 			gap: 25px;
@@ -258,5 +265,19 @@
 		.sidebar {
 			transform: translateX(-148px);
 		}
+	}
+
+	.friends {
+		display: flex;
+		padding-top: 10px;
+		flex-direction: column;
+		align-items: flex-start;
+		justify-content: flex-start;
+		width: 100%;
+		overflow-x: hidden;
+		overflow-y: auto;
+		height: 100%;
+		box-sizing: border-box;
+		gap: 10px;
 	}
 </style>

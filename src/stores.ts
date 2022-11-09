@@ -11,6 +11,7 @@ import {
 	type WhoAmIResponse,
 } from "./api";
 import type { Channel, ChannelDictionary } from "./channels";
+import { ConnectionStatus, type FriendDataDictionary } from "./friends";
 import type { NotificationDataDictionary } from "./notifications";
 import type { LoggedUser, UserDictionary } from "./users";
 
@@ -26,6 +27,64 @@ export const stHasNotifications = derived(
 	stNotifications,
 	($stNotifications) => Object.entries($stNotifications).length > 0
 );
+export const stFriends: Writable<FriendDataDictionary> = writable({
+	mockuuid: {
+		uuid: "mockuuid",
+		name: "mock",
+		id: "0100",
+		avatar: null,
+		status: ConnectionStatus.Offline,
+	},
+	mockuuid2: {
+		uuid: "mockuuid2",
+		name: "mock",
+		id: "0100",
+		avatar: null,
+		status: ConnectionStatus.Online,
+	},
+	mockuuid3: {
+		uuid: "mockuuid3",
+		name: "mock",
+		id: "0100",
+		avatar: null,
+		status: ConnectionStatus.InGame,
+	},
+	mockuuid4: {
+		uuid: "mockuuid4",
+		name: "mock",
+		id: "0100",
+		avatar: null,
+		status: ConnectionStatus.Offline,
+	},
+	mockuuid5: {
+		uuid: "mockuuid5",
+		name: "mock",
+		id: "0100",
+		avatar: null,
+		status: ConnectionStatus.Offline,
+	},
+	mockuuid6: {
+		uuid: "mockuuid6",
+		name: "mock",
+		id: "0100",
+		avatar: null,
+		status: ConnectionStatus.Offline,
+	},
+	mockuuid7: {
+		uuid: "mockuuid7",
+		name: "mock",
+		id: "0100",
+		avatar: null,
+		status: ConnectionStatus.Offline,
+	},
+	mockuuid8: {
+		uuid: "mockuuid8",
+		name: "mock",
+		id: "0100",
+		avatar: null,
+		status: ConnectionStatus.Offline,
+	},
+});
 
 export async function tryToLog() {
 	let response: WhoAmIResponse | APIStatus;
