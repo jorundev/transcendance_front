@@ -1,11 +1,13 @@
 <script lang="ts">
+	import { padIdentifier } from "../../utils";
+	import { UsersFriendship } from "../../api";
 	import { ConnectionStatus } from "../../friends";
 	import { stFriends } from "../../stores";
 	import UserAvatar from "../Users/UserAvatar.svelte";
 </script>
 
 <div class="friends cancelcard">
-	{#each Object.entries($stFriends) as [uuid, friend]}
+	{#each Object.entries($stFriends).filter(([_, ent]) => ent.friendship === UsersFriendship.True) as [uuid, friend]}
 		<div class="friend">
 			<div
 				class="avatar"
@@ -16,7 +18,7 @@
 			</div>
 			<div class="name">
 				{friend.name}
-				<div class="id">#{friend.id}</div>
+				<div class="id">#{padIdentifier(parseInt(friend.id))}</div>
 			</div>
 		</div>
 	{/each}

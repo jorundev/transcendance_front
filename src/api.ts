@@ -2,6 +2,7 @@ import { Mutex } from "async-mutex";
 import { push } from "svelte-spa-router";
 import { get } from "svelte/store";
 import { ChannelType } from "./channels";
+import type { NotificationData } from "./notifications";
 import {
 	lastPage,
 	stChannels,
@@ -163,7 +164,7 @@ async function makeRequest<T>(
 ): Promise<T | APIStatus.NoResponse | null> {
 	let promise: Promise<Response>;
 
-	for (;;) {
+	for (; ;) {
 		switch (method) {
 			case "GET":
 				promise = fetchGET(url);
@@ -367,6 +368,19 @@ export interface RelationsResponseItem {
 
 export interface RelationsResponse extends APIResponse {
 	friendship: Array<RelationsResponseItem>;
+}
+
+export interface SendFriendRequestResponse extends APIResponse {
+	uuid: string;
+	friendship: UsersFriendship;
+}
+
+export interface GetNotificationsResponse extends APIResponse {
+	data: Array<NotificationData>;
+	count: number;
+	total: number;
+	page: number;
+	page_count: number;
 }
 
 export interface Session {
@@ -1036,12 +1050,12 @@ export const api = {
 	getChannelMessages: async (uuid: string, page: number) => {
 		return makeRequest<ChannelMessagesResponse>(
 			"/api/chats/channels/" +
-				uuid +
-				"/messages" +
-				"?page=" +
-				page +
-				"&limit=" +
-				chatPageSize,
+			uuid +
+			"/messages" +
+			"?page=" +
+			page +
+			"&limit=" +
+			chatPageSize,
 			"GET"
 		);
 	},
@@ -1078,7 +1092,7 @@ export const api = {
 				"POST",
 				{ message }
 			);
-		} catch (_e) {}
+		} catch (_e) { }
 	},
 	deleteMessage: async (channel: string, uuid: string) => {
 		return makeRequest(
@@ -1248,6 +1262,21 @@ export const api = {
 	getRelations: async () => {
 		return makeRequest<RelationsResponse>("/api/users/relations", "GET");
 	},
+	sendFriendRequest: async (user: string) => {
+		return makeRequest<SendFriendRequestResponse>("/api/users/friendship/" + user, "POST");
+	},
+	removeFriend: async (user: string) => {
+		return makeRequest("/api/users/friendship/" + user, "DELETE");
+	},
+	blockUser: async (user: string) => {
+		return makeRequest("/api/users/blocklist/" + user, "POST");
+	},
+	unblockUser: async (user: string) => {
+		return makeRequest("/api/users/blocklist/" + user, "DELETE");
+	},
+	getNotifications: async () => {
+		return makeRequest<GetNotificationsResponse>("/api/users/notifications", "GET");
+	},
 	ws: {
 		connect: async () => {
 			if (get(stWebsocket) == null) {
@@ -1255,9 +1284,9 @@ export const api = {
 					window.location.protocol === "https:" ? "wss" : "ws";
 				const ws = new WebSocket(
 					protocol +
-						"://" +
-						window.location.hostname +
-						"/api/streaming"
+					"://" +
+					window.location.hostname +
+					"/api/streaming"
 				);
 				stWebsocket.set(ws);
 

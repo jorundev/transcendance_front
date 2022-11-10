@@ -3,6 +3,7 @@
 	import { api, APIStatus, getUserProfilePictureLink } from "../../api";
 	import type { User } from "../../users";
 	import { createEventDispatcher } from "svelte";
+	import { padIdentifier } from "../../utils";
 
 	export let data: FriendRequestNotificationData;
 	let user: User = undefined;
@@ -14,6 +15,9 @@
 
 	let avatar = getUserProfilePictureLink(data.user);
 	$: avatar = getUserProfilePictureLink(data.user);
+
+	let id = "";
+	$: id = padIdentifier(parseInt(user?.identifier));
 </script>
 
 <div class="invite">
@@ -25,7 +29,7 @@
 		<div class="inner">
 			<div class="username">
 				{user?.username}
-				<div class="id">#{user?.identifier}</div>
+				<div class="id">#{id}</div>
 			</div>
 			<div>wants to be your friend</div>
 		</div>

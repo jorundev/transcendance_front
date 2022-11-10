@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { stLoggedUser } from "../stores";
+	import { stLoggedUser, stNotifications } from "../stores";
 	import { api, getUserProfilePictureLink } from "../api";
 	import Card from "../components/Kit/Card.svelte";
 	import SideBar from "../components/SideBar.svelte";
@@ -7,12 +7,7 @@
 	import FriendListHorizontal from "../components/Friends/FriendListHorizontal.svelte";
 	import MatchHistory from "../components/MatchHistory.svelte";
 	import NotificationList from "../components/Notifications/NotificationList.svelte";
-	import Button from "../components/Kit/Button.svelte";
-	import {
-		newNotification,
-		NotificationType,
-		type NotificationData,
-	} from "../notifications";
+	import type { NotificationData } from "../notifications";
 	import NotificationModal from "../components/Notifications/NotificationModal.svelte";
 
 	let id = "";
@@ -36,7 +31,13 @@
 	<title>Home - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
 {#if modalData !== undefined}
-	<NotificationModal {modalData} on:back={() => (modalData = undefined)} />
+	<NotificationModal
+		{modalData}
+		on:back={() => (modalData = undefined)}
+		on:read={() => {
+			delete $stNotifications[modalData.uuid];
+		}}
+	/>
 {/if}
 <SideBar active="home" />
 <div class="home">
@@ -89,7 +90,7 @@
 					/>
 				</div>
 			</Card>
-			<Button
+			<!-- <Button
 				on:click={() => {
 					newNotification({
 						type: NotificationType.FriendRequest,
@@ -110,7 +111,7 @@
 						user: $stLoggedUser.uuid,
 					});
 				}}>New Notification</Button
-			>
+			> -->
 		</div>
 	</div>
 	<div class="s-column nomobile">

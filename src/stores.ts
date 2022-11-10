@@ -5,6 +5,7 @@ import {
 	channelMessageLimit,
 	chatPageSize,
 	getUsersFromUUIDs,
+	UsersFriendship,
 	type APIChannel,
 	type ChannelMessagesResponse,
 	type ListChannelsResponse,
@@ -54,8 +55,9 @@ export async function tryToLog() {
 
 	stServerDown.set(false);
 	api.ws.connect();
-	await initChannels();
+	await initNotifications();
 	await initFriends();
+	await initChannels();
 }
 
 /* Removes duplicates channels (that are public AND joined) */
@@ -170,6 +172,7 @@ async function initFriends() {
 				id: user.identifier,
 				avatar: user.avatar,
 				status: ConnectionStatus.Online, // TODO
+				friendship: relation.friendship,
 			};
 		}
 
@@ -241,6 +244,18 @@ async function initChannels() {
 		}
 	}
 	stChannels.set(channels);
+}
+
+async function initNotifications() {
+	const notifs = await api.getNotifications();
+	if (notifs === null || notifs === APIStatus.NoResponse) {
+		return;
+	}
+	const dictionary: NotificationDataDictionary = {};
+	for (const notif of notifs.data) {
+		dictionary[notif.uuid] = notif;
+	}
+	stNotifications.set(dictionary);
 }
 
 export async function initPrivChannel(channelUUID: string) {

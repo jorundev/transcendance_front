@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Card from "../components/Kit/Card.svelte";
 	import type { User } from "../users";
-	import { api, APIStatus } from "../api";
+	import { api, APIStatus, UsersFriendship } from "../api";
 	import SideBar from "../components/SideBar.svelte";
 	import NotFound from "./NotFound.svelte";
 	import MatchHistory from "../components/MatchHistory.svelte";
@@ -9,6 +9,9 @@
 	import Button from "../components/Kit/Button.svelte";
 	import Modal from "../components/Kit/Modal.svelte";
 	import ClickOutside from "svelte-click-outside";
+	import { padIdentifier } from "../utils";
+	import { stFriends } from "../stores";
+	import { ConnectionStatus } from "../friends";
 
 	export let params: {
 		uuid: string;
@@ -21,10 +24,16 @@
 		if (
 			usr !== null &&
 			usr !== APIStatus.NoResponse &&
-			(usr as any).statusCode !== 404
+			(usr as any).statusCode !== 404 &&
+			(usr as any).statusCode !== 400
 		) {
 			user = usr;
 			return;
+		} else if (
+			(usr as any).statusCode === 404 &&
+			(usr as any).statusCode !== 400
+		) {
+			user = null;
 		}
 	}
 
@@ -34,11 +43,54 @@
 		}
 	}
 
+	let profileID = "";
+	$: profileID = padIdentifier(parseInt(user?.identifier));
+
 	let levelPercentage = 20;
 
 	let displayAddFriendModal = false;
 	let displayPlayAgainstModal = false;
 	let displayBlockModal = false;
+
+	let pending = false;
+	let requested = false;
+	let friends = false;
+
+	$: {
+		pending = false;
+		requested = false;
+		friends = false;
+		if ($stFriends[params.uuid]) {
+			switch ($stFriends[params.uuid].friendship) {
+				case UsersFriendship.True:
+					friends = true;
+					break;
+				case UsersFriendship.Pending:
+					pending = true;
+					break;
+				case UsersFriendship.Requested:
+					requested = true;
+					break;
+			}
+		}
+	}
+
+	async function sendFriendRequest() {
+		const resp = await api.sendFriendRequest(params.uuid);
+		if (resp !== null && resp !== APIStatus.NoResponse) {
+			stFriends.update((old) => {
+				old[resp.uuid] = {
+					uuid: resp.uuid,
+					avatar: user?.avatar,
+					name: user?.username,
+					id: user?.identifier,
+					status: ConnectionStatus.Offline, // TODO
+					friendship: resp.friendship,
+				};
+				return old;
+			});
+		}
+	}
 </script>
 
 <svelte:head>
@@ -70,7 +122,8 @@
 										(displayAddFriendModal = false)}
 									>Back</Button
 								>
-								<Button>Yes</Button>
+								<Button on:click={sendFriendRequest}>Yes</Button
+								>
 							</div>
 						</ClickOutside>
 					</div>
@@ -148,7 +201,7 @@
 					<div class="info">
 						<div class="user">
 							<div class="name">{user.username}</div>
-							<div class="id">#{user.identifier}</div>
+							<div class="id">#{profileID}</div>
 							<div class="rank" />
 						</div>
 						<div class="level">
@@ -167,11 +220,33 @@
 									(displayPlayAgainstModal = true)}
 								>Play against</Button
 							>
-							<Button
-								padding="6px"
-								on:click={() => (displayAddFriendModal = true)}
-								>Add friend</Button
-							>
+							{#if pending}
+								<Button highlight={false} padding="6px"
+									>Request sent</Button
+								>
+							{:else if requested}
+								<Button
+									padding="6px"
+									on:click={() =>
+										(displayAddFriendModal = true)}
+									>Accept friend request</Button
+								>
+							{:else if friends}
+								<Button
+									red
+									padding="6px"
+									on:click={() =>
+										(displayAddFriendModal = true)}
+									>Remove friend</Button
+								>
+							{:else}
+								<Button
+									padding="6px"
+									on:click={() =>
+										(displayAddFriendModal = true)}
+									>Add friend</Button
+								>
+							{/if}
 							<Button
 								padding="6px"
 								red

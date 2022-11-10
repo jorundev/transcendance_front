@@ -1,3 +1,5 @@
+import type { UsersFriendship } from "./api";
+
 export enum ConnectionStatus {
 	Offline,
 	Online,
@@ -11,6 +13,7 @@ export interface FriendData {
 	avatar: string;
 	status: ConnectionStatus;
 	gameLobby?: string;
+	friendship: UsersFriendship;
 }
 
 export interface FriendDataDictionary {

@@ -11,6 +11,8 @@
 	import { onMount } from "svelte";
 	import { api, APIStatus } from "../../api";
 	import type { User } from "../../users";
+	import { stFriends } from "../../stores";
+	import { ConnectionStatus } from "../../friends";
 
 	let canGoBack = false;
 
@@ -29,6 +31,37 @@
 	});
 
 	let dispatch = createEventDispatcher();
+
+	async function sendFriendRequest() {
+		const resp = await api.sendFriendRequest(modalData.user);
+		if (resp !== null && resp !== APIStatus.NoResponse) {
+			stFriends.update((old) => {
+				old[resp.uuid] = {
+					uuid: resp.uuid,
+					avatar: user?.avatar,
+					name: user?.username,
+					id: user?.identifier,
+					status: ConnectionStatus.Offline, // TODO
+					friendship: resp.friendship,
+				};
+				return old;
+			});
+			dispatch("read");
+			dispatch("back");
+		}
+	}
+
+	async function removeFriend() {
+		const resp = await api.removeFriend(modalData.user);
+		if (resp !== null && resp !== APIStatus.NoResponse) {
+			stFriends.update((old) => {
+				delete old[modalData.user];
+				return old;
+			});
+			dispatch("read");
+			dispatch("back");
+		}
+	}
 </script>
 
 <Modal>
@@ -49,8 +82,8 @@
 							{user?.username}
 						</div>
 						<div class="buttons">
-							<Button red>No</Button>
-							<Button>Yes</Button>
+							<Button red on:click={removeFriend}>No</Button>
+							<Button on:click={sendFriendRequest}>Yes</Button>
 						</div>
 					{:else if modalData.type === NotificationType.GameInvite}
 						<div class="title">Join casual lobby ?</div>
