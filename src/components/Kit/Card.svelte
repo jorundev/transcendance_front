@@ -1,4 +1,9 @@
-<div><slot /></div>
+<script lang="ts">
+	export let outline = undefined;
+	export let outlineWidth = "3px";
+</script>
+
+<div style="outline: {outlineWidth} solid {outline}"><slot /></div>
 
 <style lang="scss">
 	div {

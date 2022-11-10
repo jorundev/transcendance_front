@@ -51,7 +51,6 @@
 </script>
 
 <div class="set">
-	<!-- <VirtualList {items} let:item={message}> -->
 	{#each messages as message, i (message.uuid)}
 		<div
 			class="bubble-wrapper {side}"
@@ -119,7 +118,6 @@
 				one_above={i !== 0}
 			/>
 		</div>
-		<!-- </VirtualList> -->
 	{/each}
 </div>
 

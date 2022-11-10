@@ -44,8 +44,9 @@
 	<SideBar />
 	<div class="user-profile">
 		<div class="column">
-			<Card>
+			<Card outline="white">
 				<div class="profile">
+					<div class="back" />
 					<div class="avatar">
 						<UserAvatar uuid={params.uuid} />
 					</div>
@@ -64,6 +65,11 @@
 								/>
 							</div>
 						</div>
+						<div class="buttons">
+							<Button padding="6px">Play against</Button>
+							<Button padding="6px">Add friend</Button>
+							<Button padding="6px" red>Block</Button>
+						</div>
 					</div>
 				</div>
 			</Card>
@@ -73,7 +79,6 @@
 					<MatchHistory />
 				</div>
 			</Card>
-			<Button>Play against</Button>
 		</div>
 	</div>
 {/if}
@@ -87,7 +92,7 @@
 		@media screen and (min-width: 800px) {
 			padding: 0;
 			margin-left: 56px;
-			margin-top: 14px;
+			margin-top: 18px;
 		}
 	}
 
@@ -109,10 +114,29 @@
 		}
 	}
 
+	.buttons {
+		max-width: 400px;
+		display: flex;
+		gap: 10px;
+	}
+
 	.profile {
 		display: flex;
 		gap: 16px;
 		width: 100%;
+		position: relative;
+		transform-style: preserve-3d;
+
+		.back {
+			border-top-left-radius: 10px;
+			border-top-right-radius: 10px;
+			transform: translateX(-20px) + translateY(-20px) + translateZ(-1px);
+			position: absolute;
+			top: 0;
+			width: calc(100% + 40px);
+			height: 56px;
+			background: rgb(255, 255, 255);
+		}
 
 		.info {
 			padding-top: 10px;
@@ -121,16 +145,17 @@
 			flex-direction: column;
 			gap: 16px;
 			width: 100%;
+			font-size: 20px;
 
 			.user {
 				display: flex;
 
 				.name {
-					color: white;
+					color: rgb(0, 0, 0);
 				}
 
 				.id {
-					color: #787771;
+					color: #4e4e4e;
 				}
 			}
 
@@ -162,8 +187,10 @@
 		}
 	}
 	.avatar {
-		width: 60px;
-		height: 60px;
+		width: 80px;
+		height: 80px;
 		flex-shrink: 0;
+		outline: 3px solid #161618;
+		border-radius: 100%;
 	}
 </style>

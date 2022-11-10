@@ -349,8 +349,24 @@ interface WebsocketMessage {
 	namespace: WsNamespace;
 }
 
+export enum UsersFriendship {
+	False,
+	True,
+	Pending,
+	Requested,
+}
+
 export interface SessionsResponse extends APIResponse {
 	data: Array<Session>;
+}
+
+export interface RelationsResponseItem {
+	uuid: string;
+	friendship: UsersFriendship;
+}
+
+export interface RelationsResponse extends APIResponse {
+	friendship: Array<RelationsResponseItem>;
 }
 
 export interface Session {
@@ -1228,6 +1244,9 @@ export const api = {
 				user_uuid: user,
 			}
 		);
+	},
+	getRelations: async () => {
+		return makeRequest<RelationsResponse>("/api/users/relations", "GET");
 	},
 	ws: {
 		connect: async () => {

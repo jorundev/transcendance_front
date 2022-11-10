@@ -27,64 +27,7 @@ export const stHasNotifications = derived(
 	stNotifications,
 	($stNotifications) => Object.entries($stNotifications).length > 0
 );
-export const stFriends: Writable<FriendDataDictionary> = writable({
-	mockuuid: {
-		uuid: "mockuuid",
-		name: "mock",
-		id: "0100",
-		avatar: null,
-		status: ConnectionStatus.Offline,
-	},
-	mockuuid2: {
-		uuid: "mockuuid2",
-		name: "mock",
-		id: "0100",
-		avatar: null,
-		status: ConnectionStatus.Online,
-	},
-	mockuuid3: {
-		uuid: "mockuuid3",
-		name: "mock",
-		id: "0100",
-		avatar: null,
-		status: ConnectionStatus.InGame,
-	},
-	mockuuid4: {
-		uuid: "mockuuid4",
-		name: "mock",
-		id: "0100",
-		avatar: null,
-		status: ConnectionStatus.Offline,
-	},
-	mockuuid5: {
-		uuid: "mockuuid5",
-		name: "mock",
-		id: "0100",
-		avatar: null,
-		status: ConnectionStatus.Offline,
-	},
-	mockuuid6: {
-		uuid: "mockuuid6",
-		name: "mock",
-		id: "0100",
-		avatar: null,
-		status: ConnectionStatus.Offline,
-	},
-	mockuuid7: {
-		uuid: "mockuuid7",
-		name: "mock",
-		id: "0100",
-		avatar: null,
-		status: ConnectionStatus.Offline,
-	},
-	mockuuid8: {
-		uuid: "mockuuid8",
-		name: "mock",
-		id: "0100",
-		avatar: null,
-		status: ConnectionStatus.Offline,
-	},
-});
+export const stFriends: Writable<FriendDataDictionary> = writable({});
 
 export async function tryToLog() {
 	let response: WhoAmIResponse | APIStatus;
@@ -112,6 +55,7 @@ export async function tryToLog() {
 	stServerDown.set(false);
 	api.ws.connect();
 	await initChannels();
+	await initFriends();
 }
 
 /* Removes duplicates channels (that are public AND joined) */
@@ -209,6 +153,28 @@ async function channelFromAPIChannel(
 			banned_users,
 			muted_users,
 		};
+}
+
+async function initFriends() {
+	const relations = await api.getRelations();
+	if (relations !== null && relations !== APIStatus.NoResponse) {
+		const dictionary: FriendDataDictionary = {};
+		for (const relation of relations.friendship) {
+			const user = await api.getUserData(relation.uuid);
+			if (user === null || user === APIStatus.NoResponse) {
+				continue;
+			}
+			dictionary[relation.uuid] = {
+				uuid: relation.uuid,
+				name: user.username,
+				id: user.identifier,
+				avatar: user.avatar,
+				status: ConnectionStatus.Online, // TODO
+			};
+		}
+
+		stFriends.set(dictionary);
+	}
 }
 
 async function initChannels() {
