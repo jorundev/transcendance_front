@@ -31,7 +31,7 @@ export const stFriends: Writable<FriendDataDictionary> = writable({});
 
 export async function tryToLog() {
 	let response: WhoAmIResponse | APIStatus;
-	for (;;) {
+	for (; ;) {
 		response = await api.whoami();
 		if (response == null) {
 			return;

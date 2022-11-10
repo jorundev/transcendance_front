@@ -7,6 +7,8 @@
 	import MatchHistory from "../components/MatchHistory.svelte";
 	import UserAvatar from "../components/Users/UserAvatar.svelte";
 	import Button from "../components/Kit/Button.svelte";
+	import Modal from "../components/Kit/Modal.svelte";
+	import ClickOutside from "svelte-click-outside";
 
 	export let params: {
 		uuid: string;
@@ -33,6 +35,10 @@
 	}
 
 	let levelPercentage = 20;
+
+	let displayAddFriendModal = false;
+	let displayPlayAgainstModal = false;
+	let displayBlockModal = false;
 </script>
 
 <svelte:head>
@@ -41,6 +47,95 @@
 {#if !user}
 	<NotFound />
 {:else}
+	{#if displayAddFriendModal}
+		<Modal>
+			<div class="modal">
+				<Card>
+					<div class="card">
+						<ClickOutside
+							on:clickoutside={() =>
+								(displayAddFriendModal = false)}
+						>
+							<div class="title">
+								Send a friend request to {user?.username} ?
+							</div>
+							<div class="desc">
+								They will be able to accept or decline your
+								request
+							</div>
+							<div class="modbuttons">
+								<Button
+									highlight={false}
+									on:click={() =>
+										(displayAddFriendModal = false)}
+									>Back</Button
+								>
+								<Button>Yes</Button>
+							</div>
+						</ClickOutside>
+					</div>
+				</Card>
+			</div>
+		</Modal>
+	{:else if displayPlayAgainstModal}
+		<Modal>
+			<div class="modal">
+				<Card>
+					<div class="card">
+						<ClickOutside
+							on:clickoutside={() =>
+								(displayPlayAgainstModal = false)}
+						>
+							<div class="title">
+								Challenge {user?.username} in a casual game?
+							</div>
+							<div class="desc">
+								They will be able to accept or decline your
+								request
+							</div>
+							<div class="modbuttons">
+								<Button
+									highlight={false}
+									on:click={() =>
+										(displayPlayAgainstModal = false)}
+									>Back</Button
+								>
+								<Button>Yes</Button>
+							</div>
+						</ClickOutside>
+					</div>
+				</Card>
+			</div>
+		</Modal>
+	{:else if displayBlockModal}
+		<Modal>
+			<div class="modal">
+				<Card>
+					<div class="card">
+						<ClickOutside
+							on:clickoutside={() => (displayBlockModal = false)}
+						>
+							<div class="title">
+								Block {user?.username} ?
+							</div>
+							<div class="desc">
+								They will no longer be able to play against you
+								or send you direct messages
+							</div>
+							<div class="modbuttons">
+								<Button
+									highlight={false}
+									on:click={() => (displayBlockModal = false)}
+									>Back</Button
+								>
+								<Button red>Yes</Button>
+							</div>
+						</ClickOutside>
+					</div>
+				</Card>
+			</div>
+		</Modal>
+	{/if}
 	<SideBar />
 	<div class="user-profile">
 		<div class="column">
@@ -66,9 +161,23 @@
 							</div>
 						</div>
 						<div class="buttons">
-							<Button padding="6px">Play against</Button>
-							<Button padding="6px">Add friend</Button>
-							<Button padding="6px" red>Block</Button>
+							<Button
+								padding="6px"
+								on:click={() =>
+									(displayPlayAgainstModal = true)}
+								>Play against</Button
+							>
+							<Button
+								padding="6px"
+								on:click={() => (displayAddFriendModal = true)}
+								>Add friend</Button
+							>
+							<Button
+								padding="6px"
+								red
+								on:click={() => (displayBlockModal = true)}
+								>Block</Button
+							>
 						</div>
 					</div>
 				</div>
@@ -192,5 +301,24 @@
 		flex-shrink: 0;
 		outline: 3px solid #161618;
 		border-radius: 100%;
+	}
+
+	.modal {
+		width: 100%;
+		height: 100%;
+		display: grid;
+		place-items: center;
+
+		.title {
+			font-size: 20px;
+			margin-bottom: 16px;
+		}
+
+		.modbuttons {
+			display: flex;
+			gap: 10px;
+			margin-top: 10px;
+			width: 100%;
+		}
 	}
 </style>
