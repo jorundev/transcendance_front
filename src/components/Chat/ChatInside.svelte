@@ -124,6 +124,7 @@
 	}
 
 	let old_last_message_uuid = "";
+	let old_message_count = 0;
 	let old_channel_uuid: string;
 	let info: Channel = null;
 
@@ -209,12 +210,14 @@
 				? info.loaded_messages[info.loaded_messages.length - 1].uuid
 				: "";
 		if (
-			last_message_uuid != old_last_message_uuid ||
+			info.loaded_messages.length !== old_message_count ||
+			last_message_uuid !== old_last_message_uuid ||
 			info.uuid != old_channel_uuid ||
 			info.reload
 		) {
 			info.reload = undefined;
 			old_last_message_uuid = last_message_uuid;
+			old_message_count = info.loaded_messages.length;
 			old_channel_uuid = info.uuid;
 			const messagesBuffer = [];
 			for (const message of info.loaded_messages) {
