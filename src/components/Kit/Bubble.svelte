@@ -1,80 +1,15 @@
 <script lang="ts">
-	import { api } from "../../api";
-	// import ClickOutside from "svelte-click-outside";
 	import type { ChatMessage } from "../../channels";
 	export let message: ChatMessage;
 	export let side: "left" | "right";
 	export let last: boolean;
 	export let one_above: boolean;
-	export let channel: string;
-
-	let defaultWidth: number;
-	let defaultHeight: number;
-
-	let display_options = false;
-	let removing_options = false;
-
-	$: if (message.value == null) {
-		display_options = false;
-	}
-
-	function contextMenu() {
-		if (message.value != null && side == "right") {
-			removing_options = false;
-			display_options = true;
-		}
-	}
-
-	function removeOptions() {
-		setTimeout(() => {
-			display_options = false;
-		}, 200);
-		removing_options = true;
-	}
-
-	async function deleteMessage() {
-		if (message.value != null) {
-			return api.deleteMessage(channel, message.uuid);
-		}
-	}
 </script>
 
-<!-- on:contextmenu|preventDefault={contextMenu} -->
-<div
-	class="bubble {side}"
-	class:last
-	class:one-above={one_above}
-	class:pending={!message.confirmed}
-	class:red={display_options}
-	class:no-pre-wrap={display_options}
-	class:deleted={message.value == null}
->
-	<!-- {#if !display_options} -->
-	<div
-		class="message"
-		class:deleted={message.value == null}
-		bind:clientWidth={defaultWidth}
-		bind:clientHeight={defaultHeight}
-	>
-		{#if message.value != null}
-			{message.value}
-		{:else}
-			{"This message was deleted"}
-		{/if}
+<div class="bubble {side}" class:last class:one-above={one_above}>
+	<div class="message">
+		{message.value}
 	</div>
-	<!-- {:else}
-		<ClickOutside on:clickoutside={removeOptions}>
-			<div
-				class="options"
-				class:bye={removing_options}
-				style="width: {defaultWidth}px; height: {defaultHeight}px;"
-			>
-				<div class="inner" on:click={async () => await deleteMessage()}>
-					Delete ?
-				</div>
-			</div>
-		</ClickOutside>
-	{/if} -->
 </div>
 
 <style lang="scss">

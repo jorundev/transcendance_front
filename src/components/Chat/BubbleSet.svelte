@@ -117,7 +117,6 @@
 				{side}
 				last={i + 1 === messages.length}
 				one_above={i !== 0}
-				{channel}
 			/>
 		</div>
 		<!-- </VirtualList> -->

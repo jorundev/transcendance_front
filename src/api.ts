@@ -402,7 +402,7 @@ export async function getUsersFromUUIDs(channel: APIChannel): Promise<
 }
 
 // Max number of messages displayed per channel
-export const channelMessageLimit = 100;
+export const channelMessageLimit = 250;
 
 interface UserCache {
 	[key: string]: Promise<APIStatus | User>;
