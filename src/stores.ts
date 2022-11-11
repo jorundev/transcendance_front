@@ -253,6 +253,9 @@ async function initNotifications() {
 	}
 	const dictionary: NotificationDataDictionary = {};
 	for (const notif of notifs.data) {
+		if (notif.read) {
+			break;
+		}
 		dictionary[notif.uuid] = notif;
 	}
 	stNotifications.set(dictionary);

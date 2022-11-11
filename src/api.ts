@@ -2,12 +2,13 @@ import { Mutex } from "async-mutex";
 import { push } from "svelte-spa-router";
 import { get } from "svelte/store";
 import { ChannelType } from "./channels";
-import type { NotificationData } from "./notifications";
+import { newNotification, type NotificationData } from "./notifications";
 import {
 	lastPage,
 	stChannels,
 	stFriends,
 	stLoggedUser,
+	stNotifications,
 	stServerDown,
 	stUsers,
 	stWebsocket,
@@ -32,6 +33,9 @@ import {
 	type WsChatUnmute,
 	type WsUser,
 	type WsUserAvatar,
+	type WsUserNotification,
+	type WsUserNotificationRead,
+	type WsUserUnfriend,
 } from "./websocket/types";
 
 export enum APIStatus {
@@ -933,7 +937,37 @@ async function wsChatAvatar(data: WsChatAvatar) {
 	}
 }
 
+async function wsUserReceiveNotification(data: WsUserNotification) {
+	const notificationData = {
+		type: data.type,
+		creation_time: data.creation_time,
+		uuid: data.uuid,
+		user: data.user,
+		read: false,
+	};
+	stNotifications.update((old) => {
+		old[data.uuid] = notificationData;
+		return old;
+	});
+	await newNotification(notificationData);
+}
+
+async function wsUserUnfriend(data: WsUserUnfriend) {
+	stFriends.update((old) => {
+		delete old[data.user];
+		return old;
+	});
+}
+
+async function wsUserNotificationRead(data: WsUserNotificationRead) {
+	stNotifications.update((old) => {
+		delete old[data.uuid];
+		return old;
+	});
+}
+
 async function wsUserMessage(data: WsUser) {
+	console.log(data);
 	switch (data.action) {
 		case UserAction.Refresh:
 			if (!(await refreshToken())) {
@@ -942,6 +976,15 @@ async function wsUserMessage(data: WsUser) {
 			break;
 		case UserAction.Avatar:
 			await wsUserAvatar(data as WsUserAvatar);
+			break;
+		case UserAction.Notification:
+			await wsUserReceiveNotification(data as WsUserNotification);
+			break;
+		case UserAction.Unfriend:
+			await wsUserUnfriend(data as WsUserUnfriend);
+			break;
+		case UserAction.Read:
+			await wsUserNotificationRead(data as WsUserNotificationRead);
 			break;
 	}
 }
@@ -1276,6 +1319,9 @@ export const api = {
 	},
 	getNotifications: async () => {
 		return makeRequest<GetNotificationsResponse>("/api/users/notifications", "GET");
+	},
+	readNotification: async (uuid: string) => {
+		return makeRequest("/api/users/notifications/" + uuid, "DELETE");
 	},
 	ws: {
 		connect: async () => {

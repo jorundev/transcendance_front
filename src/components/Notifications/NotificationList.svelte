@@ -29,7 +29,7 @@
 				if (isFriendRequestNotificationData(data)) {
 					dispatch("invite-click", data);
 				} else if (isFriendRequestAcceptedNotificationData(data)) {
-					dismiss();
+					dispatch("noticed-friend-accepted", data);
 				} else if (isGameInviteNotificationData(data)) {
 					dispatch("accept-invite-click", data);
 				}

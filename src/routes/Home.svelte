@@ -7,8 +7,13 @@
 	import FriendListHorizontal from "../components/Friends/FriendListHorizontal.svelte";
 	import MatchHistory from "../components/MatchHistory.svelte";
 	import NotificationList from "../components/Notifications/NotificationList.svelte";
-	import type { NotificationData } from "../notifications";
+	import {
+		canUseBrowserNotifications,
+		NotificationType,
+		type NotificationData,
+	} from "../notifications";
 	import NotificationModal from "../components/Notifications/NotificationModal.svelte";
+	import { onMount } from "svelte";
 
 	let id = "";
 
@@ -21,10 +26,25 @@
 	let modalData: NotificationData;
 
 	function invite(data) {
-		modalData = data.detail;
+		if (data.detail.type === NotificationType.AcceptedFriendRequest) {
+			onRead(data.detail);
+		} else {
+			modalData = data.detail;
+		}
 	}
 
-	function acceptInvite(data) {}
+	onMount(async () => {
+		await canUseBrowserNotifications();
+	});
+
+	async function onRead(data: NotificationData) {
+		await api.readNotification(data.uuid);
+		stNotifications.update((old) => {
+			delete old[data.uuid];
+			return old;
+		});
+		modalData = undefined;
+	}
 </script>
 
 <svelte:head>
@@ -34,9 +54,7 @@
 	<NotificationModal
 		{modalData}
 		on:back={() => (modalData = undefined)}
-		on:read={() => {
-			delete $stNotifications[modalData.uuid];
-		}}
+		on:read={() => onRead(modalData)}
 	/>
 {/if}
 <SideBar active="home" />
@@ -87,6 +105,7 @@
 					<NotificationList
 						on:invite-click={invite}
 						on:accept-invite-click={invite}
+						on:noticed-friend-accepted={invite}
 					/>
 				</div>
 			</Card>

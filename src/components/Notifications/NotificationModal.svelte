@@ -36,8 +36,8 @@
 		const resp = await api.sendFriendRequest(modalData.user);
 		if (resp !== null && resp !== APIStatus.NoResponse) {
 			stFriends.update((old) => {
-				old[resp.uuid] = {
-					uuid: resp.uuid,
+				old[modalData.user] = {
+					uuid: modalData.user,
 					avatar: user?.avatar,
 					name: user?.username,
 					id: user?.identifier,
@@ -47,7 +47,6 @@
 				return old;
 			});
 			dispatch("read");
-			dispatch("back");
 		}
 	}
 
@@ -59,7 +58,6 @@
 				return old;
 			});
 			dispatch("read");
-			dispatch("back");
 		}
 	}
 </script>

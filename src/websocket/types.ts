@@ -2,6 +2,8 @@
  * Websocket response
  */
 
+import type { NotificationType } from "../notifications";
+
 export enum WsNamespace {
 	Chat = "Chat",
 	User = "User",
@@ -107,18 +109,48 @@ export interface WsChatUnban extends WsChat {
 	user: string;
 }
 
+export interface WsUserNotification extends WsUser {
+	action: UserAction.Notification;
+	type: NotificationType;
+	user: string;
+	uuid: string;
+	creation_time: Date;
+}
+
+export interface WsUserNotificationRead extends WsUser {
+	action: UserAction.Read;
+	uuid: string;
+}
+
+export interface WsUserBlock extends WsUser {
+	action: UserAction.Block;
+	user: string;
+}
+
+export interface WsUserUnblock extends WsUser {
+	action: UserAction.Unblock;
+	user: string;
+}
+
+export interface WsUserUnfriend extends WsUser {
+	action: UserActions.Unfriend;
+	user: string;
+}
+
 /**
  * User
  */
 
 export enum UserAction {
+	Unfriend = 'UNFRIEND',
 	Block = 'BLOCK',
 	Unblock = 'UNBLOCK',
 	Refresh = 'REFRESH',
 	Expired = 'EXPIRED',
 	Avatar = 'AVATAR',
 	Session = 'SESSION',
-	Notification = 'NOTIFICATION'
+	Notification = 'NOTIFICATION',
+	Read = 'READ'
 }
 
 export interface WsUser {

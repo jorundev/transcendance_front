@@ -10,9 +10,10 @@ export enum NotificationType {
 
 export interface NotificationData {
 	type: NotificationType,
-	date: Date,
+	creation_time: Date,
 	uuid: string,
 	user: string,
+	read: boolean;
 }
 
 export interface GameInviteNotificationData extends NotificationData {
