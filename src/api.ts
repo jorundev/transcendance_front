@@ -6,6 +6,7 @@ import type { NotificationData } from "./notifications";
 import {
 	lastPage,
 	stChannels,
+	stFriends,
 	stLoggedUser,
 	stServerDown,
 	stUsers,
@@ -371,7 +372,6 @@ export interface RelationsResponse extends APIResponse {
 }
 
 export interface SendFriendRequestResponse extends APIResponse {
-	uuid: string;
 	friendship: UsersFriendship;
 }
 

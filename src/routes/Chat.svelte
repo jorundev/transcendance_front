@@ -139,7 +139,7 @@
 						params = { uuid: join_channel.uuid };
 						join_channel_modal = false;
 						if (window.innerWidth <= 800) {
-							push("/inner/group/" + params.uuid);
+							push("/chat/inner/" + params.uuid);
 						}
 					}}
 				/>
@@ -157,7 +157,7 @@
 						create_channel_modal = false;
 						params = { uuid: data.detail.uuid };
 						if (window.innerWidth <= 800) {
-							push("/inner/group/" + params.uuid);
+							push("/chat/inner/" + params.uuid);
 						}
 					}}
 				/>

@@ -10,7 +10,7 @@
 	import Modal from "../components/Kit/Modal.svelte";
 	import ClickOutside from "svelte-click-outside";
 	import { padIdentifier } from "../utils";
-	import { stFriends } from "../stores";
+	import { stFriends, stLoggedUser } from "../stores";
 	import { ConnectionStatus } from "../friends";
 
 	export let params: {
@@ -28,12 +28,22 @@
 			(usr as any).statusCode !== 400
 		) {
 			user = usr;
-			return;
-		} else if (
-			(usr as any).statusCode === 404 &&
-			(usr as any).statusCode !== 400
-		) {
+		} else {
 			user = null;
+			return;
+		}
+		if (
+			!$stFriends[params.uuid] &&
+			user.friendship === UsersFriendship.Requested
+		) {
+			$stFriends[params.uuid] = {
+				uuid: params.uuid,
+				name: user.username,
+				id: user.identifier,
+				avatar: user.avatar,
+				friendship: user.friendship,
+				status: ConnectionStatus.Offline, // TODO
+			};
 		}
 	}
 
@@ -51,6 +61,14 @@
 	let displayAddFriendModal = false;
 	let displayPlayAgainstModal = false;
 	let displayBlockModal = false;
+	let displayCancelRequestModal = false;
+
+	function clearModals() {
+		displayAddFriendModal = false;
+		displayPlayAgainstModal = false;
+		displayBlockModal = false;
+		displayCancelRequestModal = false;
+	}
 
 	let pending = false;
 	let requested = false;
@@ -78,17 +96,26 @@
 	async function sendFriendRequest() {
 		const resp = await api.sendFriendRequest(params.uuid);
 		if (resp !== null && resp !== APIStatus.NoResponse) {
+			$stFriends[params.uuid] = {
+				uuid: params.uuid,
+				avatar: user?.avatar,
+				name: user?.username,
+				id: user?.identifier,
+				status: ConnectionStatus.Offline, // TODO
+				friendship: resp.friendship,
+			};
+			clearModals();
+		}
+	}
+
+	async function cancelFriendRequest() {
+		const resp = await api.removeFriend(params.uuid);
+		if (resp !== null && resp !== APIStatus.NoResponse) {
 			stFriends.update((old) => {
-				old[resp.uuid] = {
-					uuid: resp.uuid,
-					avatar: user?.avatar,
-					name: user?.username,
-					id: user?.identifier,
-					status: ConnectionStatus.Offline, // TODO
-					friendship: resp.friendship,
-				};
+				delete old[params.uuid];
 				return old;
 			});
+			clearModals();
 		}
 	}
 </script>
@@ -109,11 +136,19 @@
 								(displayAddFriendModal = false)}
 						>
 							<div class="title">
-								Send a friend request to {user?.username} ?
+								{#if requested}
+									Accept friend request from {user?.username} ?
+								{:else}
+									Send a friend request to {user?.username} ?
+								{/if}
 							</div>
 							<div class="desc">
-								They will be able to accept or decline your
-								request
+								{#if requested}
+									They will be added to you friends list
+								{:else}
+									They will be able to accept or decline your
+									request
+								{/if}
 							</div>
 							<div class="modbuttons">
 								<Button
@@ -188,11 +223,52 @@
 				</Card>
 			</div>
 		</Modal>
+	{:else if displayCancelRequestModal}
+		<Modal>
+			<div class="modal">
+				<Card>
+					<div class="card">
+						<ClickOutside
+							on:clickoutside={() =>
+								(displayCancelRequestModal = false)}
+						>
+							<div class="title">
+								{#if friends}
+									Remove {user?.username} from friend list?
+								{:else}
+									Cancel friend request?
+								{/if}
+							</div>
+							<div class="desc">
+								{#if friends}
+									You will also be removed from their friend
+									list
+								{:else}
+									They will no longer see that you sent a
+									friend request
+								{/if}
+							</div>
+							<div class="modbuttons">
+								<Button
+									highlight={false}
+									on:click={() =>
+										(displayCancelRequestModal = false)}
+									>Back</Button
+								>
+								<Button red on:click={cancelFriendRequest}
+									>Yes</Button
+								>
+							</div>
+						</ClickOutside>
+					</div>
+				</Card>
+			</div>
+		</Modal>
 	{/if}
 	<SideBar />
 	<div class="user-profile">
 		<div class="column">
-			<Card outline="white">
+			<Card outline="rgb(232, 138, 138)">
 				<div class="profile">
 					<div class="back" />
 					<div class="avatar">
@@ -218,10 +294,16 @@
 								padding="6px"
 								on:click={() =>
 									(displayPlayAgainstModal = true)}
+								active={$stLoggedUser.uuid !== params.uuid}
 								>Play against</Button
 							>
 							{#if pending}
-								<Button highlight={false} padding="6px"
+								<Button
+									highlight={false}
+									padding="6px"
+									on:click={() =>
+										(displayCancelRequestModal = true)}
+									active={$stLoggedUser.uuid !== params.uuid}
 									>Request sent</Button
 								>
 							{:else if requested}
@@ -229,6 +311,7 @@
 									padding="6px"
 									on:click={() =>
 										(displayAddFriendModal = true)}
+									active={$stLoggedUser.uuid !== params.uuid}
 									>Accept friend request</Button
 								>
 							{:else if friends}
@@ -236,7 +319,8 @@
 									red
 									padding="6px"
 									on:click={() =>
-										(displayAddFriendModal = true)}
+										(displayCancelRequestModal = true)}
+									active={$stLoggedUser.uuid !== params.uuid}
 									>Remove friend</Button
 								>
 							{:else}
@@ -244,6 +328,7 @@
 									padding="6px"
 									on:click={() =>
 										(displayAddFriendModal = true)}
+									active={$stLoggedUser.uuid !== params.uuid}
 									>Add friend</Button
 								>
 							{/if}
@@ -251,6 +336,7 @@
 								padding="6px"
 								red
 								on:click={() => (displayBlockModal = true)}
+								active={$stLoggedUser.uuid !== params.uuid}
 								>Block</Button
 							>
 						</div>
@@ -319,7 +405,7 @@
 			top: 0;
 			width: calc(100% + 40px);
 			height: 56px;
-			background: rgb(255, 255, 255);
+			background: rgb(232, 138, 138);
 		}
 
 		.info {
@@ -335,11 +421,11 @@
 				display: flex;
 
 				.name {
-					color: rgb(0, 0, 0);
+					color: rgb(154, 0, 0);
 				}
 
 				.id {
-					color: #4e4e4e;
+					color: #420000;
 				}
 			}
 

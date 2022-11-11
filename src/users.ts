@@ -1,3 +1,5 @@
+import type { UsersFriendship } from "./api";
+
 export interface LoggedUser {
 	username: string;
 	id: number;
@@ -10,6 +12,7 @@ export interface User {
 	username: string;
 	identifier: string;
 	avatar: string | null;
+	friendship: UsersFriendship;
 }
 
 export interface UserDictionary {
