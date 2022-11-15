@@ -4,9 +4,251 @@
 	import { ConnectionStatus } from "../../friends";
 	import { stFriends } from "../../stores";
 	import UserAvatar from "../Users/UserAvatar.svelte";
+
+	export let inCard = false;
 </script>
 
-<div class="friends cancelcard">
+<div class="friends cancelcard" class:inCard>
+	{#each Object.entries($stFriends).filter(([_, ent]) => ent.friendship === UsersFriendship.True) as [uuid, friend]}
+		<div class="friend">
+			<div
+				class="avatar"
+				class:online={friend.status === ConnectionStatus.Online}
+				class:ingame={friend.status === ConnectionStatus.InGame}
+			>
+				<UserAvatar {uuid} />
+			</div>
+			<div class="name">
+				{friend.name}
+				<div class="id">#{padIdentifier(parseInt(friend.id))}</div>
+			</div>
+		</div>
+	{/each}
+	{#each Object.entries($stFriends).filter(([_, ent]) => ent.friendship === UsersFriendship.True) as [uuid, friend]}
+		<div class="friend">
+			<div
+				class="avatar"
+				class:online={friend.status === ConnectionStatus.Online}
+				class:ingame={friend.status === ConnectionStatus.InGame}
+			>
+				<UserAvatar {uuid} />
+			</div>
+			<div class="name">
+				{friend.name}
+				<div class="id">#{padIdentifier(parseInt(friend.id))}</div>
+			</div>
+		</div>
+	{/each}
+	{#each Object.entries($stFriends).filter(([_, ent]) => ent.friendship === UsersFriendship.True) as [uuid, friend]}
+		<div class="friend">
+			<div
+				class="avatar"
+				class:online={friend.status === ConnectionStatus.Online}
+				class:ingame={friend.status === ConnectionStatus.InGame}
+			>
+				<UserAvatar {uuid} />
+			</div>
+			<div class="name">
+				{friend.name}
+				<div class="id">#{padIdentifier(parseInt(friend.id))}</div>
+			</div>
+		</div>
+	{/each}
+	{#each Object.entries($stFriends).filter(([_, ent]) => ent.friendship === UsersFriendship.True) as [uuid, friend]}
+		<div class="friend">
+			<div
+				class="avatar"
+				class:online={friend.status === ConnectionStatus.Online}
+				class:ingame={friend.status === ConnectionStatus.InGame}
+			>
+				<UserAvatar {uuid} />
+			</div>
+			<div class="name">
+				{friend.name}
+				<div class="id">#{padIdentifier(parseInt(friend.id))}</div>
+			</div>
+		</div>
+	{/each}
+	{#each Object.entries($stFriends).filter(([_, ent]) => ent.friendship === UsersFriendship.True) as [uuid, friend]}
+		<div class="friend">
+			<div
+				class="avatar"
+				class:online={friend.status === ConnectionStatus.Online}
+				class:ingame={friend.status === ConnectionStatus.InGame}
+			>
+				<UserAvatar {uuid} />
+			</div>
+			<div class="name">
+				{friend.name}
+				<div class="id">#{padIdentifier(parseInt(friend.id))}</div>
+			</div>
+		</div>
+	{/each}
+	{#each Object.entries($stFriends).filter(([_, ent]) => ent.friendship === UsersFriendship.True) as [uuid, friend]}
+		<div class="friend">
+			<div
+				class="avatar"
+				class:online={friend.status === ConnectionStatus.Online}
+				class:ingame={friend.status === ConnectionStatus.InGame}
+			>
+				<UserAvatar {uuid} />
+			</div>
+			<div class="name">
+				{friend.name}
+				<div class="id">#{padIdentifier(parseInt(friend.id))}</div>
+			</div>
+		</div>
+	{/each}
+	{#each Object.entries($stFriends).filter(([_, ent]) => ent.friendship === UsersFriendship.True) as [uuid, friend]}
+		<div class="friend">
+			<div
+				class="avatar"
+				class:online={friend.status === ConnectionStatus.Online}
+				class:ingame={friend.status === ConnectionStatus.InGame}
+			>
+				<UserAvatar {uuid} />
+			</div>
+			<div class="name">
+				{friend.name}
+				<div class="id">#{padIdentifier(parseInt(friend.id))}</div>
+			</div>
+		</div>
+	{/each}
+	{#each Object.entries($stFriends).filter(([_, ent]) => ent.friendship === UsersFriendship.True) as [uuid, friend]}
+		<div class="friend">
+			<div
+				class="avatar"
+				class:online={friend.status === ConnectionStatus.Online}
+				class:ingame={friend.status === ConnectionStatus.InGame}
+			>
+				<UserAvatar {uuid} />
+			</div>
+			<div class="name">
+				{friend.name}
+				<div class="id">#{padIdentifier(parseInt(friend.id))}</div>
+			</div>
+		</div>
+	{/each}
+	{#each Object.entries($stFriends).filter(([_, ent]) => ent.friendship === UsersFriendship.True) as [uuid, friend]}
+		<div class="friend">
+			<div
+				class="avatar"
+				class:online={friend.status === ConnectionStatus.Online}
+				class:ingame={friend.status === ConnectionStatus.InGame}
+			>
+				<UserAvatar {uuid} />
+			</div>
+			<div class="name">
+				{friend.name}
+				<div class="id">#{padIdentifier(parseInt(friend.id))}</div>
+			</div>
+		</div>
+	{/each}
+	{#each Object.entries($stFriends).filter(([_, ent]) => ent.friendship === UsersFriendship.True) as [uuid, friend]}
+		<div class="friend">
+			<div
+				class="avatar"
+				class:online={friend.status === ConnectionStatus.Online}
+				class:ingame={friend.status === ConnectionStatus.InGame}
+			>
+				<UserAvatar {uuid} />
+			</div>
+			<div class="name">
+				{friend.name}
+				<div class="id">#{padIdentifier(parseInt(friend.id))}</div>
+			</div>
+		</div>
+	{/each}
+	{#each Object.entries($stFriends).filter(([_, ent]) => ent.friendship === UsersFriendship.True) as [uuid, friend]}
+		<div class="friend">
+			<div
+				class="avatar"
+				class:online={friend.status === ConnectionStatus.Online}
+				class:ingame={friend.status === ConnectionStatus.InGame}
+			>
+				<UserAvatar {uuid} />
+			</div>
+			<div class="name">
+				{friend.name}
+				<div class="id">#{padIdentifier(parseInt(friend.id))}</div>
+			</div>
+		</div>
+	{/each}
+	{#each Object.entries($stFriends).filter(([_, ent]) => ent.friendship === UsersFriendship.True) as [uuid, friend]}
+		<div class="friend">
+			<div
+				class="avatar"
+				class:online={friend.status === ConnectionStatus.Online}
+				class:ingame={friend.status === ConnectionStatus.InGame}
+			>
+				<UserAvatar {uuid} />
+			</div>
+			<div class="name">
+				{friend.name}
+				<div class="id">#{padIdentifier(parseInt(friend.id))}</div>
+			</div>
+		</div>
+	{/each}
+	{#each Object.entries($stFriends).filter(([_, ent]) => ent.friendship === UsersFriendship.True) as [uuid, friend]}
+		<div class="friend">
+			<div
+				class="avatar"
+				class:online={friend.status === ConnectionStatus.Online}
+				class:ingame={friend.status === ConnectionStatus.InGame}
+			>
+				<UserAvatar {uuid} />
+			</div>
+			<div class="name">
+				{friend.name}
+				<div class="id">#{padIdentifier(parseInt(friend.id))}</div>
+			</div>
+		</div>
+	{/each}
+	{#each Object.entries($stFriends).filter(([_, ent]) => ent.friendship === UsersFriendship.True) as [uuid, friend]}
+		<div class="friend">
+			<div
+				class="avatar"
+				class:online={friend.status === ConnectionStatus.Online}
+				class:ingame={friend.status === ConnectionStatus.InGame}
+			>
+				<UserAvatar {uuid} />
+			</div>
+			<div class="name">
+				{friend.name}
+				<div class="id">#{padIdentifier(parseInt(friend.id))}</div>
+			</div>
+		</div>
+	{/each}
+	{#each Object.entries($stFriends).filter(([_, ent]) => ent.friendship === UsersFriendship.True) as [uuid, friend]}
+		<div class="friend">
+			<div
+				class="avatar"
+				class:online={friend.status === ConnectionStatus.Online}
+				class:ingame={friend.status === ConnectionStatus.InGame}
+			>
+				<UserAvatar {uuid} />
+			</div>
+			<div class="name">
+				{friend.name}
+				<div class="id">#{padIdentifier(parseInt(friend.id))}</div>
+			</div>
+		</div>
+	{/each}
+	{#each Object.entries($stFriends).filter(([_, ent]) => ent.friendship === UsersFriendship.True) as [uuid, friend]}
+		<div class="friend">
+			<div
+				class="avatar"
+				class:online={friend.status === ConnectionStatus.Online}
+				class:ingame={friend.status === ConnectionStatus.InGame}
+			>
+				<UserAvatar {uuid} />
+			</div>
+			<div class="name">
+				{friend.name}
+				<div class="id">#{padIdentifier(parseInt(friend.id))}</div>
+			</div>
+		</div>
+	{/each}
 	{#each Object.entries($stFriends).filter(([_, ent]) => ent.friendship === UsersFriendship.True) as [uuid, friend]}
 		<div class="friend">
 			<div
@@ -29,13 +271,17 @@
 		display: flex;
 		gap: 16px;
 		align-items: center;
-		transform: translateX(-20px);
-		width: calc(100% + 40px);
-		padding-left: 20px;
-		padding-right: 20px;
 		box-sizing: border-box;
-		overflow-x: hidden;
-		overflow-y: auto;
+		overflow-x: auto;
+		overflow-y: hidden;
+		width: 100%;
+
+		&.inCard {
+			width: calc(100% + 40px);
+			transform: translateX(-20px);
+			padding-left: 20px;
+			padding-right: 20px;
+		}
 	}
 
 	.friend {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { api, APIStatus, getUserProfilePictureLink } from "../../api";
+	import { getUserProfilePictureLink } from "../../api";
 	import { stUsers } from "../../stores";
 
 	export let uuid: string;

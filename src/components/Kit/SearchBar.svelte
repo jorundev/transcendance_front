@@ -8,6 +8,8 @@
 	function onUnfocus() {
 		background = "#232324";
 	}
+
+	export let value = "";
 </script>
 
 <div class="search-bar">
@@ -16,6 +18,8 @@
 		class="search-bar-input"
 		on:focus={onFocus}
 		on:blur={onUnfocus}
+		on:input
+		bind:value
 		placeholder="Search"
 	/>
 </div>

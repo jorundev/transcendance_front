@@ -1,3 +1,4 @@
+import type ReconnectingWebSocket from "reconnecting-websocket";
 import { derived, get, writable, type Writable } from "svelte/store";
 import {
 	api,
@@ -13,13 +14,14 @@ import {
 } from "./api";
 import type { Channel, ChannelDictionary } from "./channels";
 import { ConnectionStatus, type FriendDataDictionary } from "./friends";
+import type { Lobby } from "./api";
 import type { NotificationDataDictionary } from "./notifications";
 import type { LoggedUser, UserDictionary } from "./users";
 
 export const stLoggedUser: Writable<LoggedUser | null> = writable(null);
 export const stServerDown: Writable<boolean> = writable(false);
 export const stUsers: Writable<UserDictionary> = writable({});
-export const stWebsocket: Writable<WebSocket | null> = writable(null);
+export const stWebsocket: Writable<ReconnectingWebSocket | null> = writable(null);
 export const stChannels: Writable<ChannelDictionary> = writable({});
 export const stNotifications: Writable<NotificationDataDictionary> = writable(
 	{}
@@ -29,6 +31,7 @@ export const stHasNotifications = derived(
 	($stNotifications) => Object.entries($stNotifications).length > 0
 );
 export const stFriends: Writable<FriendDataDictionary> = writable({});
+export const stLobby: Writable<Lobby> = writable(null);
 
 export async function tryToLog() {
 	let response: WhoAmIResponse | APIStatus;

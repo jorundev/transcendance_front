@@ -88,7 +88,7 @@
 			<Card>
 				<div class="home-div">
 					<div class="title">Friends</div>
-					<FriendListHorizontal />
+					<FriendListHorizontal inCard />
 				</div>
 			</Card>
 		</div>

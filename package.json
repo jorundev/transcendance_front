@@ -23,6 +23,7 @@
 		"@sveltejs/svelte-virtual-list": "^3.0.1",
 		"async-mutex": "^0.4.0",
 		"prettier": "^2.7.1",
+		"reconnecting-websocket": "^4.4.0",
 		"sass": "^1.54.5",
 		"svelte-click-outside": "^1.0.0",
 		"svelte-segmented-input": "^1.6.6",

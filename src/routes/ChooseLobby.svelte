@@ -1,9 +1,24 @@
 <script lang="ts">
+	import { api, APIStatus } from "../api";
+	import { stLobby } from "../stores";
+	import { push } from "svelte-spa-router";
 	import Card from "../components/Kit/Card.svelte";
 	import SideBar from "../components/SideBar.svelte";
+
+	async function createCasualLobby() {
+		if ($stLobby === null) {
+			const lobby = await api.createLobby();
+			if (lobby === null || lobby === APIStatus.NoResponse) {
+				return;
+			}
+			$stLobby = lobby;
+		}
+		push("/play/casual/" + $stLobby);
+	}
 </script>
 
 <SideBar active="play" />
+<svelte:head><title>Play - NEW SHINJI MEGA PONG ULTIMATE</title></svelte:head>
 <div class="play">
 	<div class="your-rank">
 		<Card>
@@ -18,7 +33,7 @@
 		<div class="title">Your Rank</div>
 	</div>
 	<div class="choices">
-		<div class="choice">
+		<div class="choice" on:click={createCasualLobby}>
 			<div class="top">
 				<div class="title">CASUAL</div>
 				<div class="subtitle">Play against friends or strangers</div>

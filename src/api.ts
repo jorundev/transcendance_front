@@ -1,7 +1,9 @@
 import { Mutex } from "async-mutex";
+import ReconnectingWebSocket from "reconnecting-websocket";
 import { push } from "svelte-spa-router";
 import { get } from "svelte/store";
 import { ChannelType } from "./channels";
+import type { LobbyPlayerReadyState } from "./lobbies";
 import { newNotification, type NotificationData } from "./notifications";
 import {
 	lastPage,
@@ -393,6 +395,14 @@ export interface Session {
 	creation_date: string;
 	active: boolean;
 	current: boolean;
+}
+
+export interface Lobby {
+	uuid: string,
+	in_game: boolean,
+	players: [string, string],
+	players_status: [LobbyPlayerReadyState],
+	spectators: Array<string>,
 }
 
 export async function getUsersFromUUIDs(channel: APIChannel): Promise<
@@ -1323,12 +1333,15 @@ export const api = {
 	readNotification: async (uuid: string) => {
 		return makeRequest("/api/users/notifications/" + uuid, "DELETE");
 	},
+	createLobby: async () => {
+		return makeRequest<Lobby>("/api/games/lobby", "POST");
+	},
 	ws: {
 		connect: async () => {
 			if (get(stWebsocket) == null) {
 				const protocol =
 					window.location.protocol === "https:" ? "wss" : "ws";
-				const ws = new WebSocket(
+				const ws = new ReconnectingWebSocket(
 					protocol +
 					"://" +
 					window.location.hostname +
@@ -1338,15 +1351,15 @@ export const api = {
 
 				ws.onerror = () => {
 					console.log(
-						"Could not connect to WebSocket. Retrying in 2 seconds"
+						"Could not connect to WebSocket."
 					);
-					ws.onerror = undefined;
-					ws.onopen = undefined;
-					ws.onclose = undefined;
-					stWebsocket.set(null);
-					setTimeout(() => {
-						api.ws.connect();
-					}, 2000);
+					// ws.onerror = undefined;
+					// ws.onopen = undefined;
+					// ws.onclose = undefined;
+					// stWebsocket.set(null);
+					// setTimeout(() => {
+					// 	api.ws.connect();
+					// }, 2000);
 				};
 
 				ws.onopen = () => {
@@ -1356,17 +1369,17 @@ export const api = {
 				ws.onclose = (e) => {
 					if (e.wasClean) {
 						console.log("Websocket closed");
-						stWebsocket.set(null);
+						// stWebsocket.set(null);
 						return;
 					}
 					console.log("Websocket got closed");
-					ws.onerror = undefined;
-					ws.onopen = undefined;
-					ws.onclose = undefined;
-					stWebsocket.set(null);
-					setTimeout(() => {
-						api.ws.connect();
-					}, 2000);
+					// ws.onerror = undefined;
+					// ws.onopen = undefined;
+					// ws.onclose = undefined;
+					// stWebsocket.set(null);
+					// setTimeout(() => {
+					// 	api.ws.connect();
+					// }, 2000);
 				};
 
 				ws.onmessage = async (message) => {

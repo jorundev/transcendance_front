@@ -10,6 +10,7 @@ import TFASettings from "./routes/TFASettings.svelte";
 import Notifications from "./routes/Notifications.svelte";
 import TFAQRCode from "./routes/TFAQRCode.svelte";
 import Password from "./routes/Password.svelte";
+import Casual from "./routes/Casual.svelte";
 import ProfileSettings from "./routes/ProfileSettings.svelte";
 
 import { wrap } from "svelte-spa-router/wrap";
@@ -63,6 +64,7 @@ export default {
 	"/notifications": requiresLogin(Notifications),
 	"/profile/:uuid": requiresLogin(Profile),
 	"/play": requiresLogin(ChooseLobby),
+	"/play/casual/:uuid": requiresLogin(Casual),
 	"/login": requiresNoLogin(Login),
 	"/login/email": requiresNoLogin(LoginByEmail),
 	"/login/2fa": requiresNoLogin(Login2FA),
