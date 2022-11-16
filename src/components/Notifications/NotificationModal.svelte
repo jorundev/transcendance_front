@@ -2,6 +2,7 @@
 	import {
 		type NotificationData,
 		NotificationType,
+		isGameInviteNotificationData,
 	} from "../../notifications";
 	import Button from "../Kit/Button.svelte";
 	import Card from "../Kit/Card.svelte";
@@ -11,8 +12,9 @@
 	import { onMount } from "svelte";
 	import { api, APIStatus } from "../../api";
 	import type { User } from "../../users";
-	import { stFriends } from "../../stores";
+	import { stFriends, stLobby } from "../../stores";
 	import { ConnectionStatus } from "../../friends";
+	import { push } from "svelte-spa-router";
 
 	let canGoBack = false;
 
@@ -60,6 +62,29 @@
 			dispatch("read");
 		}
 	}
+
+	async function goToLobby() {
+		if (isGameInviteNotificationData(modalData)) {
+			const lobby = await api.joinLobby(modalData.lobby);
+			if (
+				lobby !== null &&
+				lobby !== APIStatus.NoResponse &&
+				(lobby as any).statusCode !== 400 &&
+				(lobby as any).statusCode !== 404
+			) {
+				dispatch("read");
+				if (lobby) {
+					$stLobby = lobby;
+					setTimeout(() => push("/play/casual"), 0);
+				}
+			} else if (
+				(lobby as any).status === 400 ||
+				(lobby as any).statusCode === 404
+			) {
+				dispatch("read");
+			}
+		}
+	}
 </script>
 
 <Modal>
@@ -91,8 +116,9 @@
 							{user?.username}
 						</div>
 						<div class="buttons">
+							<!-- TODO -->
 							<Button red>No</Button>
-							<Button>Yes</Button>
+							<Button on:click={goToLobby}>Yes</Button>
 						</div>
 					{/if}
 				</div>

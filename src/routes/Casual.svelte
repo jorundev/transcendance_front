@@ -1,17 +1,20 @@
 <script lang="ts">
-	import { stLoggedUser } from "../stores";
+	import { stLobby, stLoggedUser } from "../stores";
 	import LobbyUser from "../components/Game/LobbyUser.svelte";
 	import SideBar from "../components/SideBar.svelte";
 	import Button from "../components/Kit/Button.svelte";
 	import { replace } from "svelte-spa-router";
 	import Modal from "../components/Kit/Modal.svelte";
 	import InviteFriendModal from "../components/Game/InviteFriendModal.svelte";
+	import { api } from "../api";
+	import { LobbyPlayerReadyState } from "../lobbies";
 
-	export let params: { uuid: string };
-
-	export let player1: string = $stLoggedUser.uuid;
+	export let player1: string = "";
 	export let player2: string = "";
-	let players: Array<string> = [];
+
+	$: if ($stLobby === null) {
+		replace("/play");
+	}
 
 	export let spectators: Array<string> = [
 		$stLoggedUser.uuid,
@@ -19,15 +22,14 @@
 		$stLoggedUser.uuid,
 	];
 
-	$: {
-		players = [];
-		if (player1) {
-			players.push(player1);
-		}
-		if (player2) {
-			players.push(player2);
-		}
+	let maxSpectatorCount = 0;
 
+	$: player1 = $stLobby?.players?.[0] ?? "";
+	$: player2 = $stLobby?.players?.[1] ?? "";
+	$: spectators = $stLobby?.spectators ?? [];
+	$: maxSpectatorCount = $stLobby?.max_spectators ?? 0;
+
+	$: {
 		if (!player1) {
 			replace("/play");
 		}
@@ -37,18 +39,32 @@
 	$: isMaster = player1 === $stLoggedUser.uuid;
 
 	const maxPlayerCount = 2;
-	const maxSpectatorCount = 16;
+
+	let allPlayersInLobby = false;
+	let allPlayersReady = false;
+
+	$: allPlayersReady =
+		$stLobby?.players_status?.[0] === LobbyPlayerReadyState.Ready &&
+		$stLobby?.players_status?.[1] === LobbyPlayerReadyState.Ready;
+
+	$: allPlayersInLobby =
+		allPlayersReady ||
+		($stLobby?.players_status?.[0] === LobbyPlayerReadyState.Joined &&
+			$stLobby?.players_status?.[1] === LobbyPlayerReadyState.Joined);
+
+	let playerCount = 0;
+	$: playerCount = Number(!!player1) + Number(!!player2);
 
 	let innerWidth = 0;
 
 	let inviteFriendModal = false;
 
-	function invite(e: any) {
+	async function invite(e: any) {
+		player2 = e.detail;
+		const inv = await api.invitePlayerToLobby(player2);
 		inviteFriendModal = false;
 
 		//TODO:
-
-		player2 = e.detail;
 	}
 </script>
 
@@ -74,22 +90,34 @@
 			<div class="desc">
 				Players <div
 					class="count"
-					class:ok={players.length === maxPlayerCount}
-					class:toomany={players.length > maxPlayerCount}
+					class:ok={playerCount === maxPlayerCount}
+					class:toomany={playerCount > maxPlayerCount}
 				>
-					{players.length} / {maxPlayerCount}
+					{playerCount} / {maxPlayerCount}
 				</div>
 			</div>
 			<div class="content">
-				{#each players as uuid}
-					<LobbyUser {uuid} player />
-				{/each}
+				<LobbyUser
+					uuid={player1}
+					player
+					invited={$stLobby?.players_status?.[0] ===
+						LobbyPlayerReadyState.Invited}
+					canBeReady={allPlayersInLobby}
+				/>
 				{#if isMaster && !player2}
 					<div class="button">
 						<Button on:click={() => (inviteFriendModal = true)}
 							>Invite friend</Button
 						>
 					</div>
+				{:else if player2}
+					<LobbyUser
+						uuid={player2}
+						player
+						invited={$stLobby?.players_status?.[1] ===
+							LobbyPlayerReadyState.Invited}
+						canBeReady={allPlayersInLobby}
+					/>
 				{/if}
 			</div>
 		</div>
@@ -133,10 +161,6 @@
 		padding-bottom: 30px;
 	}
 
-	.card {
-		overflow-y: hidden;
-	}
-
 	.button {
 		padding-left: 16px;
 		padding-right: 16px;
@@ -168,14 +192,6 @@
 		@media screen and (max-height: 800px) {
 			max-height: 200px;
 		}
-	}
-
-	.box {
-		overflow-y: hidden;
-		border: 1px solid rgb(60, 60, 60);
-		border-radius: 6px;
-		padding: 10px;
-		margin-top: 10px;
 	}
 
 	.grid {

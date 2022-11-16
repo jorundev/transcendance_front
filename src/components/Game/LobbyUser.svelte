@@ -8,7 +8,8 @@
 	import { stLoggedUser } from "../../stores";
 
 	export let uuid: string = "";
-	export let player: boolean;
+	export let player: boolean = false;
+	export let canBeReady = false;
 
 	export let invited = false;
 	export let ready = false;
@@ -21,11 +22,13 @@
 	let dispatch = createEventDispatcher();
 
 	$: {
-		api.getUserData(uuid).then((req) => {
-			if (req !== null && req !== APIStatus.NoResponse) {
-				user = req;
-			}
-		});
+		if (uuid) {
+			api.getUserData(uuid).then((req) => {
+				if (req !== null && req !== APIStatus.NoResponse) {
+					user = req;
+				}
+			});
+		}
 	}
 
 	let userID = "????";
@@ -48,11 +51,17 @@
 		<div class="isplayer">
 			{#if isPlayer}
 				{#if !ready}
-					<div class="button">
-						<Button timeout={600} on:click={() => dispatch("ready")}
-							>I'm ready!</Button
-						>
-					</div>
+					{#if canBeReady}
+						<div class="button">
+							<Button
+								timeout={600}
+								on:click={() => dispatch("ready")}
+								>I'm ready!</Button
+							>
+						</div>
+					{:else}
+						<div class="indicator waiting">Waiting for players</div>
+					{/if}
 				{:else}
 					<div class="indicator ready">Ready</div>
 				{/if}
@@ -110,11 +119,11 @@
 		}
 
 		.button {
-			width: 100px;
+			width: 160px;
 		}
 
 		.indicator {
-			width: 100px;
+			width: 160px;
 			height: 43px;
 			display: grid;
 			place-items: center;
@@ -122,8 +131,11 @@
 			&.ready {
 				color: green;
 			}
-			&:not(.ready):not(.invited) {
+			&:not(.ready):not(.invited):not(.waiting) {
 				color: red;
+			}
+			&.waiting {
+				color: rgb(169, 101, 101);
 			}
 		}
 	}

@@ -13,7 +13,7 @@
 			}
 			$stLobby = lobby;
 		}
-		push("/play/casual/" + $stLobby);
+		push("/play/casual");
 	}
 </script>
 

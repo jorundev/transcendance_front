@@ -109,28 +109,6 @@
 					/>
 				</div>
 			</Card>
-			<!-- <Button
-				on:click={() => {
-					newNotification({
-						type: NotificationType.FriendRequest,
-						date: new Date(),
-						uuid: "1",
-						user: $stLoggedUser.uuid,
-					});
-					newNotification({
-						type: NotificationType.AcceptedFriendRequest,
-						date: new Date(),
-						uuid: "2",
-						user: $stLoggedUser.uuid,
-					});
-					newNotification({
-						type: NotificationType.GameInvite,
-						date: new Date(),
-						uuid: "3",
-						user: $stLoggedUser.uuid,
-					});
-				}}>New Notification</Button
-			> -->
 		</div>
 	</div>
 	<div class="s-column nomobile">

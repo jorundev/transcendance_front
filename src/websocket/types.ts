@@ -117,6 +117,13 @@ export interface WsUserNotification extends WsUser {
 	creation_time: Date;
 }
 
+export enum BlockDirection {
+	IsBlocked = 0,
+	IsUnblocked = 0,
+	HasBlocked = 1,
+	HasUnblocked = 1,
+}
+
 export interface WsUserNotificationRead extends WsUser {
 	action: UserAction.Read;
 	uuid: string;
@@ -125,15 +132,17 @@ export interface WsUserNotificationRead extends WsUser {
 export interface WsUserBlock extends WsUser {
 	action: UserAction.Block;
 	user: string;
+	direction: BlockDirection;
 }
 
 export interface WsUserUnblock extends WsUser {
 	action: UserAction.Unblock;
 	user: string;
+	direction: BlockDirection;
 }
 
 export interface WsUserUnfriend extends WsUser {
-	action: UserActions.Unfriend;
+	action: UserAction.Unfriend;
 	user: string;
 }
 
@@ -172,7 +181,40 @@ export interface WsUserRefresh extends WsUser {
  * Game
  */
 
+export enum GameAction {
+	Join = 'JOIN',
+	Spectate = 'SPECTATE',
+	Ready = 'READY',
+	Start = 'START',
+	Leave = 'LEAVE'
+}
+
 export interface WsGame {
 	namespace: WsNamespace.Game;
-	action: "";
+	action: GameAction;
+	lobby_uuid: string;
+}
+
+export interface WsGameJoin extends WsGame {
+	action: GameAction.Join;
+	user_uuid: string;
+}
+
+export interface WsGameSpectate extends WsGame {
+	action: GameAction.Spectate;
+	user_uuid: string;
+}
+
+export interface WsGameReady extends WsGame {
+	action: GameAction.Ready;
+	user_uuid: string;
+}
+
+export interface WsGameStart extends WsGame {
+	action: GameAction.Start;
+}
+
+export interface WsGameLeave extends WsGame {
+	action: GameAction.Leave;
+	user_uuid: string;
 }

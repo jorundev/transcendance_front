@@ -13,6 +13,8 @@ export interface User {
 	identifier: string;
 	avatar: string | null;
 	friendship: UsersFriendship;
+	is_blocked: boolean;
+	has_blocked: boolean;
 }
 
 export interface UserDictionary {

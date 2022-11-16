@@ -64,7 +64,7 @@ export default {
 	"/notifications": requiresLogin(Notifications),
 	"/profile/:uuid": requiresLogin(Profile),
 	"/play": requiresLogin(ChooseLobby),
-	"/play/casual/:uuid": requiresLogin(Casual),
+	"/play/casual": requiresLogin(Casual),
 	"/login": requiresNoLogin(Login),
 	"/login/email": requiresNoLogin(LoginByEmail),
 	"/login/2fa": requiresNoLogin(Login2FA),

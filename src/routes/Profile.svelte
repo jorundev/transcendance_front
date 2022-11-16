@@ -10,7 +10,7 @@
 	import Modal from "../components/Kit/Modal.svelte";
 	import ClickOutside from "svelte-click-outside";
 	import { padIdentifier } from "../utils";
-	import { stFriends, stLoggedUser } from "../stores";
+	import { stFriends, stLoggedUser, stUsers } from "../stores";
 	import { ConnectionStatus } from "../friends";
 
 	export let params: {
@@ -48,7 +48,7 @@
 	}
 
 	$: {
-		if (params) {
+		if (params || $stUsers) {
 			setUser();
 		}
 	}
@@ -73,6 +73,9 @@
 	let pending = false;
 	let requested = false;
 	let friends = false;
+
+	let isBlocked = false;
+	$: isBlocked = user?.is_blocked;
 
 	$: {
 		pending = false;
@@ -118,12 +121,21 @@
 			clearModals();
 		}
 	}
+
+	async function block() {
+		if (!user?.is_blocked) {
+			await api.blockUser(params.uuid);
+		} else {
+			await api.unblockUser(params.uuid);
+		}
+		displayBlockModal = false;
+	}
 </script>
 
 <svelte:head>
 	<title>{user?.username} - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
-{#if !user}
+{#if !user || !$stLoggedUser}
 	<NotFound />
 {:else}
 	{#if displayAddFriendModal}
@@ -204,11 +216,20 @@
 							on:clickoutside={() => (displayBlockModal = false)}
 						>
 							<div class="title">
-								Block {user?.username} ?
+								{#if !user?.is_blocked}
+									Block {user?.username} ?
+								{:else}
+									Unblock {user?.username} ?
+								{/if}
 							</div>
 							<div class="desc">
-								They will no longer be able to play against you
-								or send you direct messages
+								{#if !user?.is_blocked}
+									They will no longer be able to play against
+									you or send you direct messages
+								{:else}
+									They will be able to play against you and
+									send you direct messages
+								{/if}
 							</div>
 							<div class="modbuttons">
 								<Button
@@ -216,7 +237,9 @@
 									on:click={() => (displayBlockModal = false)}
 									>Back</Button
 								>
-								<Button red>Yes</Button>
+								<Button red={!user?.is_blocked} on:click={block}
+									>Yes</Button
+								>
 							</div>
 						</ClickOutside>
 					</div>
@@ -294,8 +317,9 @@
 								padding="6px"
 								on:click={() =>
 									(displayPlayAgainstModal = true)}
-								active={$stLoggedUser.uuid !== params.uuid}
-								>Play against</Button
+								active={$stLoggedUser.uuid !== params.uuid &&
+									!user?.is_blocked &&
+									!user?.has_blocked}>Play against</Button
 							>
 							{#if pending}
 								<Button
@@ -328,27 +352,43 @@
 									padding="6px"
 									on:click={() =>
 										(displayAddFriendModal = true)}
-									active={$stLoggedUser.uuid !== params.uuid}
-									>Add friend</Button
+									active={$stLoggedUser.uuid !==
+										params.uuid &&
+										!user?.is_blocked &&
+										!user?.has_blocked}>Add friend</Button
 								>
 							{/if}
-							<Button
-								padding="6px"
-								red
-								on:click={() => (displayBlockModal = true)}
-								active={$stLoggedUser.uuid !== params.uuid}
-								>Block</Button
-							>
+							{#if isBlocked}
+								<Button
+									padding="6px"
+									on:click={() => (displayBlockModal = true)}
+									active={$stLoggedUser.uuid !== params.uuid}
+									>Unblock</Button
+								>{:else}
+								<Button
+									padding="6px"
+									red
+									on:click={() => (displayBlockModal = true)}
+									active={$stLoggedUser.uuid !== params.uuid}
+									>Block</Button
+								>
+							{/if}
 						</div>
 					</div>
 				</div>
 			</Card>
-			<Card>
-				<div class="home-div">
-					<div class="title">Match History</div>
-					<MatchHistory />
+			{#if !user?.has_blocked}
+				<div class="content">
+					<Card>
+						<div class="home-div">
+							<div class="title">Match History</div>
+							<MatchHistory />
+						</div>
+					</Card>
 				</div>
-			</Card>
+			{:else}
+				<div class="blocked">This user has blocked you.</div>
+			{/if}
 		</div>
 	</div>
 {/if}
@@ -462,6 +502,12 @@
 		flex-shrink: 0;
 		outline: 3px solid #161618;
 		border-radius: 100%;
+	}
+
+	.blocked {
+		text-align: center;
+		padding-top: 20px;
+		font-size: 24px;
 	}
 
 	.modal {

@@ -1,14 +1,16 @@
 import { Mutex } from "async-mutex";
 import ReconnectingWebSocket from "reconnecting-websocket";
-import { push } from "svelte-spa-router";
+import { push, replace } from "svelte-spa-router";
 import { get } from "svelte/store";
 import { ChannelType } from "./channels";
-import type { LobbyPlayerReadyState } from "./lobbies";
-import { newNotification, type NotificationData } from "./notifications";
+import { ConnectionStatus } from "./friends";
+import { LobbyPlayerReadyState } from "./lobbies";
+import { newNotification, type NotificationData, NotificationType } from "./notifications";
 import {
 	lastPage,
 	stChannels,
 	stFriends,
+	stLobby,
 	stLoggedUser,
 	stNotifications,
 	stServerDown,
@@ -17,7 +19,9 @@ import {
 } from "./stores";
 import type { User } from "./users";
 import {
+	BlockDirection,
 	ChatAction,
+	GameAction,
 	UserAction,
 	WsNamespace,
 	type WsChat,
@@ -33,10 +37,15 @@ import {
 	type WsChatSend,
 	type WsChatUnban,
 	type WsChatUnmute,
+	type WsGame,
+	type WsGameJoin,
+	type WsGameLeave,
 	type WsUser,
 	type WsUserAvatar,
+	type WsUserBlock,
 	type WsUserNotification,
 	type WsUserNotificationRead,
+	type WsUserUnblock,
 	type WsUserUnfriend,
 } from "./websocket/types";
 
@@ -358,10 +367,10 @@ interface WebsocketMessage {
 }
 
 export enum UsersFriendship {
-	False,
-	True,
-	Pending,
-	Requested,
+	False = 0,
+	True = 1,
+	Pending = 2,
+	Requested = 3,
 }
 
 export interface SessionsResponse extends APIResponse {
@@ -401,8 +410,9 @@ export interface Lobby {
 	uuid: string,
 	in_game: boolean,
 	players: [string, string],
-	players_status: [LobbyPlayerReadyState],
+	players_status: [LobbyPlayerReadyState, LobbyPlayerReadyState],
 	spectators: Array<string>,
+	max_spectators: number;
 }
 
 export async function getUsersFromUUIDs(channel: APIChannel): Promise<
@@ -954,11 +964,35 @@ async function wsUserReceiveNotification(data: WsUserNotification) {
 		uuid: data.uuid,
 		user: data.user,
 		read: false,
+		lobby: (data as any).lobby,
 	};
 	stNotifications.update((old) => {
 		old[data.uuid] = notificationData;
 		return old;
 	});
+	// Maybe not the best place to put this logic but whatever
+	if (data.type === NotificationType.AcceptedFriendRequest) {
+		stFriends.update((old) => {
+			old[data.user].friendship = UsersFriendship.True;
+			return old;
+		});
+	} else if (data.type === NotificationType.FriendRequest) {
+		const user = await api.getUserData(data.user);
+		if (user === null || user === APIStatus.NoResponse) {
+			return;
+		}
+		stFriends.update((old) => {
+			old[data.user] = {
+				uuid: data.user,
+				id: user.identifier,
+				name: user.username,
+				friendship: UsersFriendship.Requested,
+				avatar: user.avatar,
+				status: ConnectionStatus.Offline, // TODO	
+			};
+			return old;
+		});
+	}
 	await newNotification(notificationData);
 }
 
@@ -976,8 +1010,43 @@ async function wsUserNotificationRead(data: WsUserNotificationRead) {
 	});
 }
 
+async function wsUserBlock(data: WsUserBlock) {
+	const user = await api.getUserData(data.user);
+	if (user === null || user === APIStatus.NoResponse) {
+		return;
+	}
+	if (data.direction === BlockDirection.HasBlocked) {
+		stUsers.update((old) => {
+			old[data.user].has_blocked = true;
+			return old;
+		});
+	} else {
+		stUsers.update((old) => {
+			old[data.user].is_blocked = true;
+			return old;
+		});
+	}
+}
+
+async function wsUserUnblock(data: WsUserUnblock) {
+	const user = await api.getUserData(data.user);
+	if (user === null || user === APIStatus.NoResponse) {
+		return;
+	}
+	if (data.direction === BlockDirection.HasUnblocked) {
+		stUsers.update((old) => {
+			old[data.user].has_blocked = false;
+			return old;
+		});
+	} else {
+		stUsers.update((old) => {
+			old[data.user].is_blocked = false;
+			return old;
+		});
+	}
+}
+
 async function wsUserMessage(data: WsUser) {
-	console.log(data);
 	switch (data.action) {
 		case UserAction.Refresh:
 			if (!(await refreshToken())) {
@@ -996,6 +1065,12 @@ async function wsUserMessage(data: WsUser) {
 		case UserAction.Read:
 			await wsUserNotificationRead(data as WsUserNotificationRead);
 			break;
+		case UserAction.Block:
+			await wsUserBlock(data as WsUserBlock);
+			break;
+		case UserAction.Unblock:
+			await wsUserUnblock(data as WsUserUnblock);
+			break;
 	}
 }
 
@@ -1008,10 +1083,53 @@ async function wsUserAvatar(data: WsUserAvatar) {
 	}
 }
 
+async function wsGameJoin(data: WsGameJoin) {
+	if (data.user_uuid === get(stLoggedUser)?.uuid) {
+		return;
+	}
+	stLobby.update((old) => {
+		old.players[1] = data.user_uuid;
+		old.players_status[1] = LobbyPlayerReadyState.Joined;
+		return old;
+	});
+}
+
+async function wsGameLeave(data: WsGameLeave) {
+	if (data.user_uuid === get(stLoggedUser)?.uuid || data.user_uuid === get(stLobby)?.players[0]) {
+		setTimeout(() => replace("/play"), 0);
+		return;
+	}
+
+	// TODO: test if invites are dispatched
+
+	stLobby.update((old) => {
+		old.spectators = old.spectators.filter((uuid) => uuid !== data.user_uuid);
+		if (old.players[1] === data.user_uuid) {
+			old.players[1] = "";
+			old.players_status[1] = LobbyPlayerReadyState.Invited;
+		}
+		return old;
+	});
+}
+
+async function wsGameMessage(data: WsGame) {
+	console.log(data);
+	if (data.lobby_uuid !== get(stLobby)?.uuid) {
+		return;
+	}
+	switch (data.action) {
+		case GameAction.Join:
+			await wsGameJoin(data as WsGameJoin);
+			break;
+		case GameAction.Leave:
+			await wsGameLeave(data as WsGameLeave);
+			break;
+	}
+}
+
 export const api = {
 	whoami: async (): Promise<WhoAmIResponse | APIStatus.NoResponse | null> => {
-		const res = makeRequest<WhoAmIResponse>("/api/users/whoami", "GET");
-		return res;
+		return makeRequest<WhoAmIResponse>("/api/users/whoami", "GET");
 	},
 	logout: async () => {
 		await fetchPOST("/api/auth/logout", {});
@@ -1336,6 +1454,12 @@ export const api = {
 	createLobby: async () => {
 		return makeRequest<Lobby>("/api/games/lobby", "POST");
 	},
+	invitePlayerToLobby: async (user_uuid: string) => {
+		return makeRequest<Lobby>("/api/games/lobby/invite", "POST", { user_uuid });
+	},
+	joinLobby: async (lobby_uuid: string) => {
+		return makeRequest<Lobby>("/api/games/lobby/join/" + lobby_uuid, "POST");
+	},
 	ws: {
 		connect: async () => {
 			if (get(stWebsocket) == null) {
@@ -1390,6 +1514,9 @@ export const api = {
 							break;
 						case WsNamespace.User:
 							await wsUserMessage(data as WsUser);
+							break;
+						case WsNamespace.Game:
+							await wsGameMessage(data as WsGame);
 							break;
 					}
 				};

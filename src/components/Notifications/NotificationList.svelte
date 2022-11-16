@@ -12,16 +12,13 @@
 	import FriendRequestAcceptedNotification from "./FriendRequestAcceptedNotification.svelte";
 	import { createEventDispatcher } from "svelte";
 
-	let notifications: NotificationDataDictionary = {};
 	let dispatch = createEventDispatcher();
-
-	$: notifications = $stNotifications;
 
 	function dismiss() {}
 </script>
 
 <div class="notification-list">
-	{#each Object.entries(notifications) as [uuid, data] (uuid)}
+	{#each Object.entries($stNotifications) as [uuid, data] (uuid)}
 		<!--TODO: Dismiss-->
 		<Notification
 			on:dismiss={dismiss}

@@ -6,7 +6,6 @@ import {
 	channelMessageLimit,
 	chatPageSize,
 	getUsersFromUUIDs,
-	UsersFriendship,
 	type APIChannel,
 	type ChannelMessagesResponse,
 	type ListChannelsResponse,
