@@ -1,14 +1,22 @@
 <script lang="ts">
 	import { padIdentifier } from "../../utils";
 	import { UsersFriendship } from "../../api";
-	import { ConnectionStatus } from "../../friends";
+	import { ConnectionStatus, type FriendData } from "../../friends";
 
 	import { stFriends } from "../../stores";
 	import UserAvatar from "../Users/UserAvatar.svelte";
 	import { push } from "svelte-spa-router";
+
+	let friends: Array<[string, FriendData]> = [];
+	$: if ($stFriends)
+		friends = Object.entries($stFriends)?.filter(
+			([_, ent]) => ent.friendship === UsersFriendship.True
+		);
+
+	$: console.log($stFriends);
 </script>
 
-{#each Object.entries($stFriends).filter(([_, ent]) => ent.friendship === UsersFriendship.True) as [uuid, friend]}
+{#each friends as [uuid, friend]}
 	<div class="friend" on:click={() => push("/profile/" + uuid)}>
 		<div
 			class="avatar"

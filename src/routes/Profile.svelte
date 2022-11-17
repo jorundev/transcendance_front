@@ -81,7 +81,7 @@
 		pending = false;
 		requested = false;
 		friends = false;
-		if ($stFriends[params.uuid]) {
+		if ($stFriends?.[params.uuid]) {
 			switch ($stFriends[params.uuid].friendship) {
 				case UsersFriendship.True:
 					friends = true;

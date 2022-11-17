@@ -1,11 +1,15 @@
 import { Mutex } from "async-mutex";
 import ReconnectingWebSocket from "reconnecting-websocket";
-import { push, replace } from "svelte-spa-router";
+import { push } from "svelte-spa-router";
 import { get } from "svelte/store";
 import { ChannelType } from "./channels";
 import type { ConnectionStatus } from "./friends";
 import { LobbyPlayerReadyState } from "./lobbies";
-import { newNotification, type NotificationData, NotificationType } from "./notifications";
+import {
+	newNotification,
+	type NotificationData,
+	NotificationType,
+} from "./notifications";
 import {
 	lastPage,
 	stChannels,
@@ -185,7 +189,7 @@ async function makeRequest<T>(
 ): Promise<T | APIStatus.NoResponse | null> {
 	let promise: Promise<Response>;
 
-	for (; ;) {
+	for (;;) {
 		switch (method) {
 			case "GET":
 				promise = fetchGET(url);
@@ -412,11 +416,11 @@ export interface Session {
 }
 
 export interface Lobby {
-	uuid: string,
-	in_game: boolean,
-	players: [string, string],
-	players_status: [LobbyPlayerReadyState, LobbyPlayerReadyState],
-	spectators: Array<string>,
+	uuid: string;
+	in_game: boolean;
+	players: [string, string];
+	players_status: [LobbyPlayerReadyState, LobbyPlayerReadyState];
+	spectators: Array<string>;
 	max_spectators: number;
 }
 
@@ -1056,11 +1060,23 @@ async function wsUserStatus(data: WsUserStatus) {
 		return;
 	}
 
+	if (get(stUsers)[data.user] === undefined) {
+		const _user = await api.getUserData(data.user);
+	}
+
 	// TODO: when in game point to lobby
 	stUsers.update((old) => {
 		old[data.user].is_online = data.status;
 		return old;
 	});
+	if (get(stFriends)) {
+		stFriends.update((old) => {
+			if (old[data.user]) {
+				old[data.user].status = data.status;
+				return old;
+			}
+		});
+	}
 }
 
 async function wsUserMessage(data: WsUser) {
@@ -1089,9 +1105,8 @@ async function wsUserMessage(data: WsUser) {
 			await wsUserUnblock(data as WsUserUnblock);
 			break;
 		case UserAction.Status:
-			await wsUserStatus(data as WsUserStatus)
+			await wsUserStatus(data as WsUserStatus);
 			break;
-
 	}
 }
 
@@ -1134,19 +1149,24 @@ async function wsGameLeave(data: WsGameLeave) {
 			delete old[data.lobby_uuid];
 		} else {
 			old[data.lobby_uuid].players[1] = "";
-			old[data.lobby_uuid].players_status[1] = LobbyPlayerReadyState.Invited;
+			old[data.lobby_uuid].players_status[1] =
+				LobbyPlayerReadyState.Invited;
 		}
 		return old;
 	});
 	if (get(stLobby)?.uuid === data.lobby_uuid) {
-		if (data.user_uuid === get(stLoggedUser)?.uuid || data.user_uuid === get(stLobby)?.players[0]) {
+		if (
+			data.user_uuid === get(stLoggedUser)?.uuid ||
+			data.user_uuid === get(stLobby)?.players[0]
+		) {
 			//setTimeout(() => replace("/play"), 0);
 			stLobby.set(null);
 			return;
 		}
 
 		stLobby.update((old) => {
-			old.spectators = old.spectators?.filter((uuid) => uuid !== data.user_uuid) ?? [];
+			old.spectators =
+				old.spectators?.filter((uuid) => uuid !== data.user_uuid) ?? [];
 			if (old.players[1] === data.user_uuid) {
 				old.players[1] = "";
 				old.players_status[1] = LobbyPlayerReadyState.Invited;
@@ -1302,12 +1322,12 @@ export const api = {
 	getChannelMessages: async (uuid: string, page: number) => {
 		return makeRequest<ChannelMessagesResponse>(
 			"/api/chats/channels/" +
-			uuid +
-			"/messages" +
-			"?page=" +
-			page +
-			"&limit=" +
-			chatPageSize,
+				uuid +
+				"/messages" +
+				"?page=" +
+				page +
+				"&limit=" +
+				chatPageSize,
 			"GET"
 		);
 	},
@@ -1344,7 +1364,7 @@ export const api = {
 				"POST",
 				{ message }
 			);
-		} catch (_e) { }
+		} catch (_e) {}
 	},
 	deleteMessage: async (channel: string, uuid: string) => {
 		return makeRequest(
@@ -1515,7 +1535,10 @@ export const api = {
 		return makeRequest<RelationsResponse>("/api/users/relations", "GET");
 	},
 	sendFriendRequest: async (user: string) => {
-		return makeRequest<SendFriendRequestResponse>("/api/users/friendship/" + user, "POST");
+		return makeRequest<SendFriendRequestResponse>(
+			"/api/users/friendship/" + user,
+			"POST"
+		);
 	},
 	removeFriend: async (user: string) => {
 		return makeRequest("/api/users/friendship/" + user, "DELETE");
@@ -1527,7 +1550,10 @@ export const api = {
 		return makeRequest("/api/users/blocklist/" + user, "DELETE");
 	},
 	getNotifications: async () => {
-		return makeRequest<GetNotificationsResponse>("/api/users/notifications", "GET");
+		return makeRequest<GetNotificationsResponse>(
+			"/api/users/notifications",
+			"GET"
+		);
 	},
 	readNotification: async (uuid: string) => {
 		return makeRequest("/api/users/notifications/" + uuid, "DELETE");
@@ -1536,10 +1562,15 @@ export const api = {
 		return makeRequest<Lobby>("/api/games/lobby", "POST");
 	},
 	invitePlayerToLobby: async (user_uuid: string) => {
-		return makeRequest<Lobby>("/api/games/lobby/invite", "POST", { user_uuid });
+		return makeRequest<Lobby>("/api/games/lobby/invite", "POST", {
+			user_uuid,
+		});
 	},
 	joinLobby: async (lobby_uuid: string) => {
-		return makeRequest<Lobby>("/api/games/lobby/join/" + lobby_uuid, "POST");
+		return makeRequest<Lobby>(
+			"/api/games/lobby/join/" + lobby_uuid,
+			"POST"
+		);
 	},
 	leaveLobby: async (lobby_uuid: string) => {
 		return makeRequest("/api/games/lobby/" + lobby_uuid, "DELETE");
@@ -1548,7 +1579,10 @@ export const api = {
 		return makeRequest("/api/games/lobby/" + lobby_uuid, "PUT");
 	},
 	getLobbies: async () => {
-		const resp = await makeRequest<Array<Lobby>>("/api/games/lobby/all", "GET");
+		const resp = await makeRequest<Array<Lobby>>(
+			"/api/games/lobby/all",
+			"GET"
+		);
 		// Awful workaround
 		if ((resp as any)?.statusCode === 200) {
 			const ret: Array<Lobby> = [];
@@ -1571,16 +1605,14 @@ export const api = {
 					window.location.protocol === "https:" ? "wss" : "ws";
 				const ws = new ReconnectingWebSocket(
 					protocol +
-					"://" +
-					window.location.hostname +
-					"/api/streaming"
+						"://" +
+						window.location.hostname +
+						"/api/streaming"
 				);
 				stWebsocket.set(ws);
 
 				ws.onerror = () => {
-					console.log(
-						"Could not connect to WebSocket."
-					);
+					console.log("Could not connect to WebSocket.");
 					// ws.onerror = undefined;
 					// ws.onopen = undefined;
 					// ws.onclose = undefined;

@@ -12,7 +12,7 @@ import {
 	type WhoAmIResponse,
 } from "./api";
 import type { Channel, ChannelDictionary } from "./channels";
-import { ConnectionStatus, type FriendDataDictionary } from "./friends";
+import type { FriendDataDictionary } from "./friends";
 import type { Lobby } from "./api";
 import type { NotificationDataDictionary } from "./notifications";
 import type { LoggedUser, UserDictionary } from "./users";
@@ -21,7 +21,8 @@ import type { LobbyDictionary } from "./lobbies";
 export const stLoggedUser: Writable<LoggedUser | null> = writable(null);
 export const stServerDown: Writable<boolean> = writable(false);
 export const stUsers: Writable<UserDictionary> = writable({});
-export const stWebsocket: Writable<ReconnectingWebSocket | null> = writable(null);
+export const stWebsocket: Writable<ReconnectingWebSocket | null> =
+	writable(null);
 export const stChannels: Writable<ChannelDictionary> = writable({});
 export const stNotifications: Writable<NotificationDataDictionary> = writable(
 	{}
@@ -36,7 +37,7 @@ export const stLobbies: Writable<LobbyDictionary> = writable({});
 
 export async function tryToLog() {
 	let response: WhoAmIResponse | APIStatus;
-	for (; ;) {
+	for (;;) {
 		response = await api.whoami();
 		if (response == null) {
 			return;

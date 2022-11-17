@@ -4,6 +4,7 @@
 	import ClickOutside from "svelte-click-outside";
 	import { createEventDispatcher, onMount } from "svelte";
 	import { stFriends } from "../../stores";
+	import { UsersFriendship } from "../../api";
 
 	let canGoBack = false;
 
@@ -20,7 +21,10 @@
 	$: {
 		searchList = Object.entries($stFriends)
 			.filter(([_, data]) => {
-				return data.name.startsWith(value);
+				return (
+					data.friendship === UsersFriendship.True &&
+					data.name.startsWith(value)
+				);
 			})
 			.map(([uuid, _]) => uuid);
 	}
