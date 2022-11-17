@@ -2,6 +2,7 @@
  * Websocket response
  */
 
+import type { ConnectionStatus } from "src/friends";
 import type { NotificationType } from "../notifications";
 
 export enum WsNamespace {
@@ -159,7 +160,8 @@ export enum UserAction {
 	Avatar = 'AVATAR',
 	Session = 'SESSION',
 	Notification = 'NOTIFICATION',
-	Read = 'READ'
+	Read = 'READ',
+	Status = 'STATUS'
 }
 
 export interface WsUser {
@@ -175,6 +177,19 @@ export interface WsUserAvatar extends WsUser {
 
 export interface WsUserRefresh extends WsUser {
 	action: UserAction.Refresh;
+}
+
+export interface WsUserStatus extends WsUser {
+	action: UserAction.Status;
+	user: string;
+	status: ConnectionStatus;
+}
+
+export interface WsUserStatusInGame extends WsUser {
+	action: UserAction.Status;
+	user: string;
+	status: ConnectionStatus.InGame;
+	lobby_uuid: string;
 }
 
 /**

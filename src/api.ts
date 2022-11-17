@@ -3,7 +3,7 @@ import ReconnectingWebSocket from "reconnecting-websocket";
 import { push, replace } from "svelte-spa-router";
 import { get } from "svelte/store";
 import { ChannelType } from "./channels";
-import { ConnectionStatus } from "./friends";
+import type { ConnectionStatus } from "./friends";
 import { LobbyPlayerReadyState } from "./lobbies";
 import { newNotification, type NotificationData, NotificationType } from "./notifications";
 import {
@@ -49,6 +49,7 @@ import {
 	type WsUserBlock,
 	type WsUserNotification,
 	type WsUserNotificationRead,
+	type WsUserStatus,
 	type WsUserUnblock,
 	type WsUserUnfriend,
 } from "./websocket/types";
@@ -309,7 +310,7 @@ export interface PrivateChannelData extends APIResponse {
 }
 
 export interface APIUser extends WhoAmIResponse {
-	is_online: boolean;
+	is_online: ConnectionStatus;
 }
 
 export interface TFAInitResponse extends APIResponse {
@@ -992,7 +993,7 @@ async function wsUserReceiveNotification(data: WsUserNotification) {
 				name: user.username,
 				friendship: UsersFriendship.Requested,
 				avatar: user.avatar,
-				status: ConnectionStatus.Offline, // TODO	
+				status: user.is_online,
 			};
 			return old;
 		});
@@ -1050,6 +1051,18 @@ async function wsUserUnblock(data: WsUserUnblock) {
 	}
 }
 
+async function wsUserStatus(data: WsUserStatus) {
+	if (data.user === get(stLoggedUser)?.uuid) {
+		return;
+	}
+
+	// TODO: when in game point to lobby
+	stUsers.update((old) => {
+		old[data.user].is_online = data.status;
+		return old;
+	});
+}
+
 async function wsUserMessage(data: WsUser) {
 	switch (data.action) {
 		case UserAction.Refresh:
@@ -1075,6 +1088,10 @@ async function wsUserMessage(data: WsUser) {
 		case UserAction.Unblock:
 			await wsUserUnblock(data as WsUserUnblock);
 			break;
+		case UserAction.Status:
+			await wsUserStatus(data as WsUserStatus)
+			break;
+
 	}
 }
 

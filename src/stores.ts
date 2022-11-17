@@ -176,7 +176,7 @@ async function initFriends() {
 				name: user.username,
 				id: user.identifier,
 				avatar: user.avatar,
-				status: ConnectionStatus.Online, // TODO
+				status: user.is_online,
 				friendship: relation.friendship,
 			};
 		}

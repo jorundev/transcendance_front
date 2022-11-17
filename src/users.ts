@@ -1,4 +1,5 @@
 import type { UsersFriendship } from "./api";
+import type { ConnectionStatus } from "./friends";
 
 export interface LoggedUser {
 	username: string;
@@ -15,6 +16,7 @@ export interface User {
 	friendship: UsersFriendship;
 	is_blocked: boolean;
 	has_blocked: boolean;
+	is_online: ConnectionStatus,
 }
 
 export interface UserDictionary {

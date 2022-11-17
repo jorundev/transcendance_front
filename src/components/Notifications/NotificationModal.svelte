@@ -43,7 +43,7 @@
 					avatar: user?.avatar,
 					name: user?.username,
 					id: user?.identifier,
-					status: ConnectionStatus.Offline, // TODO
+					status: user.is_online,
 					friendship: resp.friendship,
 				};
 				return old;

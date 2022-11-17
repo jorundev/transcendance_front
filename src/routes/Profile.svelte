@@ -42,7 +42,7 @@
 				id: user.identifier,
 				avatar: user.avatar,
 				friendship: user.friendship,
-				status: ConnectionStatus.Offline, // TODO
+				status: user.is_online,
 			};
 		}
 	}
@@ -104,7 +104,7 @@
 				avatar: user?.avatar,
 				name: user?.username,
 				id: user?.identifier,
-				status: ConnectionStatus.Offline, // TODO
+				status: user.is_online,
 				friendship: resp.friendship,
 			};
 			clearModals();

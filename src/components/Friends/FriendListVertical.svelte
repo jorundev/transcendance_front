@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { padIdentifier } from "../../utils";
 	import { UsersFriendship } from "../../api";
 	import { ConnectionStatus } from "../../friends";
