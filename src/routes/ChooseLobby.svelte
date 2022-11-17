@@ -4,6 +4,7 @@
 	import { push } from "svelte-spa-router";
 	import Card from "../components/Kit/Card.svelte";
 	import SideBar from "../components/SideBar.svelte";
+	import LobbyList from "../components/Game/LobbyList.svelte";
 
 	async function createCasualLobby() {
 		if ($stLobby === null) {
@@ -13,7 +14,7 @@
 			}
 			$stLobby = lobby;
 		}
-		push("/play/casual");
+		setTimeout(() => push("/play/casual"), 0);
 	}
 </script>
 
@@ -48,6 +49,12 @@
 			<div class="card red" />
 		</div>
 	</div>
+	<div class="games">
+		<div class="title">Current games</div>
+		<div class="list">
+			<LobbyList />
+		</div>
+	</div>
 </div>
 
 <style lang="scss">
@@ -56,6 +63,28 @@
 		width: 100%;
 		gap: 20px;
 		justify-content: space-around;
+	}
+	.games {
+		width: 100%;
+
+		border: 1px solid rgb(50, 50, 50);
+		border-radius: 10px;
+
+		.title {
+			width: 100%;
+			padding: 10px;
+			box-sizing: border-box;
+		}
+
+		.list {
+			max-height: 400px;
+			padding: 10px;
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+			overflow-x: hidden;
+			overflow-y: auto;
+		}
 	}
 	.play {
 		display: flex;

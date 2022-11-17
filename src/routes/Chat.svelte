@@ -2,7 +2,7 @@
 	import { onDestroy, onMount } from "svelte";
 
 	import ChatChannel from "../components/Chat/ChatChannel.svelte";
-	import { stChannels } from "../stores";
+	import { stChannels, stLoggedUser } from "../stores";
 
 	import DesktopChatInside from "../components/Chat/DesktopChatInside.svelte";
 	import { push, replace } from "svelte-spa-router";
@@ -125,83 +125,85 @@
 <svelte:head>
 	<title>Chat - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
-<SideBar active="chat" />
-<div class="chat">
-	{#if join_channel_modal}
-		<Modal>
-			<div class="popup">
-				<JoinChannelPopup
-					channel={join_channel}
-					on:back={() => {
-						join_channel_modal = false;
-					}}
-					on:join={() => {
-						params = { uuid: join_channel.uuid };
-						join_channel_modal = false;
-						if (window.innerWidth <= 800) {
-							push("/chat/inner/" + params.uuid);
-						}
-					}}
-				/>
-			</div>
-		</Modal>
-	{/if}
-	{#if create_channel_modal}
-		<Modal>
-			<div class="popup">
-				<CreateChannelPopup
-					on:back={() => {
-						create_channel_modal = false;
-					}}
-					on:create={(data) => {
-						create_channel_modal = false;
-						params = { uuid: data.detail.uuid };
-						if (window.innerWidth <= 800) {
-							push("/chat/inner/" + params.uuid);
-						}
-					}}
-				/>
-			</div>
-		</Modal>
-	{/if}
-	<div class="chat-menu">
-		<div class="top">
-			<div class="search">
-				<ChannelSearch
-					on:join={joinChannel}
-					on:joinpriv={joinPrivChannel}
-				/>
-			</div>
-			<div class="add" on:click={createChannel} />
-		</div>
-		{#if hasJoinedChannels}
-			<div class="channels">
-				{#each channelEntries as [key, channel] (key)}
-					{#if channel.joined}
-						<ChatChannel
-							info={channel}
-							on:click={goToMessages}
-							on:join={joinChannel}
-							current={current_channel}
-							joined={!mounted ||
-								$stChannels[channel.uuid]?.joined}
-						/>
-					{/if}
-				{/each}
-			</div>
-		{:else}
-			<div class="no-channels">You didn't join any channel</div>
+{#if $stLoggedUser}
+	<SideBar active="chat" />
+	<div class="chat">
+		{#if join_channel_modal}
+			<Modal>
+				<div class="popup">
+					<JoinChannelPopup
+						channel={join_channel}
+						on:back={() => {
+							join_channel_modal = false;
+						}}
+						on:join={() => {
+							params = { uuid: join_channel.uuid };
+							join_channel_modal = false;
+							if (window.innerWidth <= 800) {
+								push("/chat/inner/" + params.uuid);
+							}
+						}}
+					/>
+				</div>
+			</Modal>
 		{/if}
+		{#if create_channel_modal}
+			<Modal>
+				<div class="popup">
+					<CreateChannelPopup
+						on:back={() => {
+							create_channel_modal = false;
+						}}
+						on:create={(data) => {
+							create_channel_modal = false;
+							params = { uuid: data.detail.uuid };
+							if (window.innerWidth <= 800) {
+								push("/chat/inner/" + params.uuid);
+							}
+						}}
+					/>
+				</div>
+			</Modal>
+		{/if}
+		<div class="chat-menu">
+			<div class="top">
+				<div class="search">
+					<ChannelSearch
+						on:join={joinChannel}
+						on:joinpriv={joinPrivChannel}
+					/>
+				</div>
+				<div class="add" on:click={createChannel} />
+			</div>
+			{#if hasJoinedChannels}
+				<div class="channels">
+					{#each channelEntries as [key, channel] (key)}
+						{#if channel.joined}
+							<ChatChannel
+								info={channel}
+								on:click={goToMessages}
+								on:join={joinChannel}
+								current={current_channel}
+								joined={!mounted ||
+									$stChannels[channel.uuid]?.joined}
+							/>
+						{/if}
+					{/each}
+				</div>
+			{:else}
+				<div class="no-channels">You didn't join any channel</div>
+			{/if}
+		</div>
+		<DesktopChatInside
+			channel={current_channel}
+			{render}
+			on:direct={(data) => {
+				params.uuid = data.detail.uuid;
+				direct = true;
+			}}
+		/>
 	</div>
-	<DesktopChatInside
-		channel={current_channel}
-		{render}
-		on:direct={(data) => {
-			params.uuid = data.detail.uuid;
-			direct = true;
-		}}
-	/>
-</div>
+{/if}
 
 <style lang="scss">
 	.chat-menu {

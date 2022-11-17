@@ -3,7 +3,7 @@
 	import LobbyUser from "../components/Game/LobbyUser.svelte";
 	import SideBar from "../components/SideBar.svelte";
 	import Button from "../components/Kit/Button.svelte";
-	import { replace } from "svelte-spa-router";
+	import { pop, replace } from "svelte-spa-router";
 	import Modal from "../components/Kit/Modal.svelte";
 	import InviteFriendModal from "../components/Game/InviteFriendModal.svelte";
 	import { api } from "../api";
@@ -16,11 +16,7 @@
 		replace("/play");
 	}
 
-	export let spectators: Array<string> = [
-		$stLoggedUser.uuid,
-		$stLoggedUser.uuid,
-		$stLoggedUser.uuid,
-	];
+	export let spectators: Array<string> = [];
 
 	let maxSpectatorCount = 0;
 
@@ -31,7 +27,7 @@
 
 	$: {
 		if (!player1) {
-			replace("/play");
+			pop();
 		}
 	}
 
@@ -41,12 +37,17 @@
 	const maxPlayerCount = 2;
 
 	let allPlayersInLobby = false;
+	let allPlayersReady = false;
 
 	$: allPlayersInLobby =
 		($stLobby?.players_status?.[0] === LobbyPlayerReadyState.Ready ||
 			$stLobby?.players_status?.[0] === LobbyPlayerReadyState.Joined) &&
 		($stLobby?.players_status?.[1] === LobbyPlayerReadyState.Ready ||
 			$stLobby?.players_status?.[1] === LobbyPlayerReadyState.Joined);
+
+	$: allPlayersReady =
+		$stLobby?.players_status?.[0] === LobbyPlayerReadyState.Ready &&
+		$stLobby?.players_status?.[1] === LobbyPlayerReadyState.Ready;
 
 	let playerCount = 0;
 	$: playerCount = Number(!!player1) + Number(!!player2);
@@ -84,68 +85,70 @@
 	<title>Casual Game - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
 <svelte:window bind:innerWidth />
-<div class="casual">
-	<div class="title">Casual Game</div>
-	<div class="grid">
-		<div class="players">
-			<div class="desc">
-				Players <div
-					class="count"
-					class:ok={playerCount === maxPlayerCount}
-					class:toomany={playerCount > maxPlayerCount}
-				>
-					{playerCount} / {maxPlayerCount}
-				</div>
-			</div>
-			<div class="content">
-				<LobbyUser
-					uuid={player1}
-					player
-					invited={$stLobby?.players_status?.[0] ===
-						LobbyPlayerReadyState.Invited}
-					ready={$stLobby?.players_status?.[0] ===
-						LobbyPlayerReadyState.Ready}
-					canBeReady={allPlayersInLobby}
-					on:ready={() => ready(player1)}
-				/>
-				{#if isMaster && !player2}
-					<div class="button">
-						<Button on:click={() => (inviteFriendModal = true)}
-							>Invite friend</Button
-						>
+{#if $stLoggedUser}
+	<div class="casual">
+		<div class="title">Casual Game</div>
+		<div class="grid">
+			<div class="players" class:game={allPlayersReady}>
+				<div class="desc">
+					Players <div
+						class="count"
+						class:ok={playerCount === maxPlayerCount}
+						class:toomany={playerCount > maxPlayerCount}
+					>
+						{playerCount} / {maxPlayerCount}
 					</div>
-				{:else if player2}
+				</div>
+				<div class="content">
 					<LobbyUser
-						uuid={player2}
+						uuid={player1}
 						player
-						invited={$stLobby?.players_status?.[1] ===
+						invited={$stLobby?.players_status?.[0] ===
 							LobbyPlayerReadyState.Invited}
-						ready={$stLobby?.players_status?.[1] ===
+						ready={$stLobby?.players_status?.[0] ===
 							LobbyPlayerReadyState.Ready}
 						canBeReady={allPlayersInLobby}
-						on:ready={() => ready(player2)}
+						on:ready={() => ready(player1)}
 					/>
-				{/if}
-			</div>
-		</div>
-		<div class="spectators">
-			<div class="desc">
-				Spectators <div
-					class="count"
-					class:ok={spectators.length === maxSpectatorCount}
-					class:toomany={spectators.length > maxSpectatorCount}
-				>
-					{spectators.length} / {maxSpectatorCount}
+					{#if isMaster && !player2}
+						<div class="button">
+							<Button on:click={() => (inviteFriendModal = true)}
+								>Invite friend</Button
+							>
+						</div>
+					{:else if player2}
+						<LobbyUser
+							uuid={player2}
+							player
+							invited={$stLobby?.players_status?.[1] ===
+								LobbyPlayerReadyState.Invited}
+							ready={$stLobby?.players_status?.[1] ===
+								LobbyPlayerReadyState.Ready}
+							canBeReady={allPlayersInLobby}
+							on:ready={() => ready(player2)}
+						/>
+					{/if}
 				</div>
 			</div>
-			<div class="content">
-				{#each spectators as uuid}
-					<LobbyUser {uuid} />
-				{/each}
+			<div class="spectators">
+				<div class="desc">
+					Spectators <div
+						class="count"
+						class:ok={spectators.length === maxSpectatorCount}
+						class:toomany={spectators.length > maxSpectatorCount}
+					>
+						{spectators.length} / {maxSpectatorCount}
+					</div>
+				</div>
+				<div class="content">
+					{#each spectators as uuid}
+						<LobbyUser {uuid} />
+					{/each}
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
+{/if}
 
 <style lang="scss">
 	.casual {
@@ -244,6 +247,24 @@
 			&.toomany {
 				color: red;
 			}
+		}
+	}
+
+	.players {
+		position: relative;
+		overflow: hidden;
+
+		&.game::after {
+			display: grid;
+			place-items: center;
+			text-align: center;
+			content: "Game started";
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(0, 0, 0, 0.6);
 		}
 	}
 

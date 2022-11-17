@@ -14,12 +14,6 @@
 	export let invited = false;
 	export let ready = false;
 
-	$: {
-		console.log("canBeReady", canBeReady);
-		console.log("invited", invited);
-		console.log("ready", ready);
-	}
-
 	let isPlayer: boolean;
 	$: isPlayer = player && $stLoggedUser.uuid === uuid;
 

@@ -10,6 +10,7 @@ import {
 	lastPage,
 	stChannels,
 	stFriends,
+	stLobbies,
 	stLobby,
 	stLoggedUser,
 	stNotifications,
@@ -41,6 +42,8 @@ import {
 	type WsGameJoin,
 	type WsGameLeave,
 	type WsGameReady,
+	type WsGameSpectate,
+	type WsGameStart,
 	type WsUser,
 	type WsUserAvatar,
 	type WsUserBlock,
@@ -1085,32 +1088,56 @@ async function wsUserAvatar(data: WsUserAvatar) {
 }
 
 async function wsGameJoin(data: WsGameJoin) {
-	if (data.user_uuid === get(stLoggedUser)?.uuid) {
-		return;
+	if (get(stLobbies)[data.lobby_uuid] === undefined) {
+		const lobby = await api.getLobbyInfo(data.lobby_uuid);
+		stLobbies.update((old) => {
+			if (lobby !== null && lobby !== APIStatus.NoResponse) {
+				old[data.lobby_uuid] = lobby;
+			}
+			return old;
+		});
+
+		if (data.user_uuid === get(stLoggedUser)?.uuid) {
+			return;
+		}
 	}
-	stLobby.update((old) => {
-		old.players[1] = data.user_uuid;
-		old.players_status[1] = LobbyPlayerReadyState.Joined;
-		return old;
-	});
+
+	if (get(stLobby)) {
+		stLobby.update((old) => {
+			old.players[1] = data.user_uuid;
+			old.players_status[1] = LobbyPlayerReadyState.Joined;
+			return old;
+		});
+	}
 }
 
 async function wsGameLeave(data: WsGameLeave) {
-	if (data.user_uuid === get(stLoggedUser)?.uuid || data.user_uuid === get(stLobby)?.players[0]) {
-		setTimeout(() => replace("/play"), 0);
-		return;
-	}
-
-	// TODO: test if invites are dispatched
-
-	stLobby.update((old) => {
-		old.spectators = old.spectators?.filter((uuid) => uuid !== data.user_uuid) ?? [];
-		if (old.players[1] === data.user_uuid) {
-			old.players[1] = "";
-			old.players_status[1] = LobbyPlayerReadyState.Invited;
+	stLobbies.update((old) => {
+		if (old[data.lobby_uuid]?.players[0] === data.user_uuid) {
+			delete old[data.lobby_uuid];
+		} else {
+			old[data.lobby_uuid].players[1] = "";
+			old[data.lobby_uuid].players_status[1] = LobbyPlayerReadyState.Invited;
 		}
 		return old;
 	});
+	if (get(stLobby)?.uuid === data.lobby_uuid) {
+		if (data.user_uuid === get(stLoggedUser)?.uuid || data.user_uuid === get(stLobby)?.players[0]) {
+			//setTimeout(() => replace("/play"), 0);
+			stLobby.set(null);
+			return;
+		}
+
+		stLobby.update((old) => {
+			old.spectators = old.spectators?.filter((uuid) => uuid !== data.user_uuid) ?? [];
+			if (old.players[1] === data.user_uuid) {
+				old.players[1] = "";
+				old.players_status[1] = LobbyPlayerReadyState.Invited;
+			}
+			return old;
+		});
+		return;
+	}
 }
 
 async function wsGameReady(data: WsGameReady) {
@@ -1124,11 +1151,27 @@ async function wsGameReady(data: WsGameReady) {
 	});
 }
 
-async function wsGameMessage(data: WsGame) {
-	console.log(data);
-	if (data.lobby_uuid !== get(stLobby)?.uuid) {
-		return;
+async function wsGameStart(data: WsGameStart) {
+	stLobby.update((old) => {
+		old.players_status[0] = LobbyPlayerReadyState.Ready;
+		old.players_status[1] = LobbyPlayerReadyState.Ready;
+		return old;
+	});
+}
+
+async function wsGameSpectate(data: WsGameSpectate) {
+	if (get(stLobby) !== null) {
+		stLobby.update((old) => {
+			old.spectators = old.spectators ?? [];
+			if (!old.spectators?.includes(data.user_uuid)) {
+				old.spectators.push(data.user_uuid);
+			}
+			return old;
+		});
 	}
+}
+
+async function wsGameMessage(data: WsGame) {
 	switch (data.action) {
 		case GameAction.Join:
 			await wsGameJoin(data as WsGameJoin);
@@ -1138,6 +1181,12 @@ async function wsGameMessage(data: WsGame) {
 			break;
 		case GameAction.Ready:
 			await wsGameReady(data as WsGameReady);
+			break;
+		case GameAction.Start:
+			await wsGameStart(data as WsGameStart);
+			break;
+		case GameAction.Spectate:
+			await wsGameSpectate(data as WsGameSpectate);
 			break;
 	}
 }
@@ -1480,6 +1529,23 @@ export const api = {
 	},
 	declareReady: async (lobby_uuid: string) => {
 		return makeRequest("/api/games/lobby/" + lobby_uuid, "PUT");
+	},
+	getLobbies: async () => {
+		const resp = await makeRequest<Array<Lobby>>("/api/games/lobby/all", "GET");
+		// Awful workaround
+		if ((resp as any)?.statusCode === 200) {
+			const ret: Array<Lobby> = [];
+			let i = 0;
+			while (resp["" + i]) {
+				ret.push(resp["" + i]);
+				++i;
+			}
+			return ret;
+		}
+		return [];
+	},
+	getLobbyInfo: async (lobby_uuid: string) => {
+		return makeRequest<Lobby>("/api/games/lobby/" + lobby_uuid, "GET");
 	},
 	ws: {
 		connect: async () => {

@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { ChannelType } from "../../channels";
-	import { stChannels } from "../../stores";
+	import { stChannels, stLobby, stUsers } from "../../stores";
 	import { createEventDispatcher } from "svelte";
 	import ClickOutside from "svelte-click-outside";
 	import { api, APIStatus } from "../../api";
 	import { push } from "svelte-spa-router";
+	import { LobbyPlayerReadyState } from "../../lobbies";
 
 	export let uuid: string;
 	export let moderator: boolean;
@@ -34,6 +35,9 @@
 	let dispatch = createEventDispatcher();
 
 	async function directMessage() {
+		if ($stUsers[uuid]?.has_blocked || $stUsers[uuid]?.is_blocked) {
+			return;
+		}
 		const channel = Object.entries($stChannels)
 			.map(([_, channel]) => channel)
 			.filter((channel) => channel.type === ChannelType.Direct)
@@ -57,6 +61,18 @@
 	function goToProfile() {
 		push("/profile/" + uuid);
 	}
+
+	async function invite() {
+		const lobby = await api.createLobby();
+		if (lobby === null || lobby === APIStatus.NoResponse) {
+			return;
+		}
+		lobby.players[1] = uuid;
+		lobby.players_status[1] = LobbyPlayerReadyState.Invited;
+		$stLobby = lobby;
+		setTimeout(() => push("/play/casual"), 0);
+		await api.invitePlayerToLobby(uuid);
+	}
 </script>
 
 <ClickOutside on:clickoutside={() => dispatch("back")}>
@@ -69,8 +85,12 @@
 			<div class="title noselect">User options</div>
 		{/if}
 		<div class="entry" on:click={goToProfile}>Go to profile</div>
-		<div class="entry" on:click={directMessage}>Send a direct message</div>
-		<div class="entry">Invite to casual game</div>
+		{#if !$stUsers[uuid]?.has_blocked && !$stUsers[uuid]?.is_blocked}
+			<div class="entry" on:click={directMessage}>
+				Send a direct message
+			</div>
+		{/if}
+		<div class="entry" on:click={invite}>Invite to casual game</div>
 		{#if (administrator || moderator) && !user?.is_administrator}
 			<div class="title noselect">Moderator options</div>
 			{#if muted}

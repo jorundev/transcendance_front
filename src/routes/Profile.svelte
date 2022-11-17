@@ -130,6 +130,8 @@
 		}
 		displayBlockModal = false;
 	}
+
+	async function spectateGame() {}
 </script>
 
 <svelte:head>
@@ -373,6 +375,9 @@
 									>Block</Button
 								>
 							{/if}
+							<button on:click={spectateGame}
+								>spectate gaem</button
+							>
 						</div>
 					</div>
 				</div>

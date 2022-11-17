@@ -39,7 +39,7 @@
 	$: sender = messages[0] ? messages[0].sender : null;
 
 	let avatarLink = getUserProfilePictureLink(sender);
-	$: if ($stUsers[sender].avatar)
+	$: if ($stUsers?.[sender].avatar)
 		avatarLink = getUserProfilePictureLink(sender);
 
 	// Svelte Virtual List has a perfect pull request to avoid this, but it hasn't been merged in about two years

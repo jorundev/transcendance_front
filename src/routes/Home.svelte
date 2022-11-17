@@ -14,6 +14,7 @@
 	} from "../notifications";
 	import NotificationModal from "../components/Notifications/NotificationModal.svelte";
 	import { onMount } from "svelte";
+	import LobbyList from "../components/Game/LobbyList.svelte";
 
 	let id = "";
 

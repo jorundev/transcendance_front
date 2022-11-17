@@ -116,8 +116,14 @@
 							{user?.username}
 						</div>
 						<div class="buttons">
-							<!-- TODO -->
-							<Button red>No</Button>
+							<Button
+								red
+								on:click={async () => {
+									await api.readNotification(modalData.uuid);
+									dispatch("back");
+									// TODO: decline invitation
+								}}>No</Button
+							>
 							<Button on:click={goToLobby}>Yes</Button>
 						</div>
 					{/if}

@@ -106,7 +106,7 @@
 
 	function getDirectMessageUser() {
 		const otherUserArray = info.users.filter((user) => {
-			return user.uuid !== $stLoggedUser.uuid;
+			return user.uuid !== $stLoggedUser?.uuid;
 		});
 
 		return !!otherUserArray[0] ? otherUserArray[0].name : "Direct message";
@@ -114,7 +114,7 @@
 
 	function getDirectMessageAvatar() {
 		const otherUserArray = info.users.filter((user) => {
-			return user.uuid !== $stLoggedUser.uuid;
+			return user.uuid !== $stLoggedUser?.uuid;
 		});
 
 		return otherUserArray[0] ? otherUserArray[0].avatar : null;
@@ -122,7 +122,7 @@
 
 	function getDirectMessageIdentifier() {
 		const otherUserArray = info.users.filter((user) => {
-			return user.uuid !== $stLoggedUser.uuid;
+			return user.uuid !== $stLoggedUser?.uuid;
 		});
 
 		return otherUserArray[0] ? otherUserArray[0].id : null;

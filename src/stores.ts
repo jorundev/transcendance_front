@@ -16,6 +16,7 @@ import { ConnectionStatus, type FriendDataDictionary } from "./friends";
 import type { Lobby } from "./api";
 import type { NotificationDataDictionary } from "./notifications";
 import type { LoggedUser, UserDictionary } from "./users";
+import type { LobbyDictionary } from "./lobbies";
 
 export const stLoggedUser: Writable<LoggedUser | null> = writable(null);
 export const stServerDown: Writable<boolean> = writable(false);
@@ -31,6 +32,7 @@ export const stHasNotifications = derived(
 );
 export const stFriends: Writable<FriendDataDictionary> = writable({});
 export const stLobby: Writable<Lobby> = writable(null);
+export const stLobbies: Writable<LobbyDictionary> = writable({});
 
 export async function tryToLog() {
 	let response: WhoAmIResponse | APIStatus;
@@ -60,6 +62,7 @@ export async function tryToLog() {
 	await initNotifications();
 	await initFriends();
 	await initChannels();
+	await initLobbies();
 }
 
 /* Removes duplicates channels (that are public AND joined) */
@@ -182,6 +185,18 @@ async function initFriends() {
 	}
 }
 
+async function initLobbies() {
+	const lobbies = await api.getLobbies();
+
+	const dictionary = {};
+
+	for (const lobby of lobbies) {
+		dictionary[lobby.uuid] = lobby;
+	}
+
+	stLobbies.set(dictionary);
+}
+
 async function initChannels() {
 	const promises = {
 		publicChannels: api.listChannels(),
@@ -258,6 +273,14 @@ async function initNotifications() {
 		if (notif.read) {
 			break;
 		}
+
+		// Failsafe
+		// if (!!(notif.type === NotificationType.GameInvite && (notif as any).lobby)) {
+		// console.log(notif);
+		// 	api.readNotification(notif.uuid);
+		// 	continue;
+		// }
+
 		dictionary[notif.uuid] = notif;
 	}
 	stNotifications.set(dictionary);

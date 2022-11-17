@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { stChannels, stLoggedUser } from "../../stores";
+	import { stChannels, stLoggedUser, stUsers } from "../../stores";
 
 	import { onDestroy, onMount, tick } from "svelte";
 	import BubbleSet from "./BubbleSet.svelte";
@@ -60,8 +60,24 @@
 			: "Direct message";
 	}
 
+	function getDirectMessageUserUUID() {
+		if (!info) {
+			return "";
+		}
+		const otherUserArray = info?.users.filter((user) => {
+			return user.uuid !== $stLoggedUser.uuid;
+		});
+
+		return otherUserArray && otherUserArray[0]
+			? otherUserArray[0].uuid
+			: "";
+	}
+
 	let user = "";
 	$: if (info) user = getDirectMessageUser();
+
+	let userUUID = "";
+	$: if (info) userUUID = getDirectMessageUserUUID();
 
 	function getDirectMessageAvatar() {
 		if (!info) {
@@ -503,6 +519,10 @@
 			<div
 				class="response-bar"
 				class:muted={showMutedInfo}
+				class:blocked={$stChannels[params.uuid]?.type ===
+					ChannelType.Direct &&
+					($stUsers[userUUID]?.is_blocked ||
+						$stUsers[userUUID]?.has_blocked)}
 				style="height: {text_area_height}"
 				class:mobile={!desktop}
 			>
@@ -596,6 +616,17 @@
 			background: black;
 			color: red;
 			content: "Error: You got muted from this channel";
+		}
+
+		&.blocked::after {
+			display: grid;
+			place-items: center;
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			background: black;
+			color: red;
+			content: "You cannot interact with this user";
 		}
 	}
 

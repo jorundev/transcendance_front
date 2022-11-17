@@ -5,10 +5,11 @@
 
 	import { stFriends } from "../../stores";
 	import UserAvatar from "../Users/UserAvatar.svelte";
+	import { push } from "svelte-spa-router";
 </script>
 
 {#each Object.entries($stFriends).filter(([_, ent]) => ent.friendship === UsersFriendship.True) as [uuid, friend]}
-	<div class="friend">
+	<div class="friend" on:click={() => push("/profile/" + uuid)}>
 		<div
 			class="avatar"
 			class:online={friend.status === ConnectionStatus.Online}
@@ -30,6 +31,7 @@
 			background: #141414;
 		}
 
+		padding: 4px 0;
 		width: 100%;
 		min-width: 200px;
 		flex-shrink: 0;

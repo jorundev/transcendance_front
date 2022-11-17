@@ -5,7 +5,7 @@
 
 	import { stLoggedUser } from "../stores";
 	import SideBar from "../components/SideBar.svelte";
-	
+
 	let innerWidth = 0;
 
 	function getProfilePictureLink(): string {
@@ -19,24 +19,27 @@
 <svelte:head>
 	<title>Settings - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
-{#if $stLoggedUser != null}
-	<SideBar active="settings"/>
+{#if $stLoggedUser}
+	<SideBar active="settings" />
 	<div class="s">
 		<div class="settings">
 			<div class="top">
 				{#if innerWidth < 800}
-				<div
-					class="back"
-					on:click={() => {
-						pop();
-					}}
-				/>
+					<div
+						class="back"
+						on:click={() => {
+							pop();
+						}}
+					/>
 				{/if}
 				<div class="title">Settings</div>
 				<div class="empty" style="width: 40px;" />
 			</div>
 			<div class="category">Account</div>
-			<div class="setting profile" on:click={() => push("/settings/profile")}>
+			<div
+				class="setting profile"
+				on:click={() => push("/settings/profile")}
+			>
 				<div
 					class="before"
 					style={"background-image: url('" +
@@ -55,9 +58,15 @@
 				Log out
 			</div>
 			<div class="category">Security</div>
-			<div class="setting" on:click={() => push("/settings/password")}>Password</div>
-			<div class="setting" on:click={() => push("/settings/2fa")}>Two-Factor Authentication</div>
-			<div class="setting" on:click={() => push("/settings/sessions")}>Sessions</div>
+			<div class="setting" on:click={() => push("/settings/password")}>
+				Password
+			</div>
+			<div class="setting" on:click={() => push("/settings/2fa")}>
+				Two-Factor Authentication
+			</div>
+			<div class="setting" on:click={() => push("/settings/sessions")}>
+				Sessions
+			</div>
 			<div class="category">Activity</div>
 			<div class="setting">Blocked accounts</div>
 		</div>
@@ -153,7 +162,7 @@
 			background-color: #202020;
 		}
 	}
-	
+
 	@media screen and (min-width: 800px) {
 		.settings {
 			padding-left: 59px;
@@ -179,7 +188,7 @@
 		}
 		.setting {
 			font-size: 18px;
-			
+
 			&:hover {
 				background-color: rgb(22, 24, 28);
 			}
