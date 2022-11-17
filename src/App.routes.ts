@@ -14,14 +14,24 @@ import Casual from "./routes/Casual.svelte";
 import ProfileSettings from "./routes/ProfileSettings.svelte";
 
 import { wrap } from "svelte-spa-router/wrap";
-import { isLogged, tryLoggingIn } from "./stores";
-import type { WrappedComponent } from "svelte-spa-router";
+import { isLogged, stLobby, tryLoggingIn } from "./stores";
+import { location, type WrappedComponent } from "svelte-spa-router";
 import type { SvelteComponentDev } from "svelte/internal";
 import NotFound from "./routes/NotFound.svelte";
 import Chat from "./routes/Chat.svelte";
 import ChatInside from "./components/Chat/ChatInside.svelte";
 import ChooseLobby from "./routes/ChooseLobby.svelte";
 import Profile from "./routes/Profile.svelte";
+import { get } from "svelte/store";
+import { api } from "./api";
+
+location.subscribe(async (loc) => {
+	if (get(stLobby) && !loc.startsWith("/play/casual")) {
+		console.log("Leaving lobby");
+		await api.leaveLobby(get(stLobby).uuid);
+		stLobby.set(null);
+	}
+});
 
 function requiresLogin(component: typeof SvelteComponentDev): WrappedComponent {
 	return wrap({
@@ -46,7 +56,7 @@ function requiresNoLogin(
 		},
 		conditions: [
 			async () => {
-				return !(await isLogged());
+				return !isLogged();
 			},
 		],
 	});

@@ -40,6 +40,7 @@ import {
 	type WsGame,
 	type WsGameJoin,
 	type WsGameLeave,
+	type WsGameReady,
 	type WsUser,
 	type WsUserAvatar,
 	type WsUserBlock,
@@ -1103,10 +1104,21 @@ async function wsGameLeave(data: WsGameLeave) {
 	// TODO: test if invites are dispatched
 
 	stLobby.update((old) => {
-		old.spectators = old.spectators.filter((uuid) => uuid !== data.user_uuid);
+		old.spectators = old.spectators?.filter((uuid) => uuid !== data.user_uuid) ?? [];
 		if (old.players[1] === data.user_uuid) {
 			old.players[1] = "";
 			old.players_status[1] = LobbyPlayerReadyState.Invited;
+		}
+		return old;
+	});
+}
+
+async function wsGameReady(data: WsGameReady) {
+	stLobby.update((old) => {
+		if (data.user_uuid === old.players[0]) {
+			old.players_status[0] = LobbyPlayerReadyState.Ready;
+		} else if (data.user_uuid === old.players[1]) {
+			old.players_status[1] = LobbyPlayerReadyState.Ready;
 		}
 		return old;
 	});
@@ -1123,6 +1135,9 @@ async function wsGameMessage(data: WsGame) {
 			break;
 		case GameAction.Leave:
 			await wsGameLeave(data as WsGameLeave);
+			break;
+		case GameAction.Ready:
+			await wsGameReady(data as WsGameReady);
 			break;
 	}
 }
@@ -1459,6 +1474,12 @@ export const api = {
 	},
 	joinLobby: async (lobby_uuid: string) => {
 		return makeRequest<Lobby>("/api/games/lobby/join/" + lobby_uuid, "POST");
+	},
+	leaveLobby: async (lobby_uuid: string) => {
+		return makeRequest("/api/games/lobby/" + lobby_uuid, "DELETE");
+	},
+	declareReady: async (lobby_uuid: string) => {
+		return makeRequest("/api/games/lobby/" + lobby_uuid, "PUT");
 	},
 	ws: {
 		connect: async () => {

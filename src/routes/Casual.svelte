@@ -41,15 +41,11 @@
 	const maxPlayerCount = 2;
 
 	let allPlayersInLobby = false;
-	let allPlayersReady = false;
-
-	$: allPlayersReady =
-		$stLobby?.players_status?.[0] === LobbyPlayerReadyState.Ready &&
-		$stLobby?.players_status?.[1] === LobbyPlayerReadyState.Ready;
 
 	$: allPlayersInLobby =
-		allPlayersReady ||
-		($stLobby?.players_status?.[0] === LobbyPlayerReadyState.Joined &&
+		($stLobby?.players_status?.[0] === LobbyPlayerReadyState.Ready ||
+			$stLobby?.players_status?.[0] === LobbyPlayerReadyState.Joined) &&
+		($stLobby?.players_status?.[1] === LobbyPlayerReadyState.Ready ||
 			$stLobby?.players_status?.[1] === LobbyPlayerReadyState.Joined);
 
 	let playerCount = 0;
@@ -63,8 +59,13 @@
 		player2 = e.detail;
 		const inv = await api.invitePlayerToLobby(player2);
 		inviteFriendModal = false;
+	}
 
-		//TODO:
+	async function ready(uuid: string) {
+		if (!uuid) {
+			return;
+		}
+		api.declareReady($stLobby.uuid);
 	}
 </script>
 
@@ -102,7 +103,10 @@
 					player
 					invited={$stLobby?.players_status?.[0] ===
 						LobbyPlayerReadyState.Invited}
+					ready={$stLobby?.players_status?.[0] ===
+						LobbyPlayerReadyState.Ready}
 					canBeReady={allPlayersInLobby}
+					on:ready={() => ready(player1)}
 				/>
 				{#if isMaster && !player2}
 					<div class="button">
@@ -116,7 +120,10 @@
 						player
 						invited={$stLobby?.players_status?.[1] ===
 							LobbyPlayerReadyState.Invited}
+						ready={$stLobby?.players_status?.[1] ===
+							LobbyPlayerReadyState.Ready}
 						canBeReady={allPlayersInLobby}
+						on:ready={() => ready(player2)}
 					/>
 				{/if}
 			</div>
