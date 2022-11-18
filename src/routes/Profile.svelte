@@ -10,8 +10,10 @@
 	import Modal from "../components/Kit/Modal.svelte";
 	import ClickOutside from "svelte-click-outside";
 	import { padIdentifier } from "../utils";
-	import { stFriends, stLoggedUser, stUsers } from "../stores";
+	import { stFriends, stLobby, stLoggedUser } from "../stores";
 	import { onMount } from "svelte";
+	import { LobbyPlayerReadyState } from "../lobbies";
+	import { push } from "svelte-spa-router";
 
 	export let params: {
 		uuid?: string;
@@ -158,12 +160,26 @@
 	}
 
 	async function spectateGame() {}
+	
+	async function play() {
+		const lobby = await api.createLobby();
+		if (lobby === null || lobby === APIStatus.NoResponse) {
+			return;
+		}
+		lobby.players[1] = params.uuid;
+		lobby.players_status[1] = LobbyPlayerReadyState.Invited;
+		$stLobby = lobby;
+		setTimeout(() => push("/play/casual"), 0);
+		await api.invitePlayerToLobby(params.uuid);
+		displayPlayAgainstModal = false;
+	}
 </script>
 
 <svelte:head>
 	<title>{user?.username} - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
-{#if show}
+<SideBar />
+{#if show || user}
 	{#if !user}
 		<NotFound />
 	{:else}
@@ -232,7 +248,7 @@
 											(displayPlayAgainstModal = false)}
 										>Back</Button
 									>
-									<Button>Yes</Button>
+									<Button on:click={play}>Yes</Button>
 								</div>
 							</ClickOutside>
 						</div>
@@ -323,7 +339,6 @@
 				</div>
 			</Modal>
 		{/if}
-		<SideBar />
 		<div class="user-profile">
 			<div class="column">
 				<Card outline="rgb(232, 138, 138)">
@@ -413,9 +428,6 @@
 											params.uuid}>Block</Button
 									>
 								{/if}
-								<button on:click={spectateGame}
-									>spectate gaem</button
-								>
 							</div>
 						</div>
 					</div>
