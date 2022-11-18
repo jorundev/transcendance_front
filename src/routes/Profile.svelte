@@ -11,13 +11,39 @@
 	import ClickOutside from "svelte-click-outside";
 	import { padIdentifier } from "../utils";
 	import { stFriends, stLoggedUser, stUsers } from "../stores";
-	import { ConnectionStatus } from "../friends";
+	import { onMount } from "svelte";
 
 	export let params: {
-		uuid: string;
+		uuid?: string;
+		user?: string;
+		id?: string;
 	};
 
+	onMount(async () => {
+		setTimeout(() => (show = true), 200);
+		if (!params.uuid) {
+			const auser = await api.getUserDataByUserAndId(
+				params.user,
+				params.id
+			);
+			if (
+				auser === null ||
+				auser === APIStatus.NoResponse ||
+				(auser as any).statusCode === 404 ||
+				(auser as any).statusCode === 400
+			) {
+				user = undefined;
+			} else {
+				params = {
+					uuid: auser.uuid,
+				};
+			}
+		}
+	});
+
 	let user: User;
+
+	let show = false;
 
 	async function setUser() {
 		const usr = await api.getUserData(params.uuid);
@@ -48,7 +74,7 @@
 	}
 
 	$: {
-		if (params || $stUsers) {
+		if (params.uuid) {
 			setUser();
 		}
 	}
@@ -137,265 +163,278 @@
 <svelte:head>
 	<title>{user?.username} - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
-{#if !user || !$stLoggedUser}
-	<NotFound />
-{:else}
-	{#if displayAddFriendModal}
-		<Modal>
-			<div class="modal">
-				<Card>
-					<div class="card">
-						<ClickOutside
-							on:clickoutside={() =>
-								(displayAddFriendModal = false)}
-						>
-							<div class="title">
-								{#if requested}
-									Accept friend request from {user?.username} ?
-								{:else}
-									Send a friend request to {user?.username} ?
-								{/if}
-							</div>
-							<div class="desc">
-								{#if requested}
-									They will be added to you friends list
-								{:else}
-									They will be able to accept or decline your
-									request
-								{/if}
-							</div>
-							<div class="modbuttons">
-								<Button
-									highlight={false}
-									on:click={() =>
-										(displayAddFriendModal = false)}
-									>Back</Button
-								>
-								<Button on:click={sendFriendRequest}>Yes</Button
-								>
-							</div>
-						</ClickOutside>
-					</div>
-				</Card>
-			</div>
-		</Modal>
-	{:else if displayPlayAgainstModal}
-		<Modal>
-			<div class="modal">
-				<Card>
-					<div class="card">
-						<ClickOutside
-							on:clickoutside={() =>
-								(displayPlayAgainstModal = false)}
-						>
-							<div class="title">
-								Challenge {user?.username} in a casual game?
-							</div>
-							<div class="desc">
-								They will be able to accept or decline your
-								request
-							</div>
-							<div class="modbuttons">
-								<Button
-									highlight={false}
-									on:click={() =>
-										(displayPlayAgainstModal = false)}
-									>Back</Button
-								>
-								<Button>Yes</Button>
-							</div>
-						</ClickOutside>
-					</div>
-				</Card>
-			</div>
-		</Modal>
-	{:else if displayBlockModal}
-		<Modal>
-			<div class="modal">
-				<Card>
-					<div class="card">
-						<ClickOutside
-							on:clickoutside={() => (displayBlockModal = false)}
-						>
-							<div class="title">
-								{#if !user?.is_blocked}
-									Block {user?.username} ?
-								{:else}
-									Unblock {user?.username} ?
-								{/if}
-							</div>
-							<div class="desc">
-								{#if !user?.is_blocked}
-									They will no longer be able to play against
-									you or send you direct messages
-								{:else}
-									They will be able to play against you and
-									send you direct messages
-								{/if}
-							</div>
-							<div class="modbuttons">
-								<Button
-									highlight={false}
-									on:click={() => (displayBlockModal = false)}
-									>Back</Button
-								>
-								<Button red={!user?.is_blocked} on:click={block}
-									>Yes</Button
-								>
-							</div>
-						</ClickOutside>
-					</div>
-				</Card>
-			</div>
-		</Modal>
-	{:else if displayCancelRequestModal}
-		<Modal>
-			<div class="modal">
-				<Card>
-					<div class="card">
-						<ClickOutside
-							on:clickoutside={() =>
-								(displayCancelRequestModal = false)}
-						>
-							<div class="title">
-								{#if friends}
-									Remove {user?.username} from friend list?
-								{:else}
-									Cancel friend request?
-								{/if}
-							</div>
-							<div class="desc">
-								{#if friends}
-									You will also be removed from their friend
-									list
-								{:else}
-									They will no longer see that you sent a
-									friend request
-								{/if}
-							</div>
-							<div class="modbuttons">
-								<Button
-									highlight={false}
-									on:click={() =>
-										(displayCancelRequestModal = false)}
-									>Back</Button
-								>
-								<Button red on:click={cancelFriendRequest}
-									>Yes</Button
-								>
-							</div>
-						</ClickOutside>
-					</div>
-				</Card>
-			</div>
-		</Modal>
-	{/if}
-	<SideBar />
-	<div class="user-profile">
-		<div class="column">
-			<Card outline="rgb(232, 138, 138)">
-				<div class="profile">
-					<div class="back" />
-					<div class="avatar">
-						<UserAvatar uuid={params.uuid} />
-					</div>
-					<div class="info">
-						<div class="user">
-							<div class="name">{user.username}</div>
-							<div class="id">#{profileID}</div>
-							<div class="rank" />
-						</div>
-						<div class="level">
-							<div class="level-text">Level 16</div>
-							<div class="level-back">
-								<div
-									class="level-inner"
-									style="width: {levelPercentage}%;"
-								/>
-							</div>
-						</div>
-						<div class="buttons">
-							<Button
-								padding="6px"
-								on:click={() =>
-									(displayPlayAgainstModal = true)}
-								active={$stLoggedUser.uuid !== params.uuid &&
-									!user?.is_blocked &&
-									!user?.has_blocked}>Play against</Button
-							>
-							{#if pending}
-								<Button
-									highlight={false}
-									padding="6px"
-									on:click={() =>
-										(displayCancelRequestModal = true)}
-									active={$stLoggedUser.uuid !== params.uuid}
-									>Request sent</Button
-								>
-							{:else if requested}
-								<Button
-									padding="6px"
-									on:click={() =>
-										(displayAddFriendModal = true)}
-									active={$stLoggedUser.uuid !== params.uuid}
-									>Accept friend request</Button
-								>
-							{:else if friends}
-								<Button
-									red
-									padding="6px"
-									on:click={() =>
-										(displayCancelRequestModal = true)}
-									active={$stLoggedUser.uuid !== params.uuid}
-									>Remove friend</Button
-								>
-							{:else}
-								<Button
-									padding="6px"
-									on:click={() =>
-										(displayAddFriendModal = true)}
-									active={$stLoggedUser.uuid !==
-										params.uuid &&
-										!user?.is_blocked &&
-										!user?.has_blocked}>Add friend</Button
-								>
-							{/if}
-							{#if isBlocked}
-								<Button
-									padding="6px"
-									on:click={() => (displayBlockModal = true)}
-									active={$stLoggedUser.uuid !== params.uuid}
-									>Unblock</Button
-								>{:else}
-								<Button
-									padding="6px"
-									red
-									on:click={() => (displayBlockModal = true)}
-									active={$stLoggedUser.uuid !== params.uuid}
-									>Block</Button
-								>
-							{/if}
-							<button on:click={spectateGame}
-								>spectate gaem</button
-							>
-						</div>
-					</div>
-				</div>
-			</Card>
-			{#if !user?.has_blocked}
-				<div class="content">
+{#if show}
+	{#if !user}
+		<NotFound />
+	{:else}
+		{#if displayAddFriendModal}
+			<Modal>
+				<div class="modal">
 					<Card>
-						<div class="home-div">
-							<div class="title">Match History</div>
-							<MatchHistory />
+						<div class="card">
+							<ClickOutside
+								on:clickoutside={() =>
+									(displayAddFriendModal = false)}
+							>
+								<div class="title">
+									{#if requested}
+										Accept friend request from {user?.username}
+										?
+									{:else}
+										Send a friend request to {user?.username}
+										?
+									{/if}
+								</div>
+								<div class="desc">
+									{#if requested}
+										They will be added to you friends list
+									{:else}
+										They will be able to accept or decline
+										your request
+									{/if}
+								</div>
+								<div class="modbuttons">
+									<Button
+										highlight={false}
+										on:click={() =>
+											(displayAddFriendModal = false)}
+										>Back</Button
+									>
+									<Button on:click={sendFriendRequest}
+										>Yes</Button
+									>
+								</div>
+							</ClickOutside>
 						</div>
 					</Card>
 				</div>
-			{:else}
-				<div class="blocked">This user has blocked you.</div>
-			{/if}
+			</Modal>
+		{:else if displayPlayAgainstModal}
+			<Modal>
+				<div class="modal">
+					<Card>
+						<div class="card">
+							<ClickOutside
+								on:clickoutside={() =>
+									(displayPlayAgainstModal = false)}
+							>
+								<div class="title">
+									Challenge {user?.username} in a casual game?
+								</div>
+								<div class="desc">
+									They will be able to accept or decline your
+									request
+								</div>
+								<div class="modbuttons">
+									<Button
+										highlight={false}
+										on:click={() =>
+											(displayPlayAgainstModal = false)}
+										>Back</Button
+									>
+									<Button>Yes</Button>
+								</div>
+							</ClickOutside>
+						</div>
+					</Card>
+				</div>
+			</Modal>
+		{:else if displayBlockModal}
+			<Modal>
+				<div class="modal">
+					<Card>
+						<div class="card">
+							<ClickOutside
+								on:clickoutside={() =>
+									(displayBlockModal = false)}
+							>
+								<div class="title">
+									{#if !user?.is_blocked}
+										Block {user?.username} ?
+									{:else}
+										Unblock {user?.username} ?
+									{/if}
+								</div>
+								<div class="desc">
+									{#if !user?.is_blocked}
+										They will no longer be able to play
+										against you or send you direct messages
+									{:else}
+										They will be able to play against you
+										and send you direct messages
+									{/if}
+								</div>
+								<div class="modbuttons">
+									<Button
+										highlight={false}
+										on:click={() =>
+											(displayBlockModal = false)}
+										>Back</Button
+									>
+									<Button
+										red={!user?.is_blocked}
+										on:click={block}>Yes</Button
+									>
+								</div>
+							</ClickOutside>
+						</div>
+					</Card>
+				</div>
+			</Modal>
+		{:else if displayCancelRequestModal}
+			<Modal>
+				<div class="modal">
+					<Card>
+						<div class="card">
+							<ClickOutside
+								on:clickoutside={() =>
+									(displayCancelRequestModal = false)}
+							>
+								<div class="title">
+									{#if friends}
+										Remove {user?.username} from friend list?
+									{:else}
+										Cancel friend request?
+									{/if}
+								</div>
+								<div class="desc">
+									{#if friends}
+										You will also be removed from their
+										friend list
+									{:else}
+										They will no longer see that you sent a
+										friend request
+									{/if}
+								</div>
+								<div class="modbuttons">
+									<Button
+										highlight={false}
+										on:click={() =>
+											(displayCancelRequestModal = false)}
+										>Back</Button
+									>
+									<Button red on:click={cancelFriendRequest}
+										>Yes</Button
+									>
+								</div>
+							</ClickOutside>
+						</div>
+					</Card>
+				</div>
+			</Modal>
+		{/if}
+		<SideBar />
+		<div class="user-profile">
+			<div class="column">
+				<Card outline="rgb(232, 138, 138)">
+					<div class="profile">
+						<div class="back" />
+						<div class="avatar">
+							<UserAvatar uuid={params.uuid} />
+						</div>
+						<div class="info">
+							<div class="user">
+								<div class="name">{user.username}</div>
+								<div class="id">#{profileID}</div>
+								<div class="rank" />
+							</div>
+							<div class="level">
+								<div class="level-text">Level 16</div>
+								<div class="level-back">
+									<div
+										class="level-inner"
+										style="width: {levelPercentage}%;"
+									/>
+								</div>
+							</div>
+							<div class="buttons">
+								<Button
+									padding="6px"
+									on:click={() =>
+										(displayPlayAgainstModal = true)}
+									active={$stLoggedUser.uuid !==
+										params.uuid &&
+										!user?.is_blocked &&
+										!user?.has_blocked}>Play against</Button
+								>
+								{#if pending}
+									<Button
+										highlight={false}
+										padding="6px"
+										on:click={() =>
+											(displayCancelRequestModal = true)}
+										active={$stLoggedUser.uuid !==
+											params.uuid}>Request sent</Button
+									>
+								{:else if requested}
+									<Button
+										padding="6px"
+										on:click={() =>
+											(displayAddFriendModal = true)}
+										active={$stLoggedUser.uuid !==
+											params.uuid}
+										>Accept friend request</Button
+									>
+								{:else if friends}
+									<Button
+										red
+										padding="6px"
+										on:click={() =>
+											(displayCancelRequestModal = true)}
+										active={$stLoggedUser.uuid !==
+											params.uuid}>Remove friend</Button
+									>
+								{:else}
+									<Button
+										padding="6px"
+										on:click={() =>
+											(displayAddFriendModal = true)}
+										active={$stLoggedUser.uuid !==
+											params.uuid &&
+											!user?.is_blocked &&
+											!user?.has_blocked}
+										>Add friend</Button
+									>
+								{/if}
+								{#if isBlocked}
+									<Button
+										padding="6px"
+										on:click={() =>
+											(displayBlockModal = true)}
+										active={$stLoggedUser.uuid !==
+											params.uuid}>Unblock</Button
+									>{:else}
+									<Button
+										padding="6px"
+										red
+										on:click={() =>
+											(displayBlockModal = true)}
+										active={$stLoggedUser.uuid !==
+											params.uuid}>Block</Button
+									>
+								{/if}
+								<button on:click={spectateGame}
+									>spectate gaem</button
+								>
+							</div>
+						</div>
+					</div>
+				</Card>
+				{#if !user?.has_blocked}
+					<div class="content">
+						<Card>
+							<div class="home-div">
+								<div class="title">Match History</div>
+								<MatchHistory />
+							</div>
+						</Card>
+					</div>
+				{:else}
+					<div class="blocked">This user has blocked you.</div>
+				{/if}
+			</div>
 		</div>
-	</div>
+	{/if}
 {/if}
 
 <style lang="scss">

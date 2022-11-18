@@ -14,7 +14,7 @@
 </script>
 
 {#each friends as [uuid, friend]}
-	<div class="friend" on:click={() => push("/profile/" + uuid)}>
+	<div class="friend" on:click={() => push("/profile/" + friend.name + "/" + friend.id)}>
 		<div
 			class="avatar"
 			class:online={friend.status === ConnectionStatus.Online}

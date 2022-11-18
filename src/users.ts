@@ -10,6 +10,7 @@ export interface LoggedUser {
 }
 
 export interface User {
+	uuid: string;
 	username: string;
 	identifier: string;
 	avatar: string | null;

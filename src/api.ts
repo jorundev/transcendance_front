@@ -189,7 +189,7 @@ async function makeRequest<T>(
 ): Promise<T | APIStatus.NoResponse | null> {
 	let promise: Promise<Response>;
 
-	for (;;) {
+	for (; ;) {
 		switch (method) {
 			case "GET":
 				promise = fetchGET(url);
@@ -1069,7 +1069,7 @@ async function wsUserStatus(data: WsUserStatus) {
 		old[data.user].is_online = data.status;
 		return old;
 	});
-	
+
 	stFriends.update((old) => {
 		if (old[data.user]) {
 			old[data.user].status = data.status;
@@ -1322,12 +1322,12 @@ export const api = {
 	getChannelMessages: async (uuid: string, page: number) => {
 		return makeRequest<ChannelMessagesResponse>(
 			"/api/chats/channels/" +
-				uuid +
-				"/messages" +
-				"?page=" +
-				page +
-				"&limit=" +
-				chatPageSize,
+			uuid +
+			"/messages" +
+			"?page=" +
+			page +
+			"&limit=" +
+			chatPageSize,
 			"GET"
 		);
 	},
@@ -1351,6 +1351,22 @@ export const api = {
 		}
 		return user;
 	},
+	getUserDataByUserAndId: async (username: string, id: string) => {
+		const from_store = Object.entries(get(stUsers)).filter((entry) => {
+			return entry[1].username === username && entry[1].identifier === id
+		});
+		if (from_store.length > 0) {
+			return from_store[0][1];
+		}
+		const user = await makeRequest<User>(`/api/users/profile/${username}/${id}`, "GET");
+		if (user !== APIStatus.NoResponse) {
+			stUsers.update((u) => {
+				u[user.uuid] = user;
+				return u;
+			});
+		}
+		return user;
+	},
 	getJoinedChannels: async () => {
 		return makeRequest<ListChannelsResponse>(
 			"/api/chats/channels/in",
@@ -1364,7 +1380,7 @@ export const api = {
 				"POST",
 				{ message }
 			);
-		} catch (_e) {}
+		} catch (_e) { }
 	},
 	deleteMessage: async (channel: string, uuid: string) => {
 		return makeRequest(
@@ -1605,9 +1621,9 @@ export const api = {
 					window.location.protocol === "https:" ? "wss" : "ws";
 				const ws = new ReconnectingWebSocket(
 					protocol +
-						"://" +
-						window.location.hostname +
-						"/api/streaming"
+					"://" +
+					window.location.hostname +
+					"/api/streaming"
 				);
 				stWebsocket.set(ws);
 

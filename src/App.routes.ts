@@ -73,6 +73,7 @@ export default {
 	"/chat/inner/:uuid": requiresLogin(ChatInside),
 	"/notifications": requiresLogin(Notifications),
 	"/profile/:uuid": requiresLogin(Profile),
+	"/profile/:user/:id": requiresLogin(Profile),
 	"/play": requiresLogin(ChooseLobby),
 	"/play/casual": requiresLogin(Casual),
 	"/login": requiresNoLogin(Login),
