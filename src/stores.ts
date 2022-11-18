@@ -35,6 +35,53 @@ export const stFriends: Writable<FriendDataDictionary> = writable({});
 export const stLobby: Writable<Lobby> = writable(null);
 export const stLobbies: Writable<LobbyDictionary> = writable({});
 
+/* Integrity checks */
+stLoggedUser.subscribe((loggedUser) => {
+	if (loggedUser === undefined) {
+		console.error("The store responsible for storing information about the logged user has been set to undefined. This should not have happened. You are now in hell and nothing is expected to work normally. Good luck.")
+	}
+});
+stServerDown.subscribe((serverDown) => {
+	if (serverDown === undefined) {
+		console.error("The store responsible for storing information about wether or not the server is reachable has been set to undefined. This should not have happened. You are now in hell and nothing is expected to work normally. Good luck.")
+	}
+});
+stUsers.subscribe((users) => {
+	if (users === undefined) {
+		console.error("The store responsible for storing information about users has been set to undefined. This should not have happened. You are now in hell and nothing is expected to work normally. Good luck.")
+	}
+});
+stWebsocket.subscribe((ws) => {
+	if (ws === undefined) {
+		console.error("The store responsible for storing information about the websocket has been set to undefined. This should not have happened. You are now in hell and nothing is expected to work normally. Good luck.")
+	}
+});
+stChannels.subscribe((channels) => {
+	if (channels === undefined) {
+		console.error("The store responsible for storing information about the channels has been set to undefined. This should not have happened. You are now in hell and nothing is expected to work normally. Good luck.")
+	}
+});
+stNotifications.subscribe((notifications) => {
+	if (notifications === undefined) {
+		console.error("The store responsible for storing information about notifications has been set to undefined. This should not have happened. You are now in hell and nothing is expected to work normally. Good luck.")
+	}
+});
+stFriends.subscribe((friends) => {
+	if (friends === undefined) {
+		console.error("The store responsible for storing information about friends has been set to undefined. This should not have happened. You are now in hell and nothing is expected to work normally. Good luck.")
+	}
+});
+stLobby.subscribe((lobby) => {
+	if (lobby === undefined) {
+		console.error("The store responsible for storing information about the lobby you are in has been set to undefined. This should not have happened. You are now in hell and nothing is expected to work normally. Good luck.")
+	}
+});
+stLobbies.subscribe((lobbies) => {
+	if (lobbies === undefined) {
+		console.error("The store responsible for storing information about public lobbies has been set to undefined. This should not have happened. You are now in hell and nothing is expected to work normally. Good luck.")
+	}
+});
+
 export async function tryToLog() {
 	let response: WhoAmIResponse | APIStatus;
 	for (;;) {

@@ -1069,14 +1069,14 @@ async function wsUserStatus(data: WsUserStatus) {
 		old[data.user].is_online = data.status;
 		return old;
 	});
-	if (get(stFriends)) {
-		stFriends.update((old) => {
-			if (old[data.user]) {
-				old[data.user].status = data.status;
-				return old;
-			}
-		});
-	}
+	
+	stFriends.update((old) => {
+		if (old[data.user]) {
+			old[data.user].status = data.status;
+			return old;
+		}
+		return old;
+	});
 }
 
 async function wsUserMessage(data: WsUser) {

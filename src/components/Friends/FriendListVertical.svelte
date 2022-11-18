@@ -8,12 +8,9 @@
 	import { push } from "svelte-spa-router";
 
 	let friends: Array<[string, FriendData]> = [];
-	$: if ($stFriends)
-		friends = Object.entries($stFriends)?.filter(
-			([_, ent]) => ent.friendship === UsersFriendship.True
-		);
-
-	$: console.log($stFriends);
+	$: friends = Object.entries($stFriends)?.filter(
+		([_, ent]) => ent.friendship === UsersFriendship.True
+	);
 </script>
 
 {#each friends as [uuid, friend]}
