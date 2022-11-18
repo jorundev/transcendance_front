@@ -43,6 +43,7 @@ import {
 	type WsChatUnban,
 	type WsChatUnmute,
 	type WsGame,
+	type WsGameDisband,
 	type WsGameJoin,
 	type WsGameLeave,
 	type WsGameReady,
@@ -1134,7 +1135,7 @@ async function wsGameJoin(data: WsGameJoin) {
 		}
 	}
 
-	if (get(stLobby)) {
+	if (get(stLobby) && data.lobby_uuid === get(stLobby).uuid) {
 		stLobby.update((old) => {
 			old.players[1] = data.user_uuid;
 			old.players_status[1] = LobbyPlayerReadyState.Joined;
@@ -1159,7 +1160,6 @@ async function wsGameLeave(data: WsGameLeave) {
 			data.user_uuid === get(stLoggedUser)?.uuid ||
 			data.user_uuid === get(stLobby)?.players[0]
 		) {
-			//setTimeout(() => replace("/play"), 0);
 			stLobby.set(null);
 			return;
 		}
@@ -1208,6 +1208,16 @@ async function wsGameSpectate(data: WsGameSpectate) {
 	}
 }
 
+async function wsGameDisband(data: WsGameDisband) {
+	if (get(stLobby) && get(stLobby).uuid === data.lobby_uuid) {
+		stLobby.set(null);
+	}
+	stLobbies.update((old) => {
+		delete old[data.lobby_uuid];
+		return old;
+	});
+}
+
 async function wsGameMessage(data: WsGame) {
 	switch (data.action) {
 		case GameAction.Join:
@@ -1224,6 +1234,9 @@ async function wsGameMessage(data: WsGame) {
 			break;
 		case GameAction.Spectate:
 			await wsGameSpectate(data as WsGameSpectate);
+			break;
+		case GameAction.Disband:
+			await wsGameDisband(data as WsGameDisband);
 			break;
 	}
 }

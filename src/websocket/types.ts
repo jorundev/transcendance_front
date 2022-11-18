@@ -196,12 +196,15 @@ export interface WsUserStatusInGame extends WsUser {
  * Game
  */
 
-export enum GameAction {
+
+ export enum GameAction {
 	Join = 'JOIN',
+	Invite = 'INVITE',
 	Spectate = 'SPECTATE',
 	Ready = 'READY',
 	Start = 'START',
-	Leave = 'LEAVE'
+	Leave = 'LEAVE',
+	Disband = 'DISBAND'
 }
 
 export interface WsGame {
@@ -232,4 +235,8 @@ export interface WsGameStart extends WsGame {
 export interface WsGameLeave extends WsGame {
 	action: GameAction.Leave;
 	user_uuid: string;
+}
+
+export interface WsGameDisband extends WsGame {
+	action: GameAction.Disband;
 }

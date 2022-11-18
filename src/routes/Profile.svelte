@@ -2,6 +2,7 @@
 	import Card from "../components/Kit/Card.svelte";
 	import type { User } from "../users";
 	import { api, APIStatus, UsersFriendship } from "../api";
+	import { LobbyPlayerReadyState } from "../lobbies";
 	import SideBar from "../components/SideBar.svelte";
 	import NotFound from "./NotFound.svelte";
 	import MatchHistory from "../components/MatchHistory.svelte";
@@ -12,7 +13,6 @@
 	import { padIdentifier } from "../utils";
 	import { stFriends, stLobby, stLoggedUser } from "../stores";
 	import { onMount } from "svelte";
-	import { LobbyPlayerReadyState } from "../lobbies";
 	import { push } from "svelte-spa-router";
 
 	export let params: {

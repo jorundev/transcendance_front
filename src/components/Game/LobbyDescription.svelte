@@ -10,7 +10,7 @@
 	let status = "";
 
 	$: {
-		if (!lobby.players?.[1]) {
+		if (!lobby?.players?.[1]) {
 			status = "Waiting for players";
 		}
 	}
