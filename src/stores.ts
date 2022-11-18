@@ -23,6 +23,7 @@ export const stServerDown: Writable<boolean> = writable(false);
 export const stUsers: Writable<UserDictionary> = writable({});
 export const stWebsocket: Writable<ReconnectingWebSocket | null> =
 	writable(null);
+export const websocketConnected: Writable<boolean> = writable(false);
 export const stChannels: Writable<ChannelDictionary> = writable({});
 export const stNotifications: Writable<NotificationDataDictionary> = writable(
 	{}

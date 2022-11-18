@@ -3,12 +3,15 @@
 
 	import Router, { replace } from "svelte-spa-router";
 	import routes from "./App.routes";
+	import Modal from "./components/Kit/Modal.svelte";
+	import SpinnerModal from "./components/Kit/SpinnerModal.svelte";
 	import {
 		stChannels,
 		stLoggedUser,
 		stServerDown,
 		stWebsocket,
 		tryLoggingIn,
+		websocketConnected,
 	} from "./stores";
 
 	let interval = null;
@@ -102,6 +105,9 @@
 		<title>Server down - NEW SHINJI MEGA PONG ULTIMATE</title>
 	{/if}
 </svelte:head>
+{#if $stLoggedUser && !$websocketConnected}
+	<Modal><SpinnerModal/></Modal>
+{/if}
 <div class="main">
 	{#if $stServerDown}
 		<div class="sorry">Server is down. Try again later!</div>

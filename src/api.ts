@@ -21,6 +21,7 @@ import {
 	stServerDown,
 	stUsers,
 	stWebsocket,
+	websocketConnected,
 } from "./stores";
 import type { User } from "./users";
 import {
@@ -1709,6 +1710,7 @@ export const api = {
 
 				ws.onerror = () => {
 					console.log("Could not connect to WebSocket.");
+					websocketConnected.set(false);
 					// ws.onerror = undefined;
 					// ws.onopen = undefined;
 					// ws.onclose = undefined;
@@ -1719,10 +1721,12 @@ export const api = {
 				};
 
 				ws.onopen = () => {
+					websocketConnected.set(true);
 					console.log("Successfully connected to websocket");
 				};
 
 				ws.onclose = (e) => {
+					websocketConnected.set(false);
 					if (e.wasClean) {
 						console.log("Websocket closed");
 						// stWebsocket.set(null);
