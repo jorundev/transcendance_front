@@ -4,7 +4,7 @@
 </script>
 
 {#if Object.entries($stLobbies).length > 0}
-	{#each Object.entries($stLobbies) as [uuid, lobby]}
+	{#each Object.entries($stLobbies) as [uuid, lobby] (uuid)}
 		<LobbyDescription {lobby} />
 	{/each}
 {:else}

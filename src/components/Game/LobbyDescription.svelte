@@ -4,14 +4,19 @@
 	import { api, APIStatus, type Lobby } from "../../api";
 	import Button from "../Kit/Button.svelte";
 	import UserAvatar from "../Users/UserAvatar.svelte";
+	import { LobbyPlayerReadyState } from "../../lobbies";
 
 	export let lobby: Lobby;
 
 	let status = "";
+	
+	$: console.log(lobby?.players[0], "vs", lobby?.players[1]);
 
 	$: {
 		if (!lobby?.players?.[1]) {
 			status = "Waiting for players";
+		} else if (lobby?.players_status[0] === LobbyPlayerReadyState.Ready && lobby?.players_status[1] === LobbyPlayerReadyState.Ready) {
+			status = "Playing"
 		}
 	}
 
@@ -38,14 +43,14 @@
 				<UserAvatar uuid={lobby.players[0]} />
 			</div>
 			vs
-			<div class="avatar" class:noplayer={!lobby.players[1]}>
-				<UserAvatar uuid={lobby.players[1]} />
+			<div class="avatar" class:noplayer={!lobby.players[1] || lobby.players_status[1] === LobbyPlayerReadyState.Invited}>
+				<UserAvatar uuid={lobby.players[1] ?? null} />
 			</div>
 		</div>
-		<div class="status">{status}</div>
 		<div class="spectator-count">
 			{lobby.spectators.length} / {lobby.max_spectators} spectators
 		</div>
+		<div class="status">{status}</div>
 	</div>
 	<div class="spectate">
 		<div class="button">

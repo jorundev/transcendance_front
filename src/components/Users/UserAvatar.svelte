@@ -7,6 +7,8 @@
 	let avatar = "/img/default.jpg";
 	$: if (uuid && $stUsers) {
 		avatar = getUserProfilePictureLink(uuid);
+	} else {
+		avatar = "/img/default.jpg";
 	}
 </script>
 

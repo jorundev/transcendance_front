@@ -240,3 +240,8 @@ export interface WsGameLeave extends WsGame {
 export interface WsGameDisband extends WsGame {
 	action: GameAction.Disband;
 }
+
+export interface WsGameInvite extends WsGame {
+	action: GameAction.Invite;
+	user_uuid: string;
+}

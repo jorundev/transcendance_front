@@ -47,6 +47,7 @@
 			return;
 		}
 		if (res.statusCode === 413) {
+			// TODO show error message
 			avatarPromise = Promise.resolve(getProfilePictureLink());
 			return;
 		}

@@ -44,6 +44,7 @@ import {
 	type WsChatUnmute,
 	type WsGame,
 	type WsGameDisband,
+	type WsGameInvite,
 	type WsGameJoin,
 	type WsGameLeave,
 	type WsGameReady,
@@ -1133,6 +1134,17 @@ async function wsGameJoin(data: WsGameJoin) {
 		if (data.user_uuid === get(stLoggedUser)?.uuid) {
 			return;
 		}
+	} else {
+		stLobbies.update((old) => {
+			if (old[data.lobby_uuid].players[0] === data.user_uuid) {
+				old[data.lobby_uuid].players_status[0] = LobbyPlayerReadyState.Joined;
+			} else {
+				old[data.lobby_uuid].players[1] = data.user_uuid;
+				old[data.lobby_uuid].players_status[1] = LobbyPlayerReadyState.Joined;
+			}
+			console.log("old", old);
+			return old;
+		});
 	}
 
 	if (get(stLobby) && data.lobby_uuid === get(stLobby).uuid) {
@@ -1148,11 +1160,12 @@ async function wsGameLeave(data: WsGameLeave) {
 	stLobbies.update((old) => {
 		if (old[data.lobby_uuid]?.players[0] === data.user_uuid) {
 			delete old[data.lobby_uuid];
-		} else {
+		} else if (old[data.lobby_uuid].players[1] === data.user_uuid) {
 			old[data.lobby_uuid].players[1] = "";
 			old[data.lobby_uuid].players_status[1] =
 				LobbyPlayerReadyState.Invited;
 		}
+		old[data.lobby_uuid].spectators = old[data.lobby_uuid].spectators?.filter((uuid) => uuid !== data.user_uuid) ?? [];
 		return old;
 	});
 	if (get(stLobby)?.uuid === data.lobby_uuid) {
@@ -1178,22 +1191,43 @@ async function wsGameLeave(data: WsGameLeave) {
 }
 
 async function wsGameReady(data: WsGameReady) {
-	stLobby.update((old) => {
-		if (data.user_uuid === old.players[0]) {
-			old.players_status[0] = LobbyPlayerReadyState.Ready;
-		} else if (data.user_uuid === old.players[1]) {
-			old.players_status[1] = LobbyPlayerReadyState.Ready;
-		}
-		return old;
-	});
+	if (get(stLobby) && get(stLobby).uuid === data.lobby_uuid) {
+		stLobby.update((old) => {
+			if (data.user_uuid === old.players[0]) {
+				old.players_status[0] = LobbyPlayerReadyState.Ready;
+			} else if (data.user_uuid === old.players[1]) {
+				old.players_status[1] = LobbyPlayerReadyState.Ready;
+			}
+			return old;
+		});
+	}
+	if (get(stLobbies)[data.lobby_uuid]) {
+		stLobbies.update((old) => {
+			if (old[data.lobby_uuid].players[0] === data.user_uuid) {
+				old[data.lobby_uuid].players_status[0] = LobbyPlayerReadyState.Ready;
+			} else if (old[data.lobby_uuid].players[1] === data.user_uuid) {
+				old[data.lobby_uuid].players_status[1] = LobbyPlayerReadyState.Ready;
+			}
+			return old;
+		});
+	}
 }
 
 async function wsGameStart(data: WsGameStart) {
-	stLobby.update((old) => {
-		old.players_status[0] = LobbyPlayerReadyState.Ready;
-		old.players_status[1] = LobbyPlayerReadyState.Ready;
-		return old;
-	});
+	if (get(stLobby) && get(stLobby).uuid === data.lobby_uuid) {
+		stLobby.update((old) => {
+			old.players_status[0] = LobbyPlayerReadyState.Ready;
+			old.players_status[1] = LobbyPlayerReadyState.Ready;
+			return old;
+		});
+	}
+	if (get(stLobbies)[data.lobby_uuid]) {
+		stLobbies.update((old) => {
+			old[data.lobby_uuid].players_status[0] = LobbyPlayerReadyState.Ready;
+			old[data.lobby_uuid].players_status[1] = LobbyPlayerReadyState.Ready;
+			return old;
+		});
+	}
 }
 
 async function wsGameSpectate(data: WsGameSpectate) {
@@ -1218,6 +1252,36 @@ async function wsGameDisband(data: WsGameDisband) {
 	});
 }
 
+async function wsGameInvite(data: WsGameInvite) {
+	if (get(stLobby) && get(stLobby).uuid === data.lobby_uuid) {
+		stLobby.update((old) => {
+			old.players[1] = data.user_uuid;
+			old.players_status[1] = LobbyPlayerReadyState.Invited;
+			return old;
+		});
+	}
+
+	if (get(stLobbies)[data.lobby_uuid] === undefined) {
+		const lobby = await api.getLobbyInfo(data.lobby_uuid);
+		stLobbies.update((old) => {
+			if (lobby !== null && lobby !== APIStatus.NoResponse) {
+				old[data.lobby_uuid] = lobby;
+			}
+			return old;
+		});
+
+		if (data.user_uuid === get(stLoggedUser)?.uuid) {
+			return;
+		}
+	} else {
+		stLobbies.update((old) => {
+			old[data.lobby_uuid].players[1] = data.user_uuid;
+			old[data.lobby_uuid].players_status[1] = LobbyPlayerReadyState.Invited;
+			return old;
+		});
+	}
+}
+
 async function wsGameMessage(data: WsGame) {
 	switch (data.action) {
 		case GameAction.Join:
@@ -1237,6 +1301,9 @@ async function wsGameMessage(data: WsGame) {
 			break;
 		case GameAction.Disband:
 			await wsGameDisband(data as WsGameDisband);
+			break;
+		case GameAction.Invite:
+			await wsGameInvite(data as WsGameInvite);
 			break;
 	}
 }
@@ -1673,6 +1740,7 @@ export const api = {
 
 				ws.onmessage = async (message) => {
 					const data: WebsocketMessage = JSON.parse(message.data);
+					console.log(data);
 					switch (data.namespace) {
 						case WsNamespace.Chat:
 							await wsChatMessage(data as WsChat);
