@@ -85,17 +85,14 @@ stLobbies.subscribe((lobbies) => {
 
 export async function tryToLog() {
 	let response: WhoAmIResponse | APIStatus;
-	for (;;) {
-		response = await api.whoami();
-		if (response == null) {
-			return;
-		}
-		if (response == APIStatus.NoResponse || response?.statusCode === 502) {
-			stServerDown.set(true);
-			await new Promise((resolve) => setTimeout(resolve, 5000));
-			continue;
-		}
-		break;
+	response = await api.whoami();
+
+	if (response === null) {
+		return ;
+	}
+	if (response == APIStatus.NoResponse || response?.statusCode === 502) {
+		stServerDown.set(true);
+		return ;
 	}
 
 	stLoggedUser.set({
@@ -352,7 +349,7 @@ export async function initPrivChannel(channelUUID: string) {
 }
 
 export async function tryLoggingIn(): Promise<boolean> {
-	if (get(stServerDown) || !isLogged()) {
+	if (!isLogged()) {
 		await tryToLog();
 	}
 	return isLogged();

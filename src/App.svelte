@@ -16,19 +16,42 @@
 
 	let interval = null;
 	let serverDownInterval = null;
+	
+	async function connectToServer()
+	{
+		// If the server throws a 200 or a 404 then the server is alright.
+		// If it returns something else (probably a 502) then the server is down
+		const res = await fetch("/api/ping");
+		return res?.status === 200 || res?.status === 404;
+	}
 
 	stServerDown.subscribe((isDown) => {
 		if (isDown) {
-			serverDownInterval = setInterval(async () => {
-				await tryLoggingIn();
-			}, 2000);
+			if (!serverDownInterval) {
+				serverDownInterval = setInterval(async () => {
+					if (await connectToServer()) {
+						stServerDown.set(false);
+						clearInterval(serverDownInterval);
+						serverDownInterval = null;
+						await tryLoggingIn();
+					}
+				}, 2000);
+			}
 		} else {
-			clearInterval(serverDownInterval);
-			serverDownInterval = null;
+			if (serverDownInterval) {
+				clearInterval(serverDownInterval);
+				serverDownInterval = null;
+			}
 		}
 	});
 
 	onMount(async () => {
+		if (await connectToServer()) {
+			await tryLoggingIn();
+		} else {
+			stServerDown.set(true);
+		}
+
 		clearInterval(interval);
 		document.documentElement.style.setProperty(
 			"--scrollbar-width",
@@ -110,7 +133,7 @@
 {/if}
 <div class="main">
 	{#if $stServerDown}
-		<div class="sorry">Server is down. Try again later!</div>
+		<div class="sorry">There is something wrong with the server.<br>Attempting reconnection...</div>
 	{:else}
 		<Router
 			{routes}
@@ -139,8 +162,12 @@
 	}
 
 	.sorry {
-		color: gray;
+		width: 100vw;
+		height: 100vh;
+		display: grid;
+		place-items: center;
 		text-align: center;
-		font-size: 40px;
+		font-size: 20px;
+		line-height: 30px;
 	}
 </style>

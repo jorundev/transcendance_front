@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { stLoggedUser } from "../stores";
+	import { stLoggedUser, stServerDown } from "../stores";
 	import { onMount } from "svelte";
 	import { push, replace } from "svelte-spa-router";
 
@@ -8,18 +8,23 @@
 	function isError(obj: Response | string): obj is string {
 		return obj === "error";
 	}
+	
+	$: if ($stLoggedUser !== null) {
+		replace("/");
+	}
 
 	onMount(async () => {
-		if ($stLoggedUser != null) {
-			replace("/");
-			return;
-		}
-
-		const res = await fetch("/api/auth/available").catch(() => {
-			return "error";
-		});
-		if (!isError(res)) {
-			availableConnexionMethods = await res.json();
+		if ($stLoggedUser === null) {
+			const res = await fetch("/api/auth/available").catch(() => {
+				return "error";
+			});
+			if (!isError(res)) {
+				try {
+					availableConnexionMethods = await res.json();
+				} catch (e) {
+					stServerDown.set(true);
+				}
+			}
 		}
 	});
 </script>

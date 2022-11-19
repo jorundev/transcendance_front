@@ -21,6 +21,7 @@ import {
 	stServerDown,
 	stUsers,
 	stWebsocket,
+	tryToLog,
 	websocketConnected,
 } from "./stores";
 import type { User } from "./users";
@@ -1721,7 +1722,9 @@ export const api = {
 				};
 
 				ws.onopen = () => {
-					websocketConnected.set(true);
+					tryToLog().then(() => {
+						websocketConnected.set(true);
+					});
 					console.log("Successfully connected to websocket");
 				};
 
