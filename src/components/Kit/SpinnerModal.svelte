@@ -1,7 +1,7 @@
 <div class="center">
     <div class="mod">
         <div class="lds-dual-ring" />
-        Reconnecting
+        Connecting
     </div>
 </div>
 
