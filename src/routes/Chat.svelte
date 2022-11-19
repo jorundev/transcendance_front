@@ -126,7 +126,7 @@
 	<title>Chat - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
 {#if $stLoggedUser}
-	<SideBar active="chat" />
+	<!-- <SideBar active="chat" /> -->
 	<div class="chat">
 		{#if join_channel_modal}
 			<Modal>

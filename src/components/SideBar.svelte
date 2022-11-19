@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { push } from "svelte-spa-router";
 	import { onMount } from "svelte";
-	import { stHasNotifications } from "../stores";
+	import { stHasNotifications, stSidebarSelected } from "../stores";
 	import FriendListVertical from "./Friends/FriendListVertical.svelte";
 
 	let bigDisplay = false;
@@ -10,13 +10,8 @@
 	let hover = false;
 	let notransition = true;
 
-	export let active:
-		| "home"
-		| "notifications"
-		| "play"
-		| "chat"
-		| "settings"
-		| undefined = undefined;
+	let active: string = null;
+	$: active = $stSidebarSelected;
 
 	let oldWidth = 0;
 
@@ -106,6 +101,20 @@
 	}
 	.sidebar-hover,
 	.sidebar {
+		::-webkit-scrollbar {
+			display: none;
+		}
+		scrollbar-width: none;
+		
+		&::before {
+			content: "";
+			min-width: 180px;
+			min-height: 100%;
+			position:fixed;
+			top: 0;
+			transform: translateX(-100%);
+		}
+
 		user-select: none;
 		-webkit-user-select: none;
 		z-index: 20;

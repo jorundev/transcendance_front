@@ -20,7 +20,7 @@
 	<title>Settings - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
 {#if $stLoggedUser}
-	<SideBar active="settings" />
+	<!-- <SideBar active="settings" /> -->
 	<div class="s">
 		<div class="settings">
 			<div class="top">
@@ -80,6 +80,7 @@
 	}
 
 	.settings {
+		box-sizing: border-box;
 		user-select: none;
 		-webkit-user-select: none;
 		width: 100%;

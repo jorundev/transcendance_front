@@ -35,6 +35,7 @@ export const stHasNotifications = derived(
 export const stFriends: Writable<FriendDataDictionary> = writable({});
 export const stLobby: Writable<Lobby> = writable(null);
 export const stLobbies: Writable<LobbyDictionary> = writable({});
+export const stSidebarSelected: Writable<string | null> = writable(null);
 
 /* Integrity checks */
 stLoggedUser.subscribe((loggedUser) => {

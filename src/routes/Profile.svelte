@@ -178,7 +178,7 @@
 <svelte:head>
 	<title>{user?.username} - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
-<SideBar />
+<!-- <SideBar /> -->
 {#if show || user}
 	{#if !user}
 		<NotFound />

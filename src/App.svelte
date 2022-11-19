@@ -5,10 +5,12 @@
 	import routes from "./App.routes";
 	import Modal from "./components/Kit/Modal.svelte";
 	import SpinnerModal from "./components/Kit/SpinnerModal.svelte";
+	import SideBar from "./components/SideBar.svelte";
 	import {
 		stChannels,
 		stLoggedUser,
 		stServerDown,
+		stSidebarSelected,
 		stWebsocket,
 		tryLoggingIn,
 		websocketConnected,
@@ -16,9 +18,33 @@
 
 	let interval = null;
 	let serverDownInterval = null;
-	
-	async function connectToServer()
-	{
+
+	let innerWidth = 0;
+
+	let hash = "";
+	$: {
+		if (hash.startsWith("/login") || hash.startsWith("/postsignup")) {
+			$stSidebarSelected = null;
+		} else {
+			if (hash.startsWith("/settings")) {
+				$stSidebarSelected = "settings";
+			} else if (hash.startsWith("/chat")) {
+				if (!hash.startsWith("/chat/inner") || innerWidth >= 800) {
+					$stSidebarSelected = "chat";
+				} else {
+					$stSidebarSelected = null;
+				}
+			} else if (hash.startsWith("/play")) {
+				$stSidebarSelected = "play";
+			} else if (hash.startsWith("/notifications")) {
+				$stSidebarSelected = "notifications";
+			} else if (hash === "/") {
+				$stSidebarSelected = "home";
+			}
+		}
+	}
+
+	async function connectToServer() {
 		// If the server throws a 200 or a 404 then the server is alright.
 		// If it returns something else (probably a 502) then the server is down
 		const res = await fetch("/api/ping");
@@ -47,7 +73,13 @@
 
 	onMount(async () => {
 		if (await connectToServer()) {
-			await tryLoggingIn();
+			const hash = window.location.hash;
+			if (
+				!hash.startsWith("#/login") &&
+				!hash.startsWith("#/postsignup")
+			) {
+				await tryLoggingIn();
+			}
 		} else {
 			stServerDown.set(true);
 		}
@@ -128,18 +160,30 @@
 		<title>Server down - NEW SHINJI MEGA PONG ULTIMATE</title>
 	{/if}
 </svelte:head>
+<svelte:window bind:innerWidth></svelte:window>
 {#if $stLoggedUser && !$websocketConnected}
-	<Modal><SpinnerModal/></Modal>
+	<Modal><SpinnerModal /></Modal>
 {/if}
 <div class="main">
 	{#if $stServerDown}
-		<div class="sorry">There is something wrong with the server.<br>Attempting reconnection...</div>
+		<div class="sorry">
+			There is something wrong with the server.<br />Attempting
+			reconnection...
+		</div>
 	{:else}
-		<Router
-			{routes}
-			restoreScrollState={true}
-			on:conditionsFailed={conditionsFailed}
-		/>
+		{#if $stSidebarSelected !== null}
+			<SideBar />
+		{/if}
+		<div class="router">
+			<Router
+				on:routeLoaded={(e) => {
+					hash = e.detail.location;
+				}}
+				{routes}
+				restoreScrollState={true}
+				on:conditionsFailed={conditionsFailed}
+			/>
+		</div>
 	{/if}
 </div>
 
@@ -152,6 +196,12 @@
 		box-sizing: border-box;
 		overflow: hidden;
 		max-width: 1600px;
+	}
+	
+	.router {
+		height: 100vh;
+		overflow-y: auto;
+		overflow-x: hidden;
 	}
 
 	@media screen and (max-width: 799px) {

@@ -7,7 +7,7 @@
 <svelte:head>
 	<title>404 - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
-<SideBar />
+<!-- <SideBar /> -->
 <div class="center">
 	<div>
 		<h1>{picture ? "404" : "GATO TEQUILA"}</h1>

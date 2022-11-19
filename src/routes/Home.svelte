@@ -14,7 +14,7 @@
 	} from "../notifications";
 	import NotificationModal from "../components/Notifications/NotificationModal.svelte";
 	import { onMount } from "svelte";
-	import LobbyList from "../components/Game/LobbyList.svelte";
+	import { fade, slide } from "svelte/transition";
 	
 	let id = "";
 
@@ -58,7 +58,7 @@
 		on:read={() => onRead(modalData)}
 	/>
 {/if}
-<SideBar active="home" />
+
 <div class="home">
 	<div class="column">
 		<Card>
@@ -137,6 +137,7 @@
 	}
 
 	.column {
+		box-sizing: border-box;
 		display: flex;
 		flex-direction: column;
 		gap: 16px;
@@ -233,8 +234,8 @@
 		}
 		.column {
 			max-width: 500px;
-			margin-top: 30px;
-			margin-bottom: 30px;
+			padding-top: 30px;
+			padding-bottom: 30px;
 		}
 
 		.nodesktop {

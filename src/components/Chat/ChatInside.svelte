@@ -358,9 +358,6 @@
 	{/if}
 </svelte:head>
 <svelte:window bind:innerWidth />
-{#if innerWidth > 800 && !desktop}
-	<SideBar active="chat" />
-{/if}
 {#await tick()}
 	Loading..
 {:then}
@@ -577,6 +574,13 @@
 		margin-bottom: 82px;
 		padding-top: 82px;
 		flex-direction: column-reverse;
+		
+		&.mobile {
+			@media screen and (min-width: 800px) {
+				padding-left: 68px;
+				width: calc(100vw - 68px - 16px);
+			}
+		}
 
 		&::-webkit-scrollbar {
 			display: none;

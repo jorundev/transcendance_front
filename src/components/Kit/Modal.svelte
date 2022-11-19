@@ -1,4 +1,8 @@
-<div class="modal">
+<script lang="ts">
+	import { fade } from 'svelte/transition';
+</script>
+
+<div class="modal" transition:fade="{{ duration: 150 }}">
 	<slot />
 </div>
 

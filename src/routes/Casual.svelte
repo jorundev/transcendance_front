@@ -80,7 +80,7 @@
 		</div>
 	</Modal>
 {/if}
-<SideBar />
+<!-- <SideBar /> -->
 <svelte:head>
 	<title>Casual Game - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>

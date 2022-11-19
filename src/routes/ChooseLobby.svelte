@@ -3,7 +3,6 @@
 	import { stLobby } from "../stores";
 	import { push } from "svelte-spa-router";
 	import Card from "../components/Kit/Card.svelte";
-	import SideBar from "../components/SideBar.svelte";
 	import LobbyList from "../components/Game/LobbyList.svelte";
 
 	async function createCasualLobby() {
@@ -18,7 +17,6 @@
 	}
 </script>
 
-<SideBar active="play" />
 <svelte:head><title>Play - NEW SHINJI MEGA PONG ULTIMATE</title></svelte:head>
 <div class="play">
 	<div class="your-rank">

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { stLoggedUser } from "../stores";
 	import { validateEmail } from "../utils";
 	import { querystring, replace } from "svelte-spa-router";
 

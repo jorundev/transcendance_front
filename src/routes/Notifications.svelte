@@ -3,7 +3,7 @@
 	import SideBar from "../components/SideBar.svelte";
 </script>
 
-<SideBar active="notifications"/>
+<!-- <SideBar active="notifications"/> -->
 <div class="notifications">
 	<NotificationList />
 </div>
