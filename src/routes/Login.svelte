@@ -2,18 +2,30 @@
 	import { stLoggedUser, stServerDown } from "../stores";
 	import { onMount } from "svelte";
 	import { push, replace } from "svelte-spa-router";
+	import Modal from "../components/Kit/Modal.svelte";
+	import Card from "../components/Kit/Card.svelte";
+	import Button from "../components/Kit/Button.svelte";
+	import ClickOutside from "svelte-click-outside";
 
 	let availableConnexionMethods: Array<string> = [];
 
 	function isError(obj: Response | string): obj is string {
 		return obj === "error";
 	}
-	
+
 	$: if ($stLoggedUser !== null) {
 		replace("/");
 	}
 
+	let oauthErrorModal = false;
+
 	onMount(async () => {
+		if (window.location.hash === "#/login/oauth-error") {
+			oauthErrorModal = true;
+			console.log(
+				"Connection method unavailable. If you are the developer, this means your OAuth token is invalid or has expired"
+			);
+		}
 		if ($stLoggedUser === null) {
 			const res = await fetch("/api/auth/available").catch(() => {
 				return "error";
@@ -29,6 +41,26 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Login - NEW SHINJI MEGA PONG ULTIMATE</title>
+</svelte:head>
+{#if oauthErrorModal}
+	<Modal>
+		<div class="modal">
+			<ClickOutside on:clickoutside={() => replace("/login")}>
+				<div class="oauth-error">
+					<Card>
+						<div class="title">Error</div>
+						<div class="desc">
+							This connection method is unavailable for now
+						</div>
+						<Button on:click={() => replace("/login")}>Ok</Button>
+					</Card>
+				</div>
+			</ClickOutside>
+		</div>
+	</Modal>
+{/if}
 <div class="login">
 	<div class="sub">
 		<h1>Hello.</h1>
@@ -98,11 +130,28 @@
 	}
 
 	.login {
+		position: absolute;
+		width: 100%;
 		display: flex;
 		flex-wrap: wrap;
 		height: 100%;
 		justify-content: center;
 		align-items: center;
+	}
+
+	.modal {
+		width: 100%;
+		height: 100%;
+		display: grid;
+		place-items: center;
+
+		.title {
+			font-size: 20px;
+		}
+		.desc {
+			margin-top: 14px;
+			margin-bottom: 14px;
+		}
 	}
 
 	.sub {

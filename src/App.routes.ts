@@ -77,6 +77,7 @@ export default {
 	"/play": requiresLogin(ChooseLobby),
 	"/play/casual": requiresLogin(Casual),
 	"/login": requiresNoLogin(Login),
+	"/login/oauth-error": requiresNoLogin(Login),
 	"/login/email": requiresNoLogin(LoginByEmail),
 	"/login/2fa": requiresNoLogin(Login2FA),
 	"/setup2fa": TFAQRCode,

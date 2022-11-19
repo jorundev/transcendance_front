@@ -220,7 +220,7 @@
 		height: 80px;
 		padding-bottom: 6px;
 		padding-top: 6px;
-		margin-bottom: 6px;
+		// margin-bottom: 6px;
 		padding-left: 16px;
 
 		&:hover {
