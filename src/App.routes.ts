@@ -7,7 +7,6 @@ import CreateAccountFromOAuthSvelte from "./routes/CreateAccountFromOAuth.svelte
 import Settings from "./routes/Settings.svelte";
 import Sessions from "./routes/Sessions.svelte";
 import TFASettings from "./routes/TFASettings.svelte";
-import Notifications from "./routes/Notifications.svelte";
 import TFAQRCode from "./routes/TFAQRCode.svelte";
 import Password from "./routes/Password.svelte";
 import Casual from "./routes/Casual.svelte";
@@ -73,7 +72,6 @@ export default {
 	"/settings/blocked-accounts": requiresLogin(BlockedAccounts),
 	"/chat/:uuid?": requiresLogin(Chat),
 	"/chat/inner/:uuid": requiresLogin(ChatInside),
-	"/notifications": requiresLogin(Notifications),
 	"/profile/:uuid": requiresLogin(Profile),
 	"/profile/:user/:id": requiresLogin(Profile),
 	"/play": requiresLogin(ChooseLobby),

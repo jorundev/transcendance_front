@@ -13,7 +13,6 @@
 	import { api, APIStatus } from "../../api";
 	import type { User } from "../../users";
 	import { stFriends, stLobby } from "../../stores";
-	import { ConnectionStatus } from "../../friends";
 	import { push } from "svelte-spa-router";
 
 	let canGoBack = false;

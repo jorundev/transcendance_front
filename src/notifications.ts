@@ -99,15 +99,7 @@ export async function newNotification(data: NotificationData) {
 			});
 		}
 		browserNotification.onclick = () => {
-			if (window.innerWidth <= 800) {
-				if (window.location.hash !== "#/notifications") {
-					push("/notifications");
-				}
-			} else {
-				if (window.location.hash !== "" && window.location.hash !== "#/") {
-					push("/");
-				}
-			}
+			push("/");
 			window.focus();
 		};
 	}

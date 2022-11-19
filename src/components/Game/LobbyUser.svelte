@@ -38,7 +38,7 @@
 <div
 	class="luser"
 	class:isplayer={isPlayer}
-	class:invited={!isPlayer && invited && player}
+	class:invited={invited && player}
 >
 	<div class="avatar">
 		<UserAvatar {uuid} />
@@ -49,7 +49,7 @@
 	</div>
 	{#if player}
 		<div class="isplayer">
-			{#if isPlayer}
+			{#if isPlayer && !invited}
 				{#if !ready}
 					{#if canBeReady}
 						<div class="button">

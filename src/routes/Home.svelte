@@ -99,7 +99,7 @@
 				<MatchHistory />
 			</div>
 		</Card>
-		<div class="nomobile">
+		<div>
 			<Card>
 				<div class="home-div">
 					<div class="title">Notifications</div>
@@ -122,7 +122,9 @@
 		display: flex;
 		justify-content: space-evenly;
 		gap: 30px;
-		height: 100%;
+		height: calc(100% - 52px);
+		overflow-y: auto;
+		overflow-x: hidden;
 	}
 
 	.s-column {
@@ -142,7 +144,7 @@
 		flex-direction: column;
 		gap: 16px;
 		width: 100%;
-		height: 100%;
+		padding-bottom: 20px;
 	}
 
 	.artwork {

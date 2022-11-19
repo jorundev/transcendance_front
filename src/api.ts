@@ -1072,7 +1072,6 @@ async function wsUserStatus(data: WsUserStatus) {
 	stUsers.update((old) => {
 		old[data.user].is_online = data.status;
 		if (data.status === ConnectionStatus.InGame) {
-			console.log(data);
 			old[data.user].lobby = (data as any).lobby_uuid;
 		}
 		return old;

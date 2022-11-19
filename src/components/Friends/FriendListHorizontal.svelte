@@ -40,6 +40,10 @@
 		box-sizing: border-box;
 		overflow-x: auto;
 		overflow-y: hidden;
+		::-webkit-scrollbar {
+			display: none;
+		}
+		scrollbar-width: none;
 		width: 100%;
 
 		&.inCard {

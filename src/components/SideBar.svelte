@@ -49,21 +49,11 @@
 	<div
 		class="elem home"
 		class:active={active === "home"}
-		class:has-notif={$stHasNotifications && innerWidth >= 800}
+		class:has-notif={$stHasNotifications}
 		on:click={() => push("/")}
 	>
 		<div class="inner">Home</div>
 	</div>
-	{#if innerWidth < 800}
-		<div
-			class="elem notifications"
-			class:active={active === "notifications"}
-			class:has-notif={$stHasNotifications}
-			on:click={() => push("/notifications")}
-		>
-			<div class="inner">Notifications</div>
-		</div>
-	{/if}
 	<div
 		class="elem play"
 		class:active={active === "play"}
@@ -142,10 +132,6 @@
 
 			&.settings {
 				background-image: url("/img/settings.png");
-			}
-
-			&.notifications {
-				background-image: url("/img/bell.png");
 			}
 
 			@keyframes flash {
