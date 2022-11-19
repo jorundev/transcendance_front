@@ -105,15 +105,6 @@
 			display: none;
 		}
 		scrollbar-width: none;
-		
-		&::before {
-			content: "";
-			min-width: 180px;
-			min-height: 100%;
-			position:fixed;
-			top: 0;
-			transform: translateX(-100%);
-		}
 
 		user-select: none;
 		-webkit-user-select: none;
@@ -236,6 +227,15 @@
 			width: 52px;
 			flex-direction: column;
 			gap: 25px;
+			
+			&::before {
+				content: "";
+				min-width: 180px;
+				min-height: 100%;
+				position:fixed;
+				top: 0;
+				transform: translateX(-100%);
+			}
 
 			.elem {
 				font-size: 18px;

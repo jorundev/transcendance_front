@@ -12,6 +12,7 @@ import TFAQRCode from "./routes/TFAQRCode.svelte";
 import Password from "./routes/Password.svelte";
 import Casual from "./routes/Casual.svelte";
 import ProfileSettings from "./routes/ProfileSettings.svelte";
+import BlockedAccounts from "./routes/BlockedAccounts.svelte";
 
 import { wrap } from "svelte-spa-router/wrap";
 import { isLogged, stLobby, tryLoggingIn } from "./stores";
@@ -69,6 +70,7 @@ export default {
 	"/settings/2fa": requiresLogin(TFASettings),
 	"/settings/password": requiresLogin(Password),
 	"/settings/profile": requiresLogin(ProfileSettings),
+	"/settings/blocked-accounts": requiresLogin(BlockedAccounts),
 	"/chat/:uuid?": requiresLogin(Chat),
 	"/chat/inner/:uuid": requiresLogin(ChatInside),
 	"/notifications": requiresLogin(Notifications),

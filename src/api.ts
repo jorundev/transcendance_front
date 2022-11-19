@@ -1046,6 +1046,7 @@ async function wsUserUnblock(data: WsUserUnblock) {
 	if (user === null || user === APIStatus.NoResponse) {
 		return;
 	}
+
 	if (data.direction === BlockDirection.HasUnblocked) {
 		stUsers.update((old) => {
 			old[data.user].has_blocked = false;

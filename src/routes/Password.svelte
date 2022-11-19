@@ -2,7 +2,6 @@
 	import { pop } from "svelte-spa-router";
 
 	import { stLoggedUser } from "../stores";
-	import SideBar from "../components/SideBar.svelte";
 	import Button from "../components/Kit/Button.svelte";
 	import { api, APIStatus } from "../api";
 

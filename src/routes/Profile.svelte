@@ -11,7 +11,7 @@
 	import Modal from "../components/Kit/Modal.svelte";
 	import ClickOutside from "svelte-click-outside";
 	import { padIdentifier } from "../utils";
-	import { stFriends, stLobby, stLoggedUser } from "../stores";
+	import { stFriends, stLobby, stLoggedUser, stUsers } from "../stores";
 	import { onMount } from "svelte";
 	import { push } from "svelte-spa-router";
 
@@ -76,7 +76,7 @@
 	}
 
 	$: {
-		if (params.uuid) {
+		if (params.uuid && $stUsers) {
 			setUser();
 		}
 	}
@@ -178,7 +178,6 @@
 <svelte:head>
 	<title>{user?.username} - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
-<!-- <SideBar /> -->
 {#if show || user}
 	{#if !user}
 		<NotFound />

@@ -38,6 +38,8 @@
 				$stSidebarSelected = "play";
 			} else if (hash.startsWith("/notifications")) {
 				$stSidebarSelected = "notifications";
+			} else if (hash.startsWith("/profile")) {
+				$stSidebarSelected = "";
 			} else if (hash === "/") {
 				$stSidebarSelected = "home";
 			}
