@@ -3,7 +3,7 @@ import ReconnectingWebSocket from "reconnecting-websocket";
 import { push } from "svelte-spa-router";
 import { get } from "svelte/store";
 import { ChannelType } from "./channels";
-import type { ConnectionStatus } from "./friends";
+import { ConnectionStatus } from "./friends";
 import { LobbyPlayerReadyState } from "./lobbies";
 import {
 	newNotification,
@@ -1068,10 +1068,13 @@ async function wsUserStatus(data: WsUserStatus) {
 	if (get(stUsers)[data.user] === undefined) {
 		const _user = await api.getUserData(data.user);
 	}
-
-	// TODO: when in game point to lobby
+	
 	stUsers.update((old) => {
 		old[data.user].is_online = data.status;
+		if (data.status === ConnectionStatus.InGame) {
+			console.log(data);
+			old[data.user].lobby = (data as any).lobby_uuid;
+		}
 		return old;
 	});
 

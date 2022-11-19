@@ -9,8 +9,6 @@
 	export let lobby: Lobby;
 
 	let status = "";
-	
-	$: console.log(lobby?.players[0], "vs", lobby?.players[1]);
 
 	$: {
 		if (!lobby?.players?.[1]) {

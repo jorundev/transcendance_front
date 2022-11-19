@@ -4,6 +4,7 @@
 	import { ConnectionStatus, type FriendData } from "../../friends";
 	import { stFriends } from "../../stores";
 	import UserAvatar from "../Users/UserAvatar.svelte";
+	import { push } from "svelte-spa-router";
 
 	export let inCard = false;
 	let friends: Array<[string, FriendData]> = [];
@@ -15,7 +16,7 @@
 
 <div class="friends cancelcard" class:inCard>
 	{#each friends as [uuid, friend]}
-		<div class="friend">
+		<div class="friend" on:click={() => push("/profile/" + uuid)}>
 			<div
 				class="avatar"
 				class:online={friend.status === ConnectionStatus.Online}
@@ -55,6 +56,7 @@
 		flex-direction: column;
 		align-items: center;
 		gap: 6px;
+		cursor: pointer;
 
 		.avatar {
 			margin: 10px;

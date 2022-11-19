@@ -106,6 +106,7 @@ export async function tryToLog() {
 
 	stServerDown.set(false);
 	api.ws.connect();
+	stLobby.set(null);
 	await initNotifications();
 	await initFriends();
 	await initChannels();

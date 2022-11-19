@@ -18,6 +18,7 @@ export interface User {
 	is_blocked: boolean;
 	has_blocked: boolean;
 	is_online: ConnectionStatus,
+	lobby?: string,
 }
 
 export interface UserDictionary {

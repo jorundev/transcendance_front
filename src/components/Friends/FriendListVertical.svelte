@@ -47,6 +47,7 @@
 		.avatar {
 			margin: 6px;
 			margin-left: 8px;
+			flex-shrink: 0;
 
 			width: 36px;
 			height: 36px;

@@ -3,7 +3,6 @@
 	import type { User } from "../users";
 	import { api, APIStatus, UsersFriendship } from "../api";
 	import { LobbyPlayerReadyState } from "../lobbies";
-	import SideBar from "../components/SideBar.svelte";
 	import NotFound from "./NotFound.svelte";
 	import MatchHistory from "../components/MatchHistory.svelte";
 	import UserAvatar from "../components/Users/UserAvatar.svelte";
@@ -14,6 +13,7 @@
 	import { stFriends, stLobby, stLoggedUser, stUsers } from "../stores";
 	import { onMount } from "svelte";
 	import { push } from "svelte-spa-router";
+	import { ConnectionStatus } from "../friends";
 
 	export let params: {
 		uuid?: string;
@@ -21,7 +21,7 @@
 		id?: string;
 	};
 
-	onMount(async () => {
+	async function mount() {
 		setTimeout(() => (show = true), 200);
 		if (!params.uuid) {
 			const auser = await api.getUserDataByUserAndId(
@@ -41,6 +41,10 @@
 				};
 			}
 		}
+	}
+
+	onMount(() => {
+		mount();
 	});
 
 	let user: User;
@@ -78,6 +82,9 @@
 	$: {
 		if (params.uuid && $stUsers) {
 			setUser();
+		} else if (!params.uuid) {
+			show = false;
+			mount();
 		}
 	}
 
@@ -159,9 +166,18 @@
 		displayBlockModal = false;
 	}
 
-	async function spectateGame() {}
-	
 	async function play() {
+		if (user?.is_online === ConnectionStatus.InGame) {
+			const lobby = await api.joinLobby(user?.lobby);
+			if (lobby === null || lobby === APIStatus.NoResponse) {
+				return ;
+			}
+			$stLobby = lobby;
+			setTimeout(() => push("/play/casual"), 0);
+			displayPlayAgainstModal = false;
+			return ;
+		}
+
 		const lobby = await api.createLobby();
 		if (lobby === null || lobby === APIStatus.NoResponse) {
 			return;
@@ -234,11 +250,19 @@
 									(displayPlayAgainstModal = false)}
 							>
 								<div class="title">
-									Challenge {user?.username} in a casual game?
+									{#if user?.is_online !== ConnectionStatus.InGame}
+										Challenge {user?.username} in a casual game?
+									{:else}
+										Spectate {user?.username}'s game?
+									{/if}
 								</div>
 								<div class="desc">
-									They will be able to accept or decline your
-									request
+									{#if user?.is_online !== ConnectionStatus.InGame}
+										They will be able to accept or decline your
+										request
+									{:else}
+										You will be able to watch his game live
+									{/if}
 								</div>
 								<div class="modbuttons">
 									<Button
@@ -362,31 +386,49 @@
 								</div>
 							</div>
 							<div class="buttons">
-								<Button
-									padding="6px"
-									on:click={() =>
-										(displayPlayAgainstModal = true)}
-									active={$stLoggedUser.uuid !==
-										params.uuid &&
-										!user?.is_blocked &&
-										!user?.has_blocked}>Play against</Button
-								>
+								{#if user?.is_online !== ConnectionStatus.InGame}
+									<Button
+										padding="6px"
+										on:click={() =>
+											(displayPlayAgainstModal = true)}
+										active={show &&
+											$stLoggedUser.uuid !==
+												params.uuid &&
+											!user?.is_blocked &&
+											!user?.has_blocked}
+										>Play against</Button
+									>
+								{:else}
+									<Button
+										padding="6px"
+										on:click={() =>
+											(displayPlayAgainstModal = true)}
+										active={show &&
+											$stLoggedUser.uuid !==
+												params.uuid &&
+											!user?.is_blocked &&
+											!user?.has_blocked}
+										>Spectate</Button
+									>
+								{/if}
+
 								{#if pending}
 									<Button
 										highlight={false}
 										padding="6px"
 										on:click={() =>
 											(displayCancelRequestModal = true)}
-										active={$stLoggedUser.uuid !==
-											params.uuid}>Request sent</Button
+										active={show &&
+											$stLoggedUser.uuid !== params.uuid}
+										>Request sent</Button
 									>
 								{:else if requested}
 									<Button
 										padding="6px"
 										on:click={() =>
 											(displayAddFriendModal = true)}
-										active={$stLoggedUser.uuid !==
-											params.uuid}
+										active={show &&
+											$stLoggedUser.uuid !== params.uuid}
 										>Accept friend request</Button
 									>
 								{:else if friends}
@@ -395,16 +437,18 @@
 										padding="6px"
 										on:click={() =>
 											(displayCancelRequestModal = true)}
-										active={$stLoggedUser.uuid !==
-											params.uuid}>Remove friend</Button
+										active={show &&
+											$stLoggedUser.uuid !== params.uuid}
+										>Remove friend</Button
 									>
 								{:else}
 									<Button
 										padding="6px"
 										on:click={() =>
 											(displayAddFriendModal = true)}
-										active={$stLoggedUser.uuid !==
-											params.uuid &&
+										active={show &&
+											$stLoggedUser.uuid !==
+												params.uuid &&
 											!user?.is_blocked &&
 											!user?.has_blocked}
 										>Add friend</Button
@@ -415,16 +459,18 @@
 										padding="6px"
 										on:click={() =>
 											(displayBlockModal = true)}
-										active={$stLoggedUser.uuid !==
-											params.uuid}>Unblock</Button
+										active={show &&
+											$stLoggedUser.uuid !== params.uuid}
+										>Unblock</Button
 									>{:else}
 									<Button
 										padding="6px"
 										red
 										on:click={() =>
 											(displayBlockModal = true)}
-										active={$stLoggedUser.uuid !==
-											params.uuid}>Block</Button
+										active={show &&
+											$stLoggedUser.uuid !== params.uuid}
+										>Block</Button
 									>
 								{/if}
 							</div>
