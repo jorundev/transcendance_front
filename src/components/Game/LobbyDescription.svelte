@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { stLobbies, stLobby } from "../../stores";
+	import { stLobbies, stLobby, stLoggedUser } from "../../stores";
 	import { push } from "svelte-spa-router";
 	import { api, APIStatus, type Lobby } from "../../api";
 	import Button from "../Kit/Button.svelte";
@@ -9,6 +9,11 @@
 	export let lobby: Lobby;
 
 	let status = "";
+
+	let inLobby = false;
+	$: inLobby =
+		lobby?.spectators?.includes($stLoggedUser.uuid) ||
+		lobby?.players?.includes($stLoggedUser.uuid);
 
 	$: {
 		if (!lobby?.players?.[1]) {
@@ -65,7 +70,7 @@
 		</div>
 		<div class="spectate">
 			<div class="button">
-				<Button on:click={join}>Spectate</Button>
+				<Button active={!inLobby} on:click={join}>Spectate</Button>
 			</div>
 		</div>
 	</div>
