@@ -119,8 +119,14 @@
 								red
 								on:click={async () => {
 									await api.readNotification(modalData.uuid);
+									if (
+										isGameInviteNotificationData(modalData)
+									) {
+										await api.declineLobbyInvite(
+											modalData.lobby
+										);
+									}
 									dispatch("back");
-									// TODO: decline invitation
 								}}>No</Button
 							>
 							<Button on:click={goToLobby}>Yes</Button>

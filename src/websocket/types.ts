@@ -16,19 +16,19 @@ export enum WsNamespace {
  */
 
 export enum ChatAction {
-	Create = 'CREATE',
-	Join = 'JOIN',
-	Leave = 'LEAVE',
-	Remove = 'REMOVE',
-	Send = 'SEND',
-	Delete = 'DELETE',
-	Promote = 'PROMOTE',
-	Demote = 'DEMOTE',
-	Ban = 'BAN',
-	Unban = 'UNBAN',
-	Mute = 'MUTE',
-	Unmute = 'UNMUTE',
-	Avatar = 'AVATAR'
+	Create = "CREATE",
+	Join = "JOIN",
+	Leave = "LEAVE",
+	Remove = "REMOVE",
+	Send = "SEND",
+	Delete = "DELETE",
+	Promote = "PROMOTE",
+	Demote = "DEMOTE",
+	Ban = "BAN",
+	Unban = "UNBAN",
+	Mute = "MUTE",
+	Unmute = "UNMUTE",
+	Avatar = "AVATAR",
 }
 
 export interface WsChat {
@@ -152,16 +152,16 @@ export interface WsUserUnfriend extends WsUser {
  */
 
 export enum UserAction {
-	Unfriend = 'UNFRIEND',
-	Block = 'BLOCK',
-	Unblock = 'UNBLOCK',
-	Refresh = 'REFRESH',
-	Expired = 'EXPIRED',
-	Avatar = 'AVATAR',
-	Session = 'SESSION',
-	Notification = 'NOTIFICATION',
-	Read = 'READ',
-	Status = 'STATUS'
+	Unfriend = "UNFRIEND",
+	Block = "BLOCK",
+	Unblock = "UNBLOCK",
+	Refresh = "REFRESH",
+	Expired = "EXPIRED",
+	Avatar = "AVATAR",
+	Session = "SESSION",
+	Notification = "NOTIFICATION",
+	Read = "READ",
+	Status = "STATUS",
 }
 
 export interface WsUser {
@@ -196,15 +196,15 @@ export interface WsUserStatusInGame extends WsUser {
  * Game
  */
 
-
- export enum GameAction {
-	Join = 'JOIN',
-	Invite = 'INVITE',
-	Spectate = 'SPECTATE',
-	Ready = 'READY',
-	Start = 'START',
-	Leave = 'LEAVE',
-	Disband = 'DISBAND'
+export enum GameAction {
+	Invite = "INVITE",
+	Decline = "DECLINE",
+	Join = "JOIN",
+	Spectate = "SPECTATE",
+	Ready = "READY",
+	Start = "START",
+	Leave = "LEAVE",
+	Disband = "DISBAND",
 }
 
 export interface WsGame {
@@ -243,5 +243,10 @@ export interface WsGameDisband extends WsGame {
 
 export interface WsGameInvite extends WsGame {
 	action: GameAction.Invite;
+	user_uuid: string;
+}
+
+export interface WsGameDecline extends WsGame {
+	action: GameAction.Decline;
 	user_uuid: string;
 }

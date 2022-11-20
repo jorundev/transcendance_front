@@ -45,6 +45,7 @@ import {
 	type WsChatUnban,
 	type WsChatUnmute,
 	type WsGame,
+	type WsGameDecline,
 	type WsGameDisband,
 	type WsGameInvite,
 	type WsGameJoin,
@@ -193,7 +194,7 @@ async function makeRequest<T>(
 ): Promise<T | APIStatus.NoResponse | null> {
 	let promise: Promise<Response>;
 
-	for (; ;) {
+	for (;;) {
 		switch (method) {
 			case "GET":
 				promise = fetchGET(url);
@@ -1068,7 +1069,7 @@ async function wsUserStatus(data: WsUserStatus) {
 	if (get(stUsers)[data.user] === undefined) {
 		const _user = await api.getUserData(data.user);
 	}
-	
+
 	stUsers.update((old) => {
 		old[data.user].is_online = data.status;
 		if (data.status === ConnectionStatus.InGame) {
@@ -1127,7 +1128,9 @@ async function wsUserAvatar(data: WsUserAvatar) {
 }
 
 async function wsGameJoin(data: WsGameJoin) {
+	// If the lobby didn't exist before
 	if (get(stLobbies)[data.lobby_uuid] === undefined) {
+		// Then get its data from the API
 		const lobby = await api.getLobbyInfo(data.lobby_uuid);
 		stLobbies.update((old) => {
 			if (lobby !== null && lobby !== APIStatus.NoResponse) {
@@ -1136,23 +1139,31 @@ async function wsGameJoin(data: WsGameJoin) {
 			return old;
 		});
 
+		// If we are the user that just joined the room then we have nothing left to do
 		if (data.user_uuid === get(stLoggedUser)?.uuid) {
 			return;
 		}
 	} else {
+		// If the lobby already existed, just update the data
 		stLobbies.update((old) => {
+			// If the player is player 1, then set its state to Joined
 			if (old[data.lobby_uuid].players[0] === data.user_uuid) {
-				old[data.lobby_uuid].players_status[0] = LobbyPlayerReadyState.Joined;
+				old[data.lobby_uuid].players_status[0] =
+					LobbyPlayerReadyState.Joined;
 			} else {
+				// If the player is player 2, then set its state to Joined
 				old[data.lobby_uuid].players[1] = data.user_uuid;
-				old[data.lobby_uuid].players_status[1] = LobbyPlayerReadyState.Joined;
+				old[data.lobby_uuid].players_status[1] =
+					LobbyPlayerReadyState.Joined;
 			}
-			console.log("old", old);
 			return old;
 		});
 	}
 
+	// If we are in the lobby
 	if (get(stLobby) && data.lobby_uuid === get(stLobby).uuid) {
+		// Then it can only be player 2, because of the first condition of the function
+		// So we put player 2's state to Joined
 		stLobby.update((old) => {
 			old.players[1] = data.user_uuid;
 			old.players_status[1] = LobbyPlayerReadyState.Joined;
@@ -1163,29 +1174,52 @@ async function wsGameJoin(data: WsGameJoin) {
 
 async function wsGameLeave(data: WsGameLeave) {
 	stLobbies.update((old) => {
+		// If it's player 1
 		if (old[data.lobby_uuid]?.players[0] === data.user_uuid) {
+			// then the lobby has been disbanded
 			delete old[data.lobby_uuid];
-		} else if (old[data.lobby_uuid].players[1] === data.user_uuid) {
+		} else if (
+			// If it's player 2 AND they were actually in the lobby (not invited)
+			old[data.lobby_uuid].players[1] === data.user_uuid &&
+			old[data.lobby_uuid].players_status[1] !==
+				LobbyPlayerReadyState.Invited
+		) {
+			// Remove them from the lobby
 			old[data.lobby_uuid].players[1] = "";
 			old[data.lobby_uuid].players_status[1] =
 				LobbyPlayerReadyState.Invited;
 		}
-		old[data.lobby_uuid].spectators = old[data.lobby_uuid].spectators?.filter((uuid) => uuid !== data.user_uuid) ?? [];
+		// Remove player from spectators
+		old[data.lobby_uuid].spectators =
+			old[data.lobby_uuid].spectators?.filter(
+				(uuid) => uuid !== data.user_uuid
+			) ?? [];
 		return old;
 	});
+
+	// If we are in the lobby
 	if (get(stLobby)?.uuid === data.lobby_uuid) {
+		// If the user that left is us, or if player 1 left
 		if (
 			data.user_uuid === get(stLoggedUser)?.uuid ||
 			data.user_uuid === get(stLobby)?.players[0]
 		) {
+			// then the lobby has been disbanded
 			stLobby.set(null);
 			return;
 		}
 
 		stLobby.update((old) => {
+			// remove the user from the spectators
 			old.spectators =
 				old.spectators?.filter((uuid) => uuid !== data.user_uuid) ?? [];
-			if (old.players[1] === data.user_uuid) {
+
+			// If it's player 2 AND they were actually in the lobby (not invited)
+			if (
+				old.players[1] === data.user_uuid &&
+				old.players_status[1] !== LobbyPlayerReadyState.Invited
+			) {
+				// Remove them from the lobby
 				old.players[1] = "";
 				old.players_status[1] = LobbyPlayerReadyState.Invited;
 			}
@@ -1196,7 +1230,9 @@ async function wsGameLeave(data: WsGameLeave) {
 }
 
 async function wsGameReady(data: WsGameReady) {
+	// If we are in the lobby
 	if (get(stLobby) && get(stLobby).uuid === data.lobby_uuid) {
+		// Set the right player to ready
 		stLobby.update((old) => {
 			if (data.user_uuid === old.players[0]) {
 				old.players_status[0] = LobbyPlayerReadyState.Ready;
@@ -1206,12 +1242,16 @@ async function wsGameReady(data: WsGameReady) {
 			return old;
 		});
 	}
+
+	// Same logic as before, but with the global lobbies store
 	if (get(stLobbies)[data.lobby_uuid]) {
 		stLobbies.update((old) => {
 			if (old[data.lobby_uuid].players[0] === data.user_uuid) {
-				old[data.lobby_uuid].players_status[0] = LobbyPlayerReadyState.Ready;
+				old[data.lobby_uuid].players_status[0] =
+					LobbyPlayerReadyState.Ready;
 			} else if (old[data.lobby_uuid].players[1] === data.user_uuid) {
-				old[data.lobby_uuid].players_status[1] = LobbyPlayerReadyState.Ready;
+				old[data.lobby_uuid].players_status[1] =
+					LobbyPlayerReadyState.Ready;
 			}
 			return old;
 		});
@@ -1219,24 +1259,32 @@ async function wsGameReady(data: WsGameReady) {
 }
 
 async function wsGameStart(data: WsGameStart) {
+	// If we are in the lobby
 	if (get(stLobby) && get(stLobby).uuid === data.lobby_uuid) {
+		// Set every player's state to Ready
 		stLobby.update((old) => {
 			old.players_status[0] = LobbyPlayerReadyState.Ready;
 			old.players_status[1] = LobbyPlayerReadyState.Ready;
 			return old;
 		});
 	}
+
+	// Same logic as before, but with the global lobbies store
 	if (get(stLobbies)[data.lobby_uuid]) {
 		stLobbies.update((old) => {
-			old[data.lobby_uuid].players_status[0] = LobbyPlayerReadyState.Ready;
-			old[data.lobby_uuid].players_status[1] = LobbyPlayerReadyState.Ready;
+			old[data.lobby_uuid].players_status[0] =
+				LobbyPlayerReadyState.Ready;
+			old[data.lobby_uuid].players_status[1] =
+				LobbyPlayerReadyState.Ready;
 			return old;
 		});
 	}
 }
 
 async function wsGameSpectate(data: WsGameSpectate) {
+	// If we are in a lobby
 	if (get(stLobby) !== null) {
+		// Add the player to spectators
 		stLobby.update((old) => {
 			old.spectators = old.spectators ?? [];
 			if (!old.spectators?.includes(data.user_uuid)) {
@@ -1245,12 +1293,28 @@ async function wsGameSpectate(data: WsGameSpectate) {
 			return old;
 		});
 	}
+
+	// Same logic as before, but with the global lobbies store
+	if (get(stLobbies)[data.lobby_uuid]) {
+		stLobbies.update((old) => {
+			old[data.lobby_uuid].spectators =
+				old[data.lobby_uuid].spectators ?? [];
+			if (!old[data.lobby_uuid].spectators?.includes(data.user_uuid)) {
+				old[data.lobby_uuid].spectators.push(data.user_uuid);
+			}
+			return old;
+		});
+	}
 }
 
 async function wsGameDisband(data: WsGameDisband) {
+	// If we are in the lobby
 	if (get(stLobby) && get(stLobby).uuid === data.lobby_uuid) {
+		// Then bye bye :)
 		stLobby.set(null);
 	}
+
+	// Remove the lobby from the list
 	stLobbies.update((old) => {
 		delete old[data.lobby_uuid];
 		return old;
@@ -1281,7 +1345,32 @@ async function wsGameInvite(data: WsGameInvite) {
 	} else {
 		stLobbies.update((old) => {
 			old[data.lobby_uuid].players[1] = data.user_uuid;
-			old[data.lobby_uuid].players_status[1] = LobbyPlayerReadyState.Invited;
+			old[data.lobby_uuid].players_status[1] =
+				LobbyPlayerReadyState.Invited;
+			return old;
+		});
+	}
+}
+
+async function wsGameDecline(data: WsGameDecline) {
+	if (get(stLobby) && data.lobby_uuid == get(stLobby).uuid) {
+		stLobby.update((old) => {
+			if (old.players[0] === data.user_uuid) {
+				old.players[0] = "";
+			} else if (old.players[1] === data.user_uuid) {
+				old.players[1] = "";
+			}
+			return old;
+		});
+	}
+
+	if (get(stLobbies)[data.lobby_uuid]) {
+		stLobbies.update((old) => {
+			if (old[data.lobby_uuid].players[0] === data.user_uuid) {
+				old[data.lobby_uuid].players[0] = "";
+			} else if (old[data.lobby_uuid].players[1] === data.user_uuid) {
+				old[data.lobby_uuid].players[1] = "";
+			}
 			return old;
 		});
 	}
@@ -1309,6 +1398,9 @@ async function wsGameMessage(data: WsGame) {
 			break;
 		case GameAction.Invite:
 			await wsGameInvite(data as WsGameInvite);
+			break;
+		case GameAction.Decline:
+			await wsGameDecline(data as WsGameDecline);
 			break;
 	}
 }
@@ -1407,12 +1499,12 @@ export const api = {
 	getChannelMessages: async (uuid: string, page: number) => {
 		return makeRequest<ChannelMessagesResponse>(
 			"/api/chats/channels/" +
-			uuid +
-			"/messages" +
-			"?page=" +
-			page +
-			"&limit=" +
-			chatPageSize,
+				uuid +
+				"/messages" +
+				"?page=" +
+				page +
+				"&limit=" +
+				chatPageSize,
 			"GET"
 		);
 	},
@@ -1438,12 +1530,15 @@ export const api = {
 	},
 	getUserDataByUserAndId: async (username: string, id: string) => {
 		const from_store = Object.entries(get(stUsers)).filter((entry) => {
-			return entry[1].username === username && entry[1].identifier === id
+			return entry[1].username === username && entry[1].identifier === id;
 		});
 		if (from_store.length > 0) {
 			return from_store[0][1];
 		}
-		const user = await makeRequest<User>(`/api/users/profile/${username}/${id}`, "GET");
+		const user = await makeRequest<User>(
+			`/api/users/profile/${username}/${id}`,
+			"GET"
+		);
 		if (user !== APIStatus.NoResponse) {
 			stUsers.update((u) => {
 				u[user.uuid] = user;
@@ -1465,7 +1560,7 @@ export const api = {
 				"POST",
 				{ message }
 			);
-		} catch (_e) { }
+		} catch (_e) {}
 	},
 	deleteMessage: async (channel: string, uuid: string) => {
 		return makeRequest(
@@ -1679,6 +1774,12 @@ export const api = {
 	declareReady: async (lobby_uuid: string) => {
 		return makeRequest("/api/games/lobby/" + lobby_uuid, "PUT");
 	},
+	declineLobbyInvite: async (lobby_uuid: string) => {
+		return makeRequest<APIResponse>(
+			"/api/games/lobby/join/" + lobby_uuid,
+			"DELETE"
+		);
+	},
 	getLobbies: async () => {
 		const resp = await makeRequest<Array<Lobby>>(
 			"/api/games/lobby/all",
@@ -1706,9 +1807,9 @@ export const api = {
 					window.location.protocol === "https:" ? "wss" : "ws";
 				const ws = new ReconnectingWebSocket(
 					protocol +
-					"://" +
-					window.location.hostname +
-					"/api/streaming"
+						"://" +
+						window.location.hostname +
+						"/api/streaming"
 				);
 				stWebsocket.set(ws);
 
