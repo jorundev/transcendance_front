@@ -169,13 +169,17 @@
 	async function play() {
 		if (user?.is_online === ConnectionStatus.InGame) {
 			const lobby = await api.joinLobby(user?.lobby);
-			if (lobby === null || lobby === APIStatus.NoResponse) {
-				return ;
+			if (
+				lobby === null ||
+				lobby === APIStatus.NoResponse ||
+				(lobby as any).statusCode === 400
+			) {
+				return;
 			}
 			$stLobby = lobby;
 			setTimeout(() => push("/play/casual"), 0);
 			displayPlayAgainstModal = false;
-			return ;
+			return;
 		}
 
 		const lobby = await api.createLobby();
@@ -258,8 +262,8 @@
 								</div>
 								<div class="desc">
 									{#if user?.is_online !== ConnectionStatus.InGame}
-										They will be able to accept or decline your
-										request
+										They will be able to accept or decline
+										your request
 									{:else}
 										You will be able to watch his game live
 									{/if}
@@ -407,8 +411,7 @@
 											$stLoggedUser.uuid !==
 												params.uuid &&
 											!user?.is_blocked &&
-											!user?.has_blocked}
-										>Spectate</Button
+											!user?.has_blocked}>Spectate</Button
 									>
 								{/if}
 

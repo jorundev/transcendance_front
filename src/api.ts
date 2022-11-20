@@ -1790,6 +1790,9 @@ export const api = {
 			const ret: Array<Lobby> = [];
 			let i = 0;
 			while (resp["" + i]) {
+				resp["" + i].spectators = resp["" + i].spectators ?? [];
+				resp["" + i].players = resp["" + i].players ?? [];
+				resp["" + i].players_status = resp["" + i].players_status ?? [];
 				ret.push(resp["" + i]);
 				++i;
 			}
