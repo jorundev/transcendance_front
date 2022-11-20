@@ -18,8 +18,6 @@
 
 	export let channel: string;
 
-	export let blacklist = false;
-
 	export let is_in_channel: boolean;
 
 	let dispatch = createEventDispatcher();

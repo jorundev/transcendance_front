@@ -190,8 +190,8 @@
 		lobby.players_status[1] = LobbyPlayerReadyState.Invited;
 		$stLobby = lobby;
 		setTimeout(() => push("/play/casual"), 0);
-		await api.invitePlayerToLobby(params.uuid);
 		displayPlayAgainstModal = false;
+		await api.invitePlayerToLobby(params.uuid);
 	}
 </script>
 

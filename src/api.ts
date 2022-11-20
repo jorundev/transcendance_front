@@ -1481,16 +1481,6 @@ export const api = {
 			""
 		);
 		await new Promise((resolve) => setTimeout(resolve, 200));
-		if (
-			res !== null &&
-			res !== APIStatus.NoResponse &&
-			res.statusCode !== 413
-		) {
-			stLoggedUser?.update((old) => {
-				old.avatar = res.avatar;
-				return old;
-			});
-		}
 		return res;
 	},
 	remove2FA: async () => {

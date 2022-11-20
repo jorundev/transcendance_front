@@ -143,7 +143,6 @@
 										{#each blacklisted_users as blacklisted}
 											<ChannelSettingsProfile
 												user={blacklisted.user}
-												blacklist
 												channel={channel.uuid}
 												is_in_channel={channel.users
 													.map((u) => u.uuid)
