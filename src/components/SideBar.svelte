@@ -213,12 +213,12 @@
 			width: 52px;
 			flex-direction: column;
 			gap: 25px;
-			
+
 			&::before {
 				content: "";
 				min-width: 180px;
 				min-height: 100%;
-				position:fixed;
+				position: fixed;
 				top: 0;
 				transform: translateX(-100%);
 			}
@@ -251,7 +251,7 @@
 
 			&.hover {
 				position: fixed;
-				width: 200px;
+				width: 228px;
 			}
 		}
 	}
