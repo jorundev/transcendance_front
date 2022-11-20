@@ -5,7 +5,9 @@
 
 {#if Object.entries($stLobbies).length > 0}
 	{#each Object.entries($stLobbies) as [uuid, lobby] (uuid)}
-		<LobbyDescription {lobby} />
+		{#if lobby}
+			<LobbyDescription {lobby} />
+		{/if}
 	{/each}
 {:else}
 	<div class="nogames">There are no games to display</div>
