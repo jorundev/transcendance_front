@@ -13,8 +13,11 @@
 	$: {
 		if (!lobby?.players?.[1]) {
 			status = "Waiting for players";
-		} else if (lobby?.players_status[0] === LobbyPlayerReadyState.Ready && lobby?.players_status[1] === LobbyPlayerReadyState.Ready) {
-			status = "Playing"
+		} else if (
+			lobby?.players_status[0] === LobbyPlayerReadyState.Ready &&
+			lobby?.players_status[1] === LobbyPlayerReadyState.Ready
+		) {
+			status = "Playing";
 		}
 	}
 
@@ -34,28 +37,35 @@
 	}
 </script>
 
-<div class="lobby-desc">
-	<div class="info">
-		<div class="avatars">
-			<div class="avatar">
-				<UserAvatar uuid={lobby.players[0]} />
+{#if lobby}
+	<div class="lobby-desc">
+		<div class="info">
+			<div class="avatars">
+				<div class="avatar">
+					<UserAvatar uuid={lobby.players[0]} />
+				</div>
+				vs
+				<div
+					class="avatar"
+					class:noplayer={!lobby.players[1] ||
+						lobby.players_status[1] ===
+							LobbyPlayerReadyState.Invited}
+				>
+					<UserAvatar uuid={lobby.players[1] ?? null} />
+				</div>
 			</div>
-			vs
-			<div class="avatar" class:noplayer={!lobby.players[1] || lobby.players_status[1] === LobbyPlayerReadyState.Invited}>
-				<UserAvatar uuid={lobby.players[1] ?? null} />
+			<div class="spectator-count">
+				{lobby.spectators.length} / {lobby.max_spectators} spectators
+			</div>
+			<div class="status">{status}</div>
+		</div>
+		<div class="spectate">
+			<div class="button">
+				<Button on:click={join}>Spectate</Button>
 			</div>
 		</div>
-		<div class="spectator-count">
-			{lobby.spectators.length} / {lobby.max_spectators} spectators
-		</div>
-		<div class="status">{status}</div>
 	</div>
-	<div class="spectate">
-		<div class="button">
-			<Button on:click={join}>Spectate</Button>
-		</div>
-	</div>
-</div>
+{/if}
 
 <style lang="scss">
 	.lobby-desc {
