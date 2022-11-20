@@ -1119,6 +1119,12 @@ async function wsUserMessage(data: WsUser) {
 }
 
 async function wsUserAvatar(data: WsUserAvatar) {
+	if (data.user === get(stLoggedUser).uuid) {
+		stLoggedUser.update((old) => {
+			old.avatar = data.avatar;
+			return old;
+		});
+	}
 	if (get(stUsers)[data.user]) {
 		stUsers.update((users) => {
 			users[data.user].avatar = data.avatar;
