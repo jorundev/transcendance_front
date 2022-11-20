@@ -23,6 +23,10 @@
 
 	async function join() {
 		const l = await api.joinLobby(lobby.uuid);
+		if ((l as any).statusCode === 400) {
+			// Already in lobby
+			return;
+		}
 		if ((l as any).statusCode === 404) {
 			stLobbies.update((old) => {
 				delete old[lobby.uuid];
