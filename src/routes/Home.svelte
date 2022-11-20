@@ -15,7 +15,7 @@
 	import NotificationModal from "../components/Notifications/NotificationModal.svelte";
 	import { onMount } from "svelte";
 	import { fade, slide } from "svelte/transition";
-	
+
 	let id = "";
 
 	$: id = padIdentifier($stLoggedUser?.id);
@@ -122,7 +122,11 @@
 		display: flex;
 		justify-content: space-evenly;
 		gap: 30px;
-		height: calc(100% - 52px);
+		height: 100%;
+
+		@media screen and (max-width: 799px) {
+			height: calc(100% - 52px);
+		}
 		overflow-y: auto;
 		overflow-x: hidden;
 	}
