@@ -251,7 +251,7 @@
 
 			&.hover {
 				position: fixed;
-				width: 228px;
+				width: 200px;
 			}
 		}
 	}

@@ -22,7 +22,7 @@
 		>
 			<UserAvatar {uuid} />
 		</div>
-		<div class="name">
+		<div class="name" style={`font-size: calc(200px / (${friend.name.length} + 10));`}>
 			{friend.name}
 			<div class="id">#{padIdentifier(parseInt(friend.id))}</div>
 		</div>
@@ -63,7 +63,6 @@
 		}
 
 		.name {
-			font-size: 15px;
 			display: flex;
 
 			.id {
