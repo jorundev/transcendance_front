@@ -2,6 +2,7 @@
 	import { onDestroy, onMount } from "svelte";
 
 	import Router, { replace } from "svelte-spa-router";
+	import { slide } from "svelte/transition";
 	import routes from "./App.routes";
 	import Modal from "./components/Kit/Modal.svelte";
 	import SpinnerModal from "./components/Kit/SpinnerModal.svelte";
@@ -11,6 +12,7 @@
 		stLoggedUser,
 		stServerDown,
 		stSidebarSelected,
+		stToast,
 		stWebsocket,
 		tryLoggingIn,
 		websocketConnected,
@@ -161,6 +163,9 @@
 	{/if}
 </svelte:head>
 <svelte:window bind:innerWidth></svelte:window>
+{#if $stToast !== null}
+	<div class="toast" transition:slide on:click={() => stToast.set(null)}>{$stToast}</div>
+{/if}
 {#if $stLoggedUser && !$websocketConnected}
 	<Modal><SpinnerModal /></Modal>
 {/if}
@@ -203,6 +208,21 @@
 		height: 100vh;
 		overflow-y: auto;
 		overflow-x: hidden;
+	}
+	
+	.toast {
+		cursor: pointer;
+		padding-left: 60px;
+		display: flex;
+		align-items: center;
+		position: fixed;
+		width: 100%;
+		top: 0;
+		height: 36px;
+		background: rgb(209, 60, 60);
+		color: white;
+		z-index: 200;
+		border-bottom: 1px solid rgb(72, 0, 0);
 	}
 
 	@media screen and (max-width: 799px) {

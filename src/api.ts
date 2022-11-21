@@ -19,6 +19,7 @@ import {
 	stLoggedUser,
 	stNotifications,
 	stServerDown,
+	stToast,
 	stUsers,
 	stWebsocket,
 	tryToLog,
@@ -245,9 +246,11 @@ async function makeRequest<T>(
 		}
 
 		switch (response.status) {
-			// TODO: 500
+			case 500:
+				stToast.set("Error 500: Something wrong happened with the server");
+				break ;
 			case 502:
-				// console.error("A terrible error happened: ", response);
+				console.error("A terrible error happened: ", response);
 				stServerDown.set(true);
 				return APIStatus.NoResponse;
 			case 200:
@@ -841,7 +844,6 @@ async function wsChatJoin(data: WsChatJoin) {
 				name: user.username,
 				id: parseInt(user.identifier),
 				avatar: user.avatar,
-				// TODO:
 				is_moderator: false,
 				is_administrator: false,
 			});

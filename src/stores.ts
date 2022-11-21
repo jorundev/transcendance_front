@@ -36,6 +36,7 @@ export const stFriends: Writable<FriendDataDictionary> = writable({});
 export const stLobby: Writable<Lobby> = writable(null);
 export const stLobbies: Writable<LobbyDictionary> = writable({});
 export const stSidebarSelected: Writable<string | null> = writable(null);
+export const stToast: Writable<string | null> = writable(null);
 
 /* Integrity checks */
 stLoggedUser.subscribe((loggedUser) => {
@@ -81,6 +82,16 @@ stLobby.subscribe((lobby) => {
 stLobbies.subscribe((lobbies) => {
 	if (lobbies === undefined) {
 		console.error("The store responsible for storing information about public lobbies has been set to undefined. This should not have happened. You are now in hell and nothing is expected to work normally. Good luck.")
+	}
+});
+
+let toastTimeout: ReturnType<typeof setTimeout> = null;
+stToast.subscribe((toast) => {
+	clearTimeout(toastTimeout);
+	if (toast !== null) {
+		toastTimeout = setTimeout(() => stToast.set(null), 5000);
+	} else {
+		toastTimeout = null;
 	}
 });
 
