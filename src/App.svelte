@@ -25,7 +25,7 @@
 
 	let hash = "";
 	$: {
-		if (hash.startsWith("/login") || hash.startsWith("/postsignup")) {
+		if (hash.startsWith("/login") || hash.startsWith("/postsignup") || hash.startsWith("/setup2fa")) {
 			$stSidebarSelected = null;
 		} else {
 			if (hash.startsWith("/settings")) {

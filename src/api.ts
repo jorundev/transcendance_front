@@ -195,7 +195,7 @@ async function makeRequest<T>(
 ): Promise<T | APIStatus.NoResponse | null> {
 	let promise: Promise<Response>;
 
-	for (;;) {
+	for (; ;) {
 		switch (method) {
 			case "GET":
 				promise = fetchGET(url);
@@ -248,7 +248,7 @@ async function makeRequest<T>(
 		switch (response.status) {
 			case 500:
 				stToast.set("Error 500: Something wrong happened with the server");
-				break ;
+				break;
 			case 502:
 				console.error("A terrible error happened: ", response);
 				stServerDown.set(true);
@@ -1190,7 +1190,7 @@ async function wsGameLeave(data: WsGameLeave) {
 			// If it's player 2 AND they were actually in the lobby (not invited)
 			old[data.lobby_uuid].players[1] === data.user_uuid &&
 			old[data.lobby_uuid].players_status[1] !==
-				LobbyPlayerReadyState.Invited
+			LobbyPlayerReadyState.Invited
 		) {
 			// Remove them from the lobby
 			old[data.lobby_uuid].players[1] = "";
@@ -1426,30 +1426,43 @@ export const api = {
 	},
 	getQRCode: async (): Promise<TFAInitResponse> => {
 		await api.whoami();
-		const res: TFAInitResponse | null = await fetch("/api/auth/2fa", {
+		const res = await fetch("/api/auth/2fa", {
 			method: "GET",
 			headers: {
 				"Content-Type": "application/json",
 			},
-		})
-			.then(async (raw) => {
-				return await raw.json();
-			})
-			.catch((e) => {
-				console.error(e);
-				return null;
-			});
-
-		if (res === null || res.statusCode === 401) {
+		});
+		
+		console.log(res);
+		
+		if (res.status === 400) {
+			stToast.set("You already have two factor authentication set up");
+			return null;
+		}
+		
+		if (res.status === 401) {
+			stToast.set("Authentication error");
+			return null;
+		}
+		
+		let data: TFAInitResponse | null;
+		try {
+			data = await res.json();
+		} catch (e) 
+		{
+			data = null;
+		}
+		
+		if (data === null) {
 			return {
-				message: res ? res.message : "Bad response",
-				statusCode: res ? res.statusCode : 500,
+				message: res.statusText,
+				statusCode: res.status,
 				text: "https://getramiel.org",
 				image: "/img/frame.png",
 			};
 		}
-
-		return res;
+		
+		return data;
 	},
 	changeAvatar: async (file: File) => {
 		let formData = new FormData();
@@ -1497,12 +1510,12 @@ export const api = {
 	getChannelMessages: async (uuid: string, page: number) => {
 		return makeRequest<ChannelMessagesResponse>(
 			"/api/chats/channels/" +
-				uuid +
-				"/messages" +
-				"?page=" +
-				page +
-				"&limit=" +
-				chatPageSize,
+			uuid +
+			"/messages" +
+			"?page=" +
+			page +
+			"&limit=" +
+			chatPageSize,
 			"GET"
 		);
 	},
@@ -1558,7 +1571,7 @@ export const api = {
 				"POST",
 				{ message }
 			);
-		} catch (_e) {}
+		} catch (_e) { }
 	},
 	deleteMessage: async (channel: string, uuid: string) => {
 		return makeRequest(
@@ -1808,9 +1821,9 @@ export const api = {
 					window.location.protocol === "https:" ? "wss" : "ws";
 				const ws = new ReconnectingWebSocket(
 					protocol +
-						"://" +
-						window.location.hostname +
-						"/api/streaming"
+					"://" +
+					window.location.hostname +
+					"/api/streaming"
 				);
 				stWebsocket.set(ws);
 

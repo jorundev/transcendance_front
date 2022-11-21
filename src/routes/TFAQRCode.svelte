@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Card from "../components/Kit/Card.svelte";
-	import { api } from "../api";
+	import { api, type TFAInitResponse } from "../api";
     import SvelteSegmentedInput from 'svelte-segmented-input';
 	import { replace } from "svelte-spa-router";
 	import { stLoggedUser } from "../stores";
@@ -12,6 +12,14 @@
     let playWiggle = false;
     
     let errorText = "";
+    
+    async function goBackIfError(prom: Promise<TFAInitResponse>) {
+        if (await prom === null) {
+            replace("/");
+        }
+    }
+    
+    $: goBackIfError(qrLinkPromise);
     
     $: {
         if (value.length === 6) {
@@ -86,13 +94,13 @@
             {#await qrLinkPromise}
             <div class="qr" style={"background: white;"}/>
             {:then response} 
-            <div class="qr" style={"background-image: url('" + response.image + "')"}/>
+            <div class="qr" style={"background-image: url('" + response?.image + "')"}/>
                 {#if errorText.length > 0}
                     <div style="color: red; padding-bottom: 10px;">{errorText}</div>
                 {/if}
                 <div class="desc">Scan this QR code with your 2FA application</div>
                 <div class="desc">or copy and paste this text in it</div>
-                <div class="qr-text" class:tip on:click={onClick}>{response.text}</div>
+                <div class="qr-text" class:tip on:click={onClick}>{response?.text}</div>
                 <div class="desc">Then enter the 6-digit code below</div>
             {/await}
             <div class="input" class:playWiggle>
