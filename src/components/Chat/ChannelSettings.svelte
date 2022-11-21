@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { api, APIStatus } from "../../api";
 	import { createEventDispatcher, onMount } from "svelte";
-	import { stChannels, stLoggedUser } from "../../stores";
+	import { stChannels, stLoggedUser, stToast } from "../../stores";
 	import ChannelSettingsProfile from "./ChannelSettingsProfile.svelte";
 	import Button from "../Kit/Button.svelte";
 	import Card from "../Kit/Card.svelte";
@@ -63,7 +63,7 @@
 
 		const pm = api.changeChannelAvatar(file, channel.uuid);
 		avatarPromise = pm.then((obj) => {
-			if (obj !== null && obj !== APIStatus.NoResponse) {
+			if (obj !== null && obj !== APIStatus.NoResponse && (obj as any).statusCode !== 413) {
 				return getProfilePictureLinkFrom(obj.avatar);
 			}
 		});
@@ -72,6 +72,7 @@
 			return;
 		}
 		if (res.statusCode === 413) {
+			stToast.set("Error: Image is too large");
 			avatarPromise = Promise.resolve(
 				getProfilePictureLinkFrom(channel.avatar)
 			);

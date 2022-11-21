@@ -164,7 +164,7 @@
 </svelte:head>
 <svelte:window bind:innerWidth></svelte:window>
 {#if $stToast !== null}
-	<div class="toast" transition:slide on:click={() => stToast.set(null)}>{$stToast}</div>
+	<div class="toast" transition:slide on:click|stopPropagation={() => stToast.set(null)}>{$stToast}</div>
 {/if}
 {#if $stLoggedUser && !$websocketConnected}
 	<Modal><SpinnerModal /></Modal>
