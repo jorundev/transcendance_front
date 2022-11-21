@@ -6,6 +6,7 @@
 	import ClickOutside from "svelte-click-outside";
 	import { stLoggedUser } from "../../stores";
 	import { createEventDispatcher } from "svelte";
+	import { push } from "svelte-spa-router";
 
 	export let user: {
 		uuid: string;
@@ -81,6 +82,7 @@
 					style={"background-image: url('" +
 						getUserProfilePictureLink(user.uuid) +
 						"')"}
+					on:click={() => push("/profile/" + user.uuid)}
 				/>
 				<div class="name">
 					{user.name}<span class="gray">#{fullID}</span>
@@ -165,6 +167,7 @@
 		padding-right: 30px;
 
 		.profile-picture {
+			cursor: pointer;
 			background-size: cover;
 			background-position: center;
 			background-repeat: no-repeat;
