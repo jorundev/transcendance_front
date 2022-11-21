@@ -41,6 +41,13 @@
 		const y = (e.clientY - rect.top) / rect.height;
 		pong.onMouseMove(x * GAME_WIDTH, y * GAME_HEIGHT);
 	}
+	function onTouchMove(e: TouchEvent) {
+		const rect = canvas.getBoundingClientRect();
+
+		const x = (e.touches[0].clientX - rect.left) / rect.width;
+		const y = (e.touches[0].clientY - rect.top) / rect.height;
+		pong.onMouseMove(x * GAME_WIDTH, y * GAME_HEIGHT);
+	}
 
 	onMount(() => {
 		pong = new Pong();
@@ -60,6 +67,7 @@
 		class="game-canvas"
 		bind:this={canvas}
 		on:mousemove={onMouseMove}
+        on:touchmove={onTouchMove}
 		width={GAME_WIDTH}
 		height={GAME_HEIGHT}
 	/>
