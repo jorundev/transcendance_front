@@ -218,7 +218,8 @@
 		position: fixed;
 		width: 100%;
 		top: 0;
-		height: 36px;
+		height: 78px;
+		font-size: 20px;
 		background: rgb(209, 60, 60);
 		color: white;
 		z-index: 200;

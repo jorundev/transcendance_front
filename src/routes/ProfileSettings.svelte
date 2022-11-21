@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { pop } from "svelte-spa-router";
-	import { stLoggedUser } from "../stores";
+	import { stLoggedUser, stToast } from "../stores";
 	import SideBar from "../components/SideBar.svelte";
 	import { api, APIStatus } from "../api";
 
@@ -47,7 +47,7 @@
 			return;
 		}
 		if (res.statusCode === 413) {
-			// TODO show error message
+			stToast.set("Error: Image is too large");
 			avatarPromise = Promise.resolve(getProfilePictureLink());
 			return;
 		}
