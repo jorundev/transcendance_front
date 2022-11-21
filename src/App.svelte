@@ -40,6 +40,8 @@
 				$stSidebarSelected = "play";
 			} else if (hash.startsWith("/profile")) {
 				$stSidebarSelected = "";
+			} else if (hash.startsWith("/game")) {
+				$stSidebarSelected = null;
 			} else if (hash === "/") {
 				$stSidebarSelected = "home";
 			}

@@ -12,6 +12,7 @@ import Password from "./routes/Password.svelte";
 import Casual from "./routes/Casual.svelte";
 import ProfileSettings from "./routes/ProfileSettings.svelte";
 import BlockedAccounts from "./routes/BlockedAccounts.svelte";
+import Game from "./routes/Game.svelte";
 
 import { wrap } from "svelte-spa-router/wrap";
 import { isLogged, stLobby, tryLoggingIn } from "./stores";
@@ -75,6 +76,7 @@ export default {
 	"/profile/:uuid": requiresLogin(Profile),
 	"/profile/:user/:id": requiresLogin(Profile),
 	"/play": requiresLogin(ChooseLobby),
+	"/game": requiresLogin(Game),
 	"/play/casual": requiresLogin(Casual),
 	"/login": requiresNoLogin(Login),
 	"/login/oauth-error": requiresNoLogin(Login),
