@@ -1434,27 +1434,26 @@ export const api = {
 				"Content-Type": "application/json",
 			},
 		});
-		
+
 		console.log(res);
-		
+
 		if (res.status === 400) {
 			stToast.set("You already have two factor authentication set up");
 			return null;
 		}
-		
+
 		if (res.status === 401) {
 			stToast.set("Authentication error");
 			return null;
 		}
-		
+
 		let data: TFAInitResponse | null;
 		try {
 			data = await res.json();
-		} catch (e) 
-		{
+		} catch (e) {
 			data = null;
 		}
-		
+
 		if (data === null) {
 			return {
 				message: res.statusText,
@@ -1463,7 +1462,7 @@ export const api = {
 				image: "/img/frame.png",
 			};
 		}
-		
+
 		return data;
 	},
 	changeAvatar: async (file: File) => {
@@ -1768,17 +1767,23 @@ export const api = {
 		return makeRequest("/api/users/notifications/" + uuid, "DELETE");
 	},
 	createLobby: async () => {
-		return makeRequest<Lobby>("/api/games/lobby", "POST");
+		return makeRequest<Lobby>("/api/games/lobby", "POST", {
+			websocket_uuid: get(stWebsocketUUID)
+		});
 	},
 	invitePlayerToLobby: async (user_uuid: string) => {
 		return makeRequest<Lobby>("/api/games/lobby/invite", "POST", {
 			user_uuid,
+			websocket_uuid: get(stWebsocketUUID)
 		});
 	},
 	joinLobby: async (lobby_uuid: string) => {
 		return makeRequest<Lobby>(
 			"/api/games/lobby/join/" + lobby_uuid,
-			"POST"
+			"POST",
+			{
+				websocket_uuid: get(stWebsocketUUID)
+			}
 		);
 	},
 	leaveLobby: async (lobby_uuid: string) => {
