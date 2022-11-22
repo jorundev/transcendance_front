@@ -22,6 +22,7 @@ import {
 	stToast,
 	stUsers,
 	stWebsocket,
+	stWebsocketUUID,
 	tryToLog,
 	websocketConnected,
 } from "./stores";
@@ -54,6 +55,7 @@ import {
 	type WsGameReady,
 	type WsGameSpectate,
 	type WsGameStart,
+	type WsMeta,
 	type WsUser,
 	type WsUserAvatar,
 	type WsUserBlock,
@@ -1875,6 +1877,10 @@ export const api = {
 							break;
 						case WsNamespace.Game:
 							await wsGameMessage(data as WsGame);
+							break;
+						case WsNamespace.Meta:
+							const metadata = data as WsMeta;
+							stWebsocketUUID.set(metadata.uuid);
 							break;
 					}
 				};

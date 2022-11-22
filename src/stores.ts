@@ -42,6 +42,7 @@ export const stLobbies: Writable<LobbyDictionary> = writable({});
 export const stSidebarSelected: Writable<string | null> = writable(null);
 export const stToast: Writable<string | null> = writable(null);
 export const stPongClient: Writable<PongClient | null> = writable(null);
+export const stWebsocketUUID: Writable<string | null> = writable(null);
 
 /* Integrity checks */
 stLoggedUser.subscribe((loggedUser) => {

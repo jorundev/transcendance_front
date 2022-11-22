@@ -6,9 +6,10 @@ import type { ConnectionStatus } from "src/friends";
 import type { NotificationType } from "../notifications";
 
 export enum WsNamespace {
-	Chat = "Chat",
-	User = "User",
-	Game = "Game",
+	Chat = 'Chat',
+	User = 'User',
+	Game = 'Game',
+	Meta = 'Meta'
 }
 
 /**
@@ -249,4 +250,13 @@ export interface WsGameInvite extends WsGame {
 export interface WsGameDecline extends WsGame {
 	action: GameAction.Decline;
 	user_uuid: string;
+}
+
+/**
+ * Lobby
+ */
+
+ export interface WsMeta {
+	namespace: WsNamespace.Meta;
+	uuid: string;
 }
