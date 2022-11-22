@@ -6,6 +6,8 @@ export class Player implements GameObject {
 	private x: number;
 	private y: number;
 	private throwDirection: Direction;
+	public score: number = 0;
+	public moveTarget = GAME_HEIGHT / 2;
 	
 	private WIDTH = 4 * (GAME_WIDTH / 512);
 	private HEIGHT = 28 * (GAME_HEIGHT / 256);

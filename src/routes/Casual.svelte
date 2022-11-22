@@ -49,6 +49,10 @@
 		$stLobby?.players_status?.[0] === LobbyPlayerReadyState.Ready &&
 		$stLobby?.players_status?.[1] === LobbyPlayerReadyState.Ready;
 
+	$: if (allPlayersReady) {
+		replace("/game");
+	}
+
 	let playerCount = 0;
 	$: playerCount = Number(!!player1) + Number(!!player2);
 

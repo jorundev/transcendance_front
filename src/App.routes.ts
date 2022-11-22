@@ -27,7 +27,7 @@ import { get } from "svelte/store";
 import { api } from "./api";
 
 location.subscribe(async (loc) => {
-	if (get(stLobby) && !loc.startsWith("/play/casual")) {
+	if (get(stLobby) && !loc.startsWith("/play/casual") && !loc.startsWith("/game")) {
 		console.log("Leaving lobby");
 		await api.leaveLobby(get(stLobby).uuid);
 		stLobby.set(null);

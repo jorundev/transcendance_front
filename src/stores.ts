@@ -16,7 +16,11 @@ import type { FriendDataDictionary } from "./friends";
 import type { Lobby } from "./api";
 import type { NotificationDataDictionary } from "./notifications";
 import type { LoggedUser, UserDictionary } from "./users";
-import type { LobbyDictionary } from "./lobbies";
+import { LobbyPlayerReadyState, type LobbyDictionary } from "./lobbies";
+import { PongClient } from "./pong/PongClient";
+import { PlayerRole } from "./pong/Pong";
+
+let lobbySpectatorCount: number | null = null;
 
 export const stLoggedUser: Writable<LoggedUser | null> = writable(null);
 export const stServerDown: Writable<boolean> = writable(false);
@@ -37,6 +41,7 @@ export const stLobby: Writable<Lobby> = writable(null);
 export const stLobbies: Writable<LobbyDictionary> = writable({});
 export const stSidebarSelected: Writable<string | null> = writable(null);
 export const stToast: Writable<string | null> = writable(null);
+export const stPongClient: Writable<PongClient | null> = writable(null);
 
 /* Integrity checks */
 stLoggedUser.subscribe((loggedUser) => {
@@ -85,6 +90,30 @@ stLobbies.subscribe((lobbies) => {
 	}
 });
 
+stLobby.subscribe((lobby) => {
+	if (!lobby
+			|| lobby.players_status[0] !== LobbyPlayerReadyState.Ready
+			|| lobby.players_status[1] !== LobbyPlayerReadyState.Ready) {
+		stPongClient.set(null);
+		return;
+	}
+	if (!get(stPongClient)) {
+		let role: PlayerRole;
+		const loggedUserUUID = get(stLoggedUser)?.uuid;
+		if (lobby.spectators.includes(loggedUserUUID)) {
+			role = PlayerRole.SPECTATOR;
+		} else if (lobby.players[0] === loggedUserUUID) {
+			role = PlayerRole.PLAYER1;
+		} else if (lobby.players[1] === loggedUserUUID) {
+			role = PlayerRole.PLAYER2;
+		} else {
+			stToast.set("Something wrong happened with the lobby");
+			return;
+		}
+		stPongClient.set(new PongClient(role));
+	}
+});
+
 let toastTimeout: ReturnType<typeof setTimeout> = null;
 stToast.subscribe((toast) => {
 	clearTimeout(toastTimeout);
@@ -100,11 +129,11 @@ export async function tryToLog() {
 	response = await api.whoami();
 
 	if (response === null) {
-		return ;
+		return;
 	}
 	if (response == APIStatus.NoResponse || response?.statusCode === 502) {
 		stServerDown.set(true);
-		return ;
+		return;
 	}
 
 	stLoggedUser.set({
