@@ -10,7 +10,7 @@
 	import Modal from "../components/Kit/Modal.svelte";
 	import ClickOutside from "svelte-click-outside";
 	import { padIdentifier } from "../utils";
-	import { stFriends, stLobby, stLoggedUser, stUsers } from "../stores";
+	import { stFriends, stLobby, stLoggedUser, stToast, stUsers } from "../stores";
 	import { onMount } from "svelte";
 	import { push } from "svelte-spa-router";
 	import { ConnectionStatus } from "../friends";
@@ -174,6 +174,7 @@
 				lobby === APIStatus.NoResponse ||
 				(lobby as any).statusCode === 400
 			) {
+				stToast.set("Something wrong happened when joining the lobby");
 				return;
 			}
 			$stLobby = lobby;
@@ -183,7 +184,8 @@
 		}
 
 		const lobby = await api.createLobby();
-		if (lobby === null || lobby === APIStatus.NoResponse) {
+		if (lobby === null || lobby === APIStatus.NoResponse || (lobby as any).statusCode === 400) {
+			stToast.set("Something wrong happened when creating lobby");
 			return;
 		}
 		lobby.players[1] = params.uuid;

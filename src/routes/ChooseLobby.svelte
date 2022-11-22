@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { api, APIStatus } from "../api";
-	import { stLobby } from "../stores";
+	import { stLobby, stToast } from "../stores";
 	import { push } from "svelte-spa-router";
 	import Card from "../components/Kit/Card.svelte";
 	import LobbyList from "../components/Game/LobbyList.svelte";
@@ -8,7 +8,8 @@
 	async function createCasualLobby() {
 		if ($stLobby === null) {
 			const lobby = await api.createLobby();
-			if (lobby === null || lobby === APIStatus.NoResponse) {
+			if (lobby === null || lobby === APIStatus.NoResponse || (lobby as any).statusCode === 400) {
+				stToast.set("Something wrong happened when creating lobby");
 				return;
 			}
 			$stLobby = lobby;

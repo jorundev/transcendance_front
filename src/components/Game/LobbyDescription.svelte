@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { stLobbies, stLobby, stLoggedUser } from "../../stores";
+	import { stLobbies, stLobby, stLoggedUser, stToast } from "../../stores";
 	import { push } from "svelte-spa-router";
 	import { api, APIStatus, type Lobby } from "../../api";
 	import Button from "../Kit/Button.svelte";
@@ -29,7 +29,7 @@
 	async function join() {
 		const l = await api.joinLobby(lobby.uuid);
 		if ((l as any).statusCode === 400) {
-			// Already in lobby
+			stToast.set("You already are in the lobby");
 			return;
 		}
 		if ((l as any).statusCode === 404) {

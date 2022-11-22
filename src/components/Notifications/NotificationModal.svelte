@@ -12,7 +12,7 @@
 	import { onMount } from "svelte";
 	import { api, APIStatus } from "../../api";
 	import type { User } from "../../users";
-	import { stFriends, stLobby } from "../../stores";
+	import { stFriends, stLobby, stToast } from "../../stores";
 	import { push } from "svelte-spa-router";
 
 	let canGoBack = false;
@@ -77,9 +77,14 @@
 					setTimeout(() => push("/play/casual"), 0);
 				}
 			} else if (
-				(lobby as any).status === 400 ||
-				(lobby as any).statusCode === 404
+				(lobby as any).status === 400
 			) {
+				stToast.set("You already are in the lobby");
+				dispatch("read");
+			} else if (
+				(lobby as any).status === 404
+			) {
+				stToast.set("This lobby does not exists anymore");
 				dispatch("read");
 			}
 		}

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ChannelType } from "../../channels";
-	import { stChannels, stLobby, stUsers } from "../../stores";
+	import { stChannels, stLobby, stToast, stUsers } from "../../stores";
 	import { createEventDispatcher } from "svelte";
 	import ClickOutside from "svelte-click-outside";
 	import { api, APIStatus } from "../../api";
@@ -64,7 +64,8 @@
 
 	async function invite() {
 		const lobby = await api.createLobby();
-		if (lobby === null || lobby === APIStatus.NoResponse) {
+		if (lobby === null || lobby === APIStatus.NoResponse || (lobby as any).statusCode === 400) {
+			stToast.set("Something wrong happened when creating lobby");
 			return;
 		}
 		lobby.players[1] = uuid;
