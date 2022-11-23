@@ -35,15 +35,15 @@
 	<div class="choices">
 		<div class="choice" on:click={createCasualLobby}>
 			<div class="top">
-				<div class="title">CASUAL</div>
-				<div class="subtitle">Play against friends or strangers</div>
+				<div class="title">CHOOSE AN OPPONENT</div>
+				<div class="subtitle">Play against people you invite</div>
 			</div>
 			<div class="card blue" />
 		</div>
-		<div class="choice">
+		<div class="choice" on:click={() => push("/play/queue")}>
 			<div class="top">
-				<div class="title">RANKED</div>
-				<div class="subtitle">Will you raise or lower your rank ?</div>
+				<div class="title">JOIN THE QUEUE</div>
+				<div class="subtitle">And gain more XP</div>
 			</div>
 			<div class="card red" />
 		</div>
@@ -158,6 +158,10 @@
 			align-items: center;
 			width: 100%;
 			height: 100%;
+			
+			.title {
+				text-align: center;
+			}
 
 			.subtitle {
 				margin: 10px;

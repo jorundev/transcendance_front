@@ -10,6 +10,7 @@ import TFASettings from "./routes/TFASettings.svelte";
 import TFAQRCode from "./routes/TFAQRCode.svelte";
 import Password from "./routes/Password.svelte";
 import Casual from "./routes/Casual.svelte";
+import Queue from "./routes/Queue.svelte";
 import ProfileSettings from "./routes/ProfileSettings.svelte";
 import BlockedAccounts from "./routes/BlockedAccounts.svelte";
 import Game from "./routes/Game.svelte";
@@ -78,6 +79,7 @@ export default {
 	"/play": requiresLogin(ChooseLobby),
 	"/game": requiresLogin(Game),
 	"/play/casual": requiresLogin(Casual),
+	"/play/queue": requiresLogin(Queue),
 	"/login": requiresNoLogin(Login),
 	"/login/oauth-error": requiresNoLogin(Login),
 	"/login/email": requiresNoLogin(LoginByEmail),

@@ -2,6 +2,7 @@
  * Websocket response
  */
 
+import type { Lobby } from "src/api";
 import type { ConnectionStatus } from "src/friends";
 import type { NotificationType } from "../notifications";
 
@@ -197,15 +198,17 @@ export interface WsUserStatusInGame extends WsUser {
  * Game
  */
 
-export enum GameAction {
-	Invite = "INVITE",
-	Decline = "DECLINE",
-	Join = "JOIN",
-	Spectate = "SPECTATE",
-	Ready = "READY",
-	Start = "START",
-	Leave = "LEAVE",
-	Disband = "DISBAND",
+ export enum GameAction {
+	Invite = 'INVITE',
+	Decline = 'DECLINE',
+	Join = 'JOIN',
+	Spectate = 'SPECTATE',
+	Ready = 'READY',
+	Start = 'START',
+	Leave = 'LEAVE',
+	Wait = 'WAIT',
+	Match = 'MATCH',
+	Disband = 'DISBAND'
 }
 
 export interface WsGame {
@@ -250,6 +253,17 @@ export interface WsGameInvite extends WsGame {
 export interface WsGameDecline extends WsGame {
 	action: GameAction.Decline;
 	user_uuid: string;
+}
+
+export interface WsGameWait {
+	namespace: WsNamespace.Game;
+	action: GameAction.Wait;
+}
+
+export interface WsGameMatch {
+	namespace: WsNamespace.Game;
+	action: GameAction.Match;
+	lobby: Lobby;
 }
 
 /**

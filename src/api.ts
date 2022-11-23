@@ -52,6 +52,7 @@ import {
 	type WsGameInvite,
 	type WsGameJoin,
 	type WsGameLeave,
+	type WsGameMatch,
 	type WsGameReady,
 	type WsGameSpectate,
 	type WsGameStart,
@@ -1386,6 +1387,14 @@ async function wsGameDecline(data: WsGameDecline) {
 	}
 }
 
+async function wsGameMatch(data: WsGameMatch) {
+	stLobbies.update((old) => {
+		old[data.lobby.uuid] = data.lobby;
+		stLobby.set(data.lobby);
+		return old;
+	});
+}
+
 async function wsGameMessage(data: WsGame) {
 	switch (data.action) {
 		case GameAction.Join:
@@ -1412,6 +1421,9 @@ async function wsGameMessage(data: WsGame) {
 		case GameAction.Decline:
 			await wsGameDecline(data as WsGameDecline);
 			break;
+		case GameAction.Match:
+			await wsGameMatch(data as any as WsGameMatch);
+			break ;
 	}
 }
 
@@ -1820,6 +1832,16 @@ export const api = {
 	},
 	getLobbyInfo: async (lobby_uuid: string) => {
 		return makeRequest<Lobby>("/api/games/lobby/" + lobby_uuid, "GET");
+	},
+	joinQueue: async () => {
+		return makeRequest("/api/games/matchmaking", "POST", {
+			websocket_uuid: get(stWebsocketUUID)
+		});
+	},
+	leaveQueue: async() => {
+		return makeRequest("/api/games/matchmaking", "DELETE", {
+			websocket_uuid: get(stWebsocketUUID)
+		});
 	},
 	ws: {
 		connect: async () => {
