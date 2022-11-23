@@ -735,5 +735,7 @@
 		height: 100%;
 		display: grid;
 		place-items: center;
+		overflow-x: hidden;
+		overflow-y: auto;
 	}
 </style>

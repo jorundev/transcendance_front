@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { pop } from "svelte-spa-router";
 	import { stLoggedUser, stToast } from "../stores";
-	import SideBar from "../components/SideBar.svelte";
 	import { api, APIStatus } from "../api";
 
 	let innerWidth = 0;
@@ -59,7 +58,6 @@
 	<title>Profile - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
 {#if $stLoggedUser != null}
-	<!-- <SideBar active="settings" /> -->
 	<div class="s">
 		<div class="settings">
 			<div class="top">
@@ -73,44 +71,47 @@
 				<div class="empty" style="width: 40px;" />
 			</div>
 			<div class="category">Avatar</div>
-			<div class="avatar">
-				{#await avatarPromise}
-					<div
-						class="loading"
-						style={"background-image: url('" +
-							currentAvatar +
-							"');"}
-					/>
-				{:then data}
-					<div
-						class="inner"
-						class:drag
-						style={"background-image: url('" + data + "')"}
-						on:click={() => {
-							let input = document.createElement("input");
-							input.type = "file";
-							input.click();
-
-							input.onchange = (e) => {
-								e.preventDefault();
-								if (input.files?.length === 1) {
-									uploadFile(input.files[0]);
+			<div class="avatar-wrapper">
+				<div class="avatar">
+					{#await avatarPromise}
+						<div
+							class="loading"
+							style={"background-image: url('" +
+								currentAvatar +
+								"');"}
+						/>
+					{:then data}
+						<div
+							class="inner"
+							class:drag
+							style={"background-image: url('" + data + "')"}
+							on:click={() => {
+								let input = document.createElement("input");
+								input.type = "file";
+								input.click();
+	
+								input.onchange = (e) => {
+									e.preventDefault();
+									if (input.files?.length === 1) {
+										uploadFile(input.files[0]);
+									}
+								};
+							}}
+							on:dragenter={() => (drag = true)}
+							on:dragexit={() => (drag = false)}
+							on:dragover|preventDefault={() => {}}
+							on:drop|preventDefault={(e) => {
+								if (e.dataTransfer?.items?.length === 1) {
+									uploadFile(e.dataTransfer.items[0].getAsFile());
 								}
-							};
-						}}
-						on:dragenter={() => (drag = true)}
-						on:dragexit={() => (drag = false)}
-						on:dragover|preventDefault={() => {}}
-						on:drop|preventDefault={(e) => {
-							if (e.dataTransfer?.items?.length === 1) {
-								uploadFile(e.dataTransfer.items[0].getAsFile());
-							}
-
-							drag = false;
-						}}
-						on:change={(e) => console.log(e)}
-					/>
-				{/await}
+	
+								drag = false;
+							}}
+							on:change={(e) => console.log(e)}
+						/>
+					{/await}
+				</div>
+				<div class="desc">Supported formats:<br> webp, png, apng, jpeg, gif</div>
 			</div>
 			<div class="category">Username</div>
 			<div class="input">
@@ -172,6 +173,22 @@
 		background-position: center;
 		background-repeat: no-repeat;
 	}
+	
+	.avatar-wrapper {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0px;
+		padding-bottom: 10px;
+		width: 100%;
+		justify-content: center;
+		
+		.desc {
+			text-align: center;
+			color: rgb(130, 142, 167);
+			line-height: 2ch;
+		}
+	}
 
 	.category {
 		margin-left: 10px;
@@ -191,9 +208,8 @@
 	}
 
 	.avatar {
-		width: 100%;
+		// width: 100%;
 		display: flex;
-		justify-content: center;
 		margin-top: 18px;
 		margin-bottom: 18px;
 
@@ -302,6 +318,13 @@
 		.input {
 			margin-top: 0;
 			margin-bottom: 0;
+		}
+		
+		.avatar-wrapper {
+			justify-content: left;
+			flex-direction: row;
+			gap: 20px;
+			padding-bottom: 0;
 		}
 
 		.avatar {

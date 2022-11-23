@@ -275,6 +275,7 @@
 								/>
 							{/await}
 						</div>
+						<div class="desc">Supported formats: webp, png, apng, jpeg, gif</div>
 					</div>
 					<div class="category">
 						<div class="category-name">Administrator</div>
@@ -415,6 +416,12 @@
 				color: rgb(117, 117, 117);
 			}
 		}
+	}
+	
+	.desc {
+		text-align: center;
+		color: rgb(130, 142, 167);
+		padding-bottom: 24px;
 	}
 
 	.require-password {
