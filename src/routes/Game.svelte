@@ -11,6 +11,7 @@
 	// }
 
 	let canvas: HTMLCanvasElement;
+	let game: HTMLDivElement;
 	let ctx: CanvasRenderingContext2D;
 	let pong: PongClient = null;
 
@@ -33,6 +34,8 @@
 		if (!pong) {
 			return;
 		}
+		
+		console.log("loop");
 
 		secs = (ts - oldTs) / 1000;
 		const dt = secs - oldSecs;
@@ -55,47 +58,90 @@
 	}
 
 	function onMouseMove(e: MouseEvent) {
-		const rect = canvas.getBoundingClientRect();
-		const x = (e.clientX - rect.left) / rect.width;
-		const y = (e.clientY - rect.top) / rect.height;
-		pong.onMouseMove(x * GAME_WIDTH, y * GAME_HEIGHT);
+		if (pong) {
+			const rect = canvas.getBoundingClientRect();
+			const x = (e.clientX - rect.left) / rect.width;
+			const y = (e.clientY - rect.top) / rect.height;
+			pong.onMouseMove(x * GAME_WIDTH, y * GAME_HEIGHT);
+		}
 	}
 
 	function onTouchMove(e: TouchEvent) {
-		const rect = canvas.getBoundingClientRect();
+		if (pong) {
+			const rect = canvas.getBoundingClientRect();
 
-		const x = (e.touches[0].clientX - rect.left) / rect.width;
-		const y = (e.touches[0].clientY - rect.top) / rect.height;
-		pong.onMouseMove(x * GAME_WIDTH, y * GAME_HEIGHT);
+			const x = (e.touches[0].clientX - rect.left) / rect.width;
+			const y = (e.touches[0].clientY - rect.top) / rect.height;
+			pong.onMouseMove(x * GAME_WIDTH, y * GAME_HEIGHT);
+		}
 	}
 
 	function keyDown(event: KeyboardEvent) {
-		if (event.key === "ArrowDown") {
-			down = true;
-		} else if (event.key === "ArrowUp") {
-			up = true;
-		} else if (event.key === "Shift") {
-			shift = true;
+		if (pong) {
+			if (event.key === "ArrowDown") {
+				down = true;
+			} else if (event.key === "ArrowUp") {
+				up = true;
+			} else if (event.key === "Shift") {
+				shift = true;
+			}
 		}
 	}
 
 	function keyUp(event: KeyboardEvent) {
-		if (event.key === "ArrowDown") {
-			down = false;
-		} else if (event.key === "ArrowUp") {
-			up = false;
-		} else if (event.key === "Shift") {
-			shift = false;
+		if (pong) {
+			if (event.key === "ArrowDown") {
+				down = false;
+			} else if (event.key === "ArrowUp") {
+				up = false;
+			} else if (event.key === "Shift") {
+				shift = false;
+			}
+		}
+	}
+
+	async function setFullcreen() {
+		await game.requestFullscreen().catch((e) => {
+			/* Already in fullscreen mode */
+		});
+	}
+
+	async function unsetFullcreen() {
+		if (document.exitFullscreen) {
+			await document.exitFullscreen().catch((e) => {
+				/* Not in fullscreen mode */
+			});
+		}
+	}
+
+	async function setupAndPlay() {
+		
+		ctx = canvas.getContext("2d");
+		pong = $stPongClient;
+		play = true;
+		console.log(pong);
+		window.requestAnimationFrame(gameLoop);
+		
+		// set fullscreen and orientation
+		if (
+			/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+				navigator.userAgent
+			)
+		) {
+			await setFullcreen();
+			await screen.orientation
+				.lock("landscape")
+				.then(() => {})
+				.catch((e) => {
+					console.log("Could not go into landscape mode:", e);
+				});
 		}
 	}
 
 	$: {
 		if (canvas) {
 			if ($stPongClient && !pong) {
-				pong = $stPongClient;
-				play = true;
-				ctx = canvas.getContext("2d");
-				window.requestAnimationFrame(gameLoop);
+				setupAndPlay();
 			} else {
 				pong = null;
 			}
@@ -106,6 +152,14 @@
 		pong = undefined;
 		play = false;
 		stPongClient.set(null);
+		try {
+			// This will throw an exception on desktop, so the fullscreen function will only
+			// happen on mobile
+			screen.orientation.unlock();
+			unsetFullcreen();
+		} catch (e) {
+			// We are on desktop, do nothing
+		}
 	});
 </script>
 
@@ -113,7 +167,7 @@
 	<title>Game! - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
 <svelte:window on:keydown={keyDown} on:keyup={keyUp} />
-<div class="game">
+<div class="game" bind:this={game}>
 	<div class="wrapper">
 		<canvas
 			class="game-canvas"
@@ -139,6 +193,10 @@
 		height: 100%;
 		padding: 20px;
 		box-sizing: border-box;
+		
+		&:fullscreen {
+			padding: 50px;
+		}
 
 		.wrapper {
 			position: relative;

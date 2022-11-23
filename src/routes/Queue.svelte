@@ -25,7 +25,10 @@
 			pop();
 			return;
 		} else if ((resp as any).statusCode === 400) {
-			stToast.set("You already were in a queue");
+			stToast.set("You already are in a queue");
+            pop();
+            inQueue = false;
+            return ;
 		}
 
 		inQueue = true;
