@@ -11,6 +11,10 @@ import {
 	NotificationType,
 } from "./notifications";
 import {
+	initChannels,
+	initFriends,
+	initLobbies,
+	initNotifications,
 	lastPage,
 	stChannels,
 	stFriends,
@@ -1868,9 +1872,14 @@ export const api = {
 					// }, 2000);
 				};
 
-				ws.onopen = () => {
-					tryToLog().then(() => {
+				ws.onopen = async () => {
+					await tryToLog().then(async () => {
 						websocketConnected.set(true);
+						stLobby.set(null);
+						await initNotifications();
+						await initFriends();
+						await initChannels();
+						await initLobbies();
 					});
 					console.log("Successfully connected to websocket");
 				};

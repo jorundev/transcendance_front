@@ -20,8 +20,6 @@ import { LobbyPlayerReadyState, type LobbyDictionary } from "./lobbies";
 import { PongClient } from "./pong/PongClient";
 import { PlayerRole } from "./pong/Pong";
 
-let lobbySpectatorCount: number | null = null;
-
 export const stLoggedUser: Writable<LoggedUser | null> = writable(null);
 export const stServerDown: Writable<boolean> = writable(false);
 export const stUsers: Writable<UserDictionary> = writable({});
@@ -146,12 +144,8 @@ export async function tryToLog() {
 	});
 
 	stServerDown.set(false);
-	api.ws.connect();
-	stLobby.set(null);
-	await initNotifications();
-	await initFriends();
-	await initChannels();
-	await initLobbies();
+
+	await api.ws.connect();
 }
 
 /* Removes duplicates channels (that are public AND joined) */
@@ -251,7 +245,7 @@ async function channelFromAPIChannel(
 		};
 }
 
-async function initFriends() {
+export async function initFriends() {
 	const relations = await api.getRelations();
 	if (relations !== null && relations !== APIStatus.NoResponse) {
 		const dictionary: FriendDataDictionary = {};
@@ -274,7 +268,7 @@ async function initFriends() {
 	}
 }
 
-async function initLobbies() {
+export async function initLobbies() {
 	const lobbies = await api.getLobbies();
 
 	const dictionary = {};
@@ -286,7 +280,7 @@ async function initLobbies() {
 	stLobbies.set(dictionary);
 }
 
-async function initChannels() {
+export async function initChannels() {
 	const promises = {
 		publicChannels: api.listChannels(),
 		joinedChannels: api.getJoinedChannels(),
@@ -352,7 +346,7 @@ async function initChannels() {
 	stChannels.set(channels);
 }
 
-async function initNotifications() {
+export async function initNotifications() {
 	const notifs = await api.getNotifications();
 	if (notifs === null || notifs === APIStatus.NoResponse) {
 		return;
