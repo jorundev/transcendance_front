@@ -10,7 +10,8 @@ export enum WsNamespace {
 	Chat = 'Chat',
 	User = 'User',
 	Game = 'Game',
-	Meta = 'Meta'
+	Meta = 'Meta',
+	Pong = 'Pong',
 }
 
 /**
@@ -273,4 +274,29 @@ export interface WsGameMatch {
  export interface WsMeta {
 	namespace: WsNamespace.Meta;
 	uuid: string;
+}
+
+
+/**
+ * Pong
+ */
+
+ export enum PongAction {
+	Bounce = 'BOUNCE',
+	Reset = 'RESET',
+}
+
+export interface WsPong {
+	namespace: WsNamespace.Pong;
+	action: PongAction;
+}
+
+export interface WsPongBounce extends WsPong {
+	action: PongAction.Bounce;
+	data: any;
+}
+
+export interface WsPongReset extends WsPong {
+	action: PongAction.Reset;
+	data: any;
 }

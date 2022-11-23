@@ -22,6 +22,7 @@ import {
 	stLobby,
 	stLoggedUser,
 	stNotifications,
+	stPongClient,
 	stServerDown,
 	stToast,
 	stUsers,
@@ -61,6 +62,7 @@ import {
 	type WsGameSpectate,
 	type WsGameStart,
 	type WsMeta,
+	type WsPong,
 	type WsUser,
 	type WsUserAvatar,
 	type WsUserBlock,
@@ -1431,6 +1433,13 @@ async function wsGameMessage(data: WsGame) {
 	}
 }
 
+function wsPongMessage(data: WsPong) {
+	if (get(stPongClient)) {
+		console.log("dispatched packet to game");
+		get(stPongClient).receivePacket(data);
+	}
+}
+
 export const api = {
 	whoami: async (): Promise<WhoAmIResponse | APIStatus.NoResponse | null> => {
 		return makeRequest<WhoAmIResponse>("/api/users/whoami", "GET");
@@ -1914,6 +1923,9 @@ export const api = {
 						case WsNamespace.Game:
 							await wsGameMessage(data as WsGame);
 							break;
+						case WsNamespace.Pong:
+							wsPongMessage(data as WsPong);
+							break ;
 						case WsNamespace.Meta:
 							const metadata = data as WsMeta;
 							stWebsocketUUID.set(metadata.uuid);

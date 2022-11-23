@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { pop, replace } from "svelte-spa-router";
-	import { onMount } from "svelte";
 	import { GAME_HEIGHT, GAME_WIDTH, PlayerRole, Pong } from "../pong/Pong";
 	import { onDestroy } from "svelte";
 	import type { PongClient } from "../pong/PongClient";
@@ -34,8 +33,6 @@
 		if (!pong) {
 			return;
 		}
-		
-		console.log("loop");
 
 		secs = (ts - oldTs) / 1000;
 		const dt = secs - oldSecs;
