@@ -5,6 +5,7 @@
 	export let session: Session;
 
 	let browser = "browser";
+	let os = "";
 	let date = "";
 
 	let dispatch = createEventDispatcher();
@@ -28,6 +29,23 @@
 			browser = "browser";
 		}
 	}
+
+	$: {
+		if (
+			session.platform.includes("Mac OS") ||
+			session.platform.includes("iOS")
+		) {
+			os = "apple";
+		} else if (session.platform.includes("Android")) {
+			os = "android";
+		} else if (session.platform.includes("Windows")) {
+			os = "windows";
+		} else if (session.platform.includes("Linux")) {
+			os = "linux";
+		} else {
+			os = "";
+		}
+	}
 </script>
 
 <div class="session" class:inactive={!session.active}>
@@ -39,6 +57,7 @@
 					style={"flex-shrink:0;background-image: url('/img/browsers/" +
 						browser +
 						".png');"}
+					data-os={os}
 				/>
 				<div class="info-text">
 					<div class="title">{session.platform}</div>
@@ -122,9 +141,39 @@
 		}
 	}
 	.browser-icon {
+		position: relative;
 		width: 40px;
 		height: 40px;
 		background-size: cover;
+		
+		&::after {
+			content: "";
+			position: absolute;
+			width: 60%;
+			height: 60%;
+			right: 0;
+			bottom: 0;
+			background-size: contain;
+			background-position-x: right;
+			background-position-y: bottom;
+			background-repeat: no-repeat;
+		}
+		
+		&[data-os="apple"]::after {	
+			background-image: url("/img/os/apple.png");
+		}
+
+		&[data-os="android"]::after {	
+			background-image: url("/img/os/android.png");
+		}
+
+		&[data-os="linux"]::after {	
+			background-image: url("/img/os/linux.png");
+		}
+
+		&[data-os="windows"]::after {	
+			background-image: url("/img/os/windows.png");
+		}
 	}
 
 	.badge {
