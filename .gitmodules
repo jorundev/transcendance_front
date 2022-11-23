@@ -1,0 +1,4 @@
+[submodule "src/pong"]
+	path = src/pong
+	url = git@github.com:jorundev/NJMPU-PONG.git
+	branch = master
