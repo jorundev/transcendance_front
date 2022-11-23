@@ -109,7 +109,7 @@ stLobby.subscribe((lobby) => {
 			stToast.set("Something wrong happened with the lobby");
 			return;
 		}
-		stPongClient.set(new PongClient(role));
+		stPongClient.set(new PongClient(role, get(stWebsocket)));
 	}
 });
 
