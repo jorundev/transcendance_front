@@ -76,6 +76,7 @@
 	});
 
 	onMount(async () => {
+		resize();
 		if (await connectToServer()) {
 			const hash = window.location.hash;
 			if (
@@ -157,6 +158,10 @@
 			replace(event.detail.userData.redirect);
 		}
 	}
+	
+	function resize() {
+		document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+	}
 </script>
 
 <svelte:head>
@@ -164,7 +169,7 @@
 		<title>Server down - NEW SHINJI MEGA PONG ULTIMATE</title>
 	{/if}
 </svelte:head>
-<svelte:window bind:innerWidth></svelte:window>
+<svelte:window bind:innerWidth on:resize={resize}></svelte:window>
 {#if $stToast !== null}
 	<div class="toast" transition:slide on:click|stopPropagation={() => stToast.set(null)}>{$stToast}</div>
 {/if}
@@ -207,7 +212,7 @@
 	}
 	
 	.router {
-		height: 100vh;
+		height: 100%;
 		overflow-y: auto;
 		overflow-x: hidden;
 	}

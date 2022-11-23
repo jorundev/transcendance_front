@@ -4,7 +4,7 @@ html,
 body {
 	font-family: "basier_circleregular";
 	width: calc(100vw - var(--scrollbar-width));
-	height: calc(100% - var(--scrollbar-height));
+	height: calc(max(var(--app-height), 100%) - var(--scrollbar-height));
 	padding: 0;
 	margin: 0;
 	background: black;
