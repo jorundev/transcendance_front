@@ -41,12 +41,18 @@
 				return getProfilePictureLinkFrom(obj.avatar);
 			}
 		});
+
 		const res = await pm;
 		if (res === null || res === APIStatus.NoResponse) {
 			return;
 		}
-		if (res.statusCode === 413) {
+		if (res.statusCode === 413 ) {
 			stToast.set("Error: Image is too large");
+			avatarPromise = Promise.resolve(getProfilePictureLink());
+			return;
+		}
+		if (res.statusCode === 400 ) {
+			stToast.set("Error: file type not supported");
 			avatarPromise = Promise.resolve(getProfilePictureLink());
 			return;
 		}
@@ -89,7 +95,7 @@
 								let input = document.createElement("input");
 								input.type = "file";
 								input.click();
-	
+
 								input.onchange = (e) => {
 									e.preventDefault();
 									if (input.files?.length === 1) {
@@ -104,7 +110,7 @@
 								if (e.dataTransfer?.items?.length === 1) {
 									uploadFile(e.dataTransfer.items[0].getAsFile());
 								}
-	
+
 								drag = false;
 							}}
 							on:change={(e) => console.log(e)}
@@ -173,7 +179,7 @@
 		background-position: center;
 		background-repeat: no-repeat;
 	}
-	
+
 	.avatar-wrapper {
 		display: flex;
 		flex-direction: column;
@@ -182,7 +188,7 @@
 		padding-bottom: 10px;
 		width: 100%;
 		justify-content: center;
-		
+
 		.desc {
 			text-align: center;
 			color: rgb(130, 142, 167);
@@ -319,7 +325,7 @@
 			margin-top: 0;
 			margin-bottom: 0;
 		}
-		
+
 		.avatar-wrapper {
 			justify-content: left;
 			flex-direction: row;

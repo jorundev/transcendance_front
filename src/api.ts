@@ -257,7 +257,7 @@ async function makeRequest<T>(
 		switch (response.status) {
 			case 500:
 				stToast.set("Error 500: Something wrong happened with the server");
-				break;
+				return null
 			case 502:
 				console.error("A terrible error happened: ", response);
 				stServerDown.set(true);
@@ -1503,7 +1503,8 @@ export const api = {
 		if (
 			res !== null &&
 			res !== APIStatus.NoResponse &&
-			res.statusCode !== 413
+			res.statusCode !== 413 &&
+			res.statusCode !== 400
 		) {
 			stLoggedUser?.update((old) => {
 				old.avatar = res.avatar;
