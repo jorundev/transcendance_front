@@ -4,6 +4,7 @@
 
 import type { Lobby } from "src/api";
 import type { ConnectionStatus } from "src/friends";
+import type { PlayerRole } from 'src/pong/Pong';
 import type { NotificationType } from "../notifications";
 
 export enum WsNamespace {
@@ -283,6 +284,7 @@ export interface WsGameMatch {
 
  export enum PongAction {
 	Bounce = 'BOUNCE',
+	Move = "MOVE",
 	Reset = 'RESET',
 }
 
@@ -294,6 +296,15 @@ export interface WsPong {
 export interface WsPongBounce extends WsPong {
 	action: PongAction.Bounce;
 	data: any;
+}
+
+export interface WsPongMove extends WsPong {
+    action: PongAction.Move;
+    player: PlayerRole;
+    data: {
+        tick: number;
+        moveTarget: number;
+    };
 }
 
 export interface WsPongReset extends WsPong {

@@ -1435,7 +1435,7 @@ async function wsGameMessage(data: WsGame) {
 
 function wsPongMessage(data: WsPong) {
 	if (get(stPongClient)) {
-		console.log("dispatched packet to game");
+		// console.log("dispatched packet to game");
 		get(stPongClient).receivePacket(data);
 	}
 }
@@ -1912,7 +1912,7 @@ export const api = {
 
 				ws.onmessage = async (message) => {
 					const data: WebsocketMessage = JSON.parse(message.data);
-					console.log(data);
+					// console.log(data);
 					switch (data.namespace) {
 						case WsNamespace.Chat:
 							await wsChatMessage(data as WsChat);
