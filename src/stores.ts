@@ -41,6 +41,11 @@ export const stSidebarSelected: Writable<string | null> = writable(null);
 export const stToast: Writable<string | null> = writable(null);
 export const stPongClient: Writable<PongClient | null> = writable(null);
 export const stWebsocketUUID: Writable<string | null> = writable(null);
+export const stGameSettings: Writable<{
+	background: "red" | "blue" | "green"
+}> = writable({
+	background: "red"
+});
 
 /* Integrity checks */
 stLoggedUser.subscribe((loggedUser) => {

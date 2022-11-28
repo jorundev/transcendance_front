@@ -3,7 +3,7 @@
 	import { GAME_HEIGHT, GAME_WIDTH, PlayerRole, Pong } from "../pong/Pong";
 	import { onDestroy } from "svelte";
 	import type { PongClient } from "../pong/PongClient";
-	import { stPongClient } from "../stores";
+	import { stGameSettings, stPongClient } from "../stores";
 
 	// $: if ($stLobby === null) {
 	//     replace("/play");
@@ -112,13 +112,12 @@
 	}
 
 	async function setupAndPlay() {
-		
 		ctx = canvas.getContext("2d");
 		pong = $stPongClient;
 		play = true;
 		console.log(pong);
 		window.requestAnimationFrame(gameLoop);
-		
+
 		// set fullscreen and orientation
 		if (
 			/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
@@ -165,7 +164,12 @@
 </svelte:head>
 <svelte:window on:keydown={keyDown} on:keyup={keyUp} />
 <div class="game" bind:this={game}>
-	<div class="wrapper">
+	<div
+		class="wrapper"
+		class:blue={$stGameSettings.background === "blue"}
+		class:red={$stGameSettings.background === "red"}
+		class:green={$stGameSettings.background === "green"}
+	>
 		<canvas
 			class="game-canvas"
 			bind:this={canvas}
@@ -190,7 +194,7 @@
 		height: 100%;
 		padding: 20px;
 		box-sizing: border-box;
-		
+
 		&:fullscreen {
 			padding: 50px;
 		}
@@ -204,14 +208,32 @@
 				height: 100%;
 				left: 0;
 				top: 0;
+				z-index: 0;
+			}
+
+			&.blue::before {
 				background-color: #21d4fd;
 				background-image: linear-gradient(
 					19deg,
 					#21d4fd 0%,
 					#b721ff 100%
 				);
-
-				z-index: 0;
+			}
+			&.red::before {
+				background-color: #fd2c21;
+				background-image: linear-gradient(
+					19deg,
+					#fd3b21 0%,
+					#940000 100%
+				);
+			}
+			&.green::before {
+				background-color: #21fd21;
+				background-image: linear-gradient(
+					19deg,
+					#21fd21 0%,
+					#007563 100%
+				);
 			}
 		}
 
