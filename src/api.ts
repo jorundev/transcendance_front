@@ -5,6 +5,7 @@ import { get } from "svelte/store";
 import { ChannelType } from "./channels";
 import { ConnectionStatus } from "./friends";
 import { LobbyPlayerReadyState } from "./lobbies";
+import type { GameHistory } from "./lobbies";
 import {
 	newNotification,
 	type NotificationData,
@@ -1852,10 +1853,13 @@ export const api = {
 			websocket_uuid: get(stWebsocketUUID)
 		});
 	},
-	leaveQueue: async() => {
+	leaveQueue: async () => {
 		return makeRequest("/api/games/matchmaking", "DELETE", {
 			websocket_uuid: get(stWebsocketUUID)
 		});
+	},
+	getMatchHistory: async (user_uuid: string) => {
+		return makeRequest<GameHistory[]>("/api/games/history/" + user_uuid, "GET");	
 	},
 	ws: {
 		connect: async () => {

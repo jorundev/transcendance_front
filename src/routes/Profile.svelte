@@ -487,7 +487,7 @@
 						<Card>
 							<div class="home-div">
 								<div class="title">Match History</div>
-								<MatchHistory />
+								<MatchHistory user={user?.uuid}/>
 							</div>
 						</Card>
 					</div>

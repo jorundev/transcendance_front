@@ -96,7 +96,7 @@
 		<Card>
 			<div class="home-div">
 				<div class="title">Match History</div>
-				<MatchHistory />
+				<MatchHistory user={$stLoggedUser?.uuid}/>
 			</div>
 		</Card>
 		<div>

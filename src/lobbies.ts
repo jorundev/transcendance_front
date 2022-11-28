@@ -15,3 +15,10 @@ export enum LobbyWinner {
 export interface LobbyDictionary {
 	[key: string]: Lobby;
 }
+
+export interface GameHistory {
+	uuid: string,
+	winner: LobbyWinner,
+	players: [string, string],
+	players_scores: [number, number],
+}

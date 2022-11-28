@@ -4,6 +4,7 @@
 
 import type { Lobby } from "src/api";
 import type { ConnectionStatus } from "src/friends";
+import type { GameHistory } from "src/lobbies";
 import type { PlayerRole } from 'src/pong/Pong';
 import type { NotificationType } from "../notifications";
 
@@ -210,7 +211,8 @@ export interface WsUserStatusInGame extends WsUser {
 	Leave = 'LEAVE',
 	Wait = 'WAIT',
 	Match = 'MATCH',
-	Disband = 'DISBAND'
+	Disband = 'DISBAND',
+	End = 'END',
 }
 
 export interface WsGame {
@@ -266,6 +268,12 @@ export interface WsGameMatch {
 	namespace: WsNamespace.Game;
 	action: GameAction.Match;
 	lobby: Lobby;
+}
+
+export interface WsGameEnd {
+	namespace: WsNamespace.Game;
+	action: GameAction.End;
+	history: GameHistory;
 }
 
 /**
