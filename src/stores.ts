@@ -42,7 +42,8 @@ export const stToast: Writable<string | null> = writable(null);
 export const stPongClient: Writable<PongClient | null> = writable(null);
 export const stWebsocketUUID: Writable<string | null> = writable(null);
 export const stGameSettings: Writable<{
-	background: "red" | "blue" | "green"
+	background: "red" | "blue" | "green",
+	// player1color: 
 }> = writable({
 	background: "red"
 });

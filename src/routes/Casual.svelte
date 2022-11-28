@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { stGameSettings, stLobby, stLoggedUser } from "../stores";
 	import LobbyUser from "../components/Game/LobbyUser.svelte";
-	import SideBar from "../components/SideBar.svelte";
 	import Button from "../components/Kit/Button.svelte";
 	import { pop, replace } from "svelte-spa-router";
 	import Modal from "../components/Kit/Modal.svelte";
@@ -15,6 +14,8 @@
 	$: if ($stLobby === null) {
 		replace("/play");
 	}
+	
+	let color: string = "#000000";
 
 	export let spectators: Array<string> = [];
 
@@ -155,12 +156,14 @@
 					Game Options
 				</div>
 				<div class="inner">
-					Background
+					<div class="opt">Background</div>
 					<div class="buttons">
 						<Button highlight={$stGameSettings.background === "red"} padding="6px" on:click={() => $stGameSettings.background = "red"}>Red</Button>
 						<Button highlight={$stGameSettings.background === "blue"} padding="6px" on:click={() => $stGameSettings.background = "blue"}>Blue</Button>
 						<Button highlight={$stGameSettings.background === "green"} padding="6px" on:click={() => $stGameSettings.background = "green"}>Green</Button>
 					</div>
+					<div class="opt">Paddle color</div>
+					<input type="color" bind:value={color}>
 				</div>
 			</div>
 		</div>
@@ -181,6 +184,11 @@
 		height: 100%;
 		display: grid;
 		place-items: center;
+	}
+	
+	.opt {
+		padding-top: 10px;
+		padding-bottom: 4px;
 	}
 
 	.title {
@@ -249,11 +257,26 @@
 				flex-direction: column;
 				justify-content: center;
 				padding: 10px;
+				padding-top: 0;
 				
 				.buttons {
 					padding-top: 6px;
 					display: flex;
 					gap: 10px;
+				}
+				
+				input[type="color"] {
+					cursor: pointer;
+					width: 100%;
+					border: none;
+					height: 32px;
+					margin: 0;
+					padding: 0;
+					position: relative;
+					
+					&:focus {
+						outline: none;
+					}
 				}
 			}
 		}
