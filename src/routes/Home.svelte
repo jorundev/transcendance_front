@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { stLoggedUser, stNotifications } from "../stores";
-	import { api, getUserProfilePictureLink } from "../api";
+	import { api, APIStatus, getUserProfilePictureLink } from "../api";
 	import Card from "../components/Kit/Card.svelte";
-	import SideBar from "../components/SideBar.svelte";
 	import { padIdentifier } from "../utils";
 	import FriendListHorizontal from "../components/Friends/FriendListHorizontal.svelte";
 	import MatchHistory from "../components/MatchHistory.svelte";
@@ -14,9 +13,90 @@
 	} from "../notifications";
 	import NotificationModal from "../components/Notifications/NotificationModal.svelte";
 	import { onMount } from "svelte";
-	import { fade, slide } from "svelte/transition";
+	import { querystring, replace } from "svelte-spa-router";
+	import { LobbyWinner } from "../lobbies";
+	import type { User } from "../users";
+	import GameEndModal from "../components/Game/GameEndModal.svelte";
 
 	let id = "";
+	
+	// ?p1=d0175f6d-65f6-4eb2-948f-c3d5309cc648&p2=d0175f6d-65f6-4eb2-948f-c3d5309cc648&w=0&pt1=11&pt2=9&xp=0
+	let query: URLSearchParams;
+	$: query = new URLSearchParams($querystring);
+	
+	interface GameEndModalInfo {
+		winner: LobbyWinner,
+		player1: User;
+		player2: User;
+		player1Score: number;
+		player2Score: number;
+		xp: number;
+	}
+	
+	let gameEndModal: GameEndModalInfo = null;
+	
+	async function setGameEndModal()
+	{
+		const hasAll =
+			query.has("p1")
+			&& query.has("p2")
+			&& query.has("w")
+			&& query.has("pt1")
+			&& query.has("pt2")
+			&& query.has("xp");
+		if (hasAll) {
+			try {
+				const w: LobbyWinner = parseInt(query.get("w"));
+				if (w !== LobbyWinner.Player1 && w !== LobbyWinner.Player2 && w !== LobbyWinner.Tie) {
+					throw "";
+				}	
+				
+				const p1 = query.get("p1");
+				if (p1.length === 0) {
+					throw "";
+				}
+				const p2 = query.get("p2");
+				if (p2.length === 0) {
+					throw "";
+				}
+				
+				const player1 = await api.getUserData(p1);
+				if (player1 === null || player1 === APIStatus.NoResponse || (player1 as any).statusCode === 404) {
+					throw "";
+				}
+				
+				const player2 = await api.getUserData(p1);
+				if (player2 === null || player2 === APIStatus.NoResponse || (player2 as any).statusCode === 404) {
+					throw "";
+				}
+				
+				const player1Score = parseInt(query.get("pt1"));
+				const player2Score = parseInt(query.get("pt2"));
+				
+				const xp = parseInt(query.get("xp"));
+				
+				if (isNaN(xp) || isNaN(player1Score) || isNaN(player2Score)) {
+					throw "";
+				}
+				
+				gameEndModal = {
+					player1,
+					player2,
+					xp,
+					winner: w,
+					player1Score,
+					player2Score,
+				};
+			} catch (_e) {}
+		} else {
+			gameEndModal = null;
+		}
+		//replace("/");
+	}
+	
+	$: if (query) {
+		setGameEndModal();
+	}
 
 	$: id = padIdentifier($stLoggedUser?.id);
 
@@ -51,6 +131,9 @@
 <svelte:head>
 	<title>Home - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
+{#if gameEndModal !== null}
+<GameEndModal data={gameEndModal} on:back={() => gameEndModal = null}></GameEndModal>
+{/if}
 {#if modalData !== undefined}
 	<NotificationModal
 		{modalData}
