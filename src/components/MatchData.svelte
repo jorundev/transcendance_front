@@ -102,10 +102,6 @@
 			background: rgb(71, 0, 0);
 		}
 
-		.nodata {
-			color: rgb(207, 207, 207);
-		}
-		
 		.avatar {
 			flex-shrink: 0;
 			width: 40px;

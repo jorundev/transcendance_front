@@ -35,10 +35,6 @@
 			opacity: 0.8;
 		}
 
-		.message.deleted {
-			color: rgb(200, 200, 200);
-		}
-
 		&.no-pre-wrap {
 			white-space: normal;
 		}
@@ -105,24 +101,6 @@
 			animation: optionkill 0.2s ease-in-out;
 			min-width: 0;
 			min-height: 0;
-		}
-
-		.inner {
-			display: grid;
-			place-items: center;
-			overflow: hidden;
-			width: 100%;
-			height: 100%;
-			border-radius: 10px;
-			transition: background-color 0.03s;
-
-			&:hover {
-				background-color: rgb(202, 0, 0);
-			}
-
-			&:active {
-				background-color: rgb(167, 0, 0);
-			}
 		}
 	}
 </style>
