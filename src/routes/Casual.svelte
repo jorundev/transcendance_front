@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { stGameSettings, stLobby, stLoggedUser } from "../stores";
+	import { stGameSettings, stLobby, stLoggedUser, stToast } from "../stores";
 	import LobbyUser from "../components/Game/LobbyUser.svelte";
 	import Button from "../components/Kit/Button.svelte";
 	import { pop, replace } from "svelte-spa-router";
 	import Modal from "../components/Kit/Modal.svelte";
 	import InviteFriendModal from "../components/Game/InviteFriendModal.svelte";
-	import { api } from "../api";
+	import { api, APIStatus } from "../api";
 	import { LobbyPlayerReadyState } from "../lobbies";
 
 	export let player1: string = "";
@@ -34,7 +34,10 @@
 
 	async function change() {
 		if ($stLobby && color) {
-			await api.changePlayerColor($stLobby?.uuid, color.value);
+			const res = await api.changePlayerColor($stLobby?.uuid, color.value);
+			if (res === null || res === APIStatus.NoResponse || (res as any).statusCode === 400) {
+				stToast.set("Error: Could not change paddle color");
+			}
 		}
 	}
 
