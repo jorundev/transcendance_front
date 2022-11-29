@@ -33,7 +33,9 @@
 	}
 
 	async function change() {
-		// TODO: change player color
+		if ($stLobby && color) {
+			await api.changePlayerColor($stLobby?.uuid, color.value);
+		}
 	}
 
 	let isMaster = false;

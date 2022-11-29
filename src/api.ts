@@ -19,6 +19,7 @@ import {
 	lastPage,
 	stChannels,
 	stFriends,
+	stGameSettings,
 	stLobbies,
 	stLobby,
 	stLoggedUser,
@@ -1285,6 +1286,10 @@ async function wsGameStart(data: WsGameStart) {
 			old.players_status[1] = LobbyPlayerReadyState.Ready;
 			return old;
 		});
+		stGameSettings.update((old) => {
+			old.colors = data.colors;
+			return old;
+		});
 	}
 
 	// Same logic as before, but with the global lobbies store
@@ -1860,6 +1865,11 @@ export const api = {
 	},
 	getMatchHistory: async (user_uuid: string) => {
 		return makeRequest<GameHistory[]>("/api/games/history/" + user_uuid, "GET");	
+	},
+	changePlayerColor: async (lobby: string, color: string) => {
+		return makeRequest<APIResponse>("/api/games/lobby/" + lobby, "PATCH", {
+			color
+		});	
 	},
 	ws: {
 		connect: async () => {

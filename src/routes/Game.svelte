@@ -116,8 +116,10 @@
 	async function setupAndPlay() {
 		ctx = canvas.getContext("2d");
 		pong = $stPongClient;
+		if (pong) {
+			pong.setColors($stGameSettings.colors ?? ['white', 'white']);
+		}
 		play = true;
-		console.log(pong);
 		window.requestAnimationFrame(gameLoop);
 
 		// set fullscreen and orientation
