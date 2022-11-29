@@ -15,7 +15,7 @@
 		replace("/play");
 	}
 	
-	let color: string = "#000000";
+	let color: HTMLInputElement;
 
 	export let spectators: Array<string> = [];
 
@@ -30,6 +30,10 @@
 		if (!player1) {
 			pop();
 		}
+	}
+
+	async function change() {
+		// TODO: change player color
 	}
 
 	let isMaster = false;
@@ -163,7 +167,7 @@
 						<Button highlight={$stGameSettings.background === "green"} padding="6px" on:click={() => $stGameSettings.background = "green"}>Green</Button>
 					</div>
 					<div class="opt">Paddle color</div>
-					<input type="color" bind:value={color}>
+					<input type="color" value="#ffffff" bind:this={color} on:change={change}>
 				</div>
 			</div>
 		</div>

@@ -1,13 +1,10 @@
 <script lang="ts">
 	import { pop, replace } from "svelte-spa-router";
-	import { GAME_HEIGHT, GAME_WIDTH, PlayerRole, Pong } from "../pong/Pong";
+	import { GAME_HEIGHT, GAME_WIDTH } from "../pong/Pong";
 	import { onDestroy } from "svelte";
 	import type { PongClient } from "../pong/PongClient";
-	import { stGameSettings, stPongClient } from "../stores";
-
-	// $: if ($stLobby === null) {
-	//     replace("/play");
-	// }
+	import { stGameSettings, stLobby, stPongClient } from "../stores";
+	import { api } from "../api";
 
 	let canvas: HTMLCanvasElement;
 	let game: HTMLDivElement;
@@ -26,7 +23,12 @@
 	let shift = false;
 
 	$: if (!$stPongClient) {
-		pop();
+		if ($stLobby) {
+			console.log($stLobby);
+			replace("/play/casual");
+		} else {
+			pop();
+		}
 	}
 
 	function gameLoop(ts: number) {
