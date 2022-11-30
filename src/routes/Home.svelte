@@ -21,7 +21,6 @@
 
 	let id = "";
 	
-	// ?p1=d0175f6d-65f6-4eb2-948f-c3d5309cc648&p2=d0175f6d-65f6-4eb2-948f-c3d5309cc648&w=0&pt1=11&pt2=9&xp=0
 	let query: URLSearchParams;
 	$: query = new URLSearchParams($querystring);
 	
@@ -67,7 +66,7 @@
 					throw "";
 				}
 				
-				const player2 = await api.getUserData(p1);
+				const player2 = await api.getUserData(p2);
 				if (player2 === null || player2 === APIStatus.NoResponse || (player2 as any).statusCode === 404) {
 					throw "";
 				}
@@ -134,7 +133,10 @@
 	<title>Home - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
 {#if gameEndModal !== null}
-<GameEndModal data={gameEndModal} on:back={() => gameEndModal = null}></GameEndModal>
+<GameEndModal data={gameEndModal} on:back={() => {
+	gameEndModal = null;
+	replace("/");
+	}}></GameEndModal>
 {/if}
 {#if modalData !== undefined}
 	<NotificationModal

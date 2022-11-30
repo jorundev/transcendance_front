@@ -1,6 +1,6 @@
 import { Mutex } from "async-mutex";
 import ReconnectingWebSocket from "reconnecting-websocket";
-import { push } from "svelte-spa-router";
+import { push, replace } from "svelte-spa-router";
 import { get } from "svelte/store";
 import { ChannelType } from "./channels";
 import { ConnectionStatus } from "./friends";
@@ -56,6 +56,7 @@ import {
 	type WsGame,
 	type WsGameDecline,
 	type WsGameDisband,
+	type WsGameEnd,
 	type WsGameInvite,
 	type WsGameJoin,
 	type WsGameLeave,
@@ -1408,6 +1409,27 @@ async function wsGameMatch(data: WsGameMatch) {
 	});
 }
 
+async function wsGameEnd(data: WsGameEnd) {
+	if (get(stLobby)) {
+		stLobbies.update((old) => {
+			delete old[get(stLobby).uuid];
+			return old;
+		});
+		stPongClient.set(null);
+		stLobby.set(null);
+	}
+	
+	const isPlayer1 = data.history.players[0] === get(stLoggedUser).uuid;
+	replace(`/?
+		p1=${data.history.players[0]}
+		&p2=${data.history.players[1]}
+		&w=${data.history.winner}
+		&pt1=${data.history.players_scores[0]}
+		&pt2=${data.history.players_scores[1]}
+		&xp=${(isPlayer1) ? data.history.players_xp[0] : data.history.players_xp[1]}
+	`);
+}
+
 async function wsGameMessage(data: WsGame) {
 	switch (data.action) {
 		case GameAction.Join:
@@ -1436,13 +1458,15 @@ async function wsGameMessage(data: WsGame) {
 			break;
 		case GameAction.Match:
 			await wsGameMatch(data as any as WsGameMatch);
-			break ;
+			break;
+		case GameAction.End:
+			await wsGameEnd(data as any as WsGameEnd);
+			break;
 	}
 }
 
 function wsPongMessage(data: WsPong) {
 	if (get(stPongClient)) {
-		// console.log("dispatched packet to game");
 		get(stPongClient).receivePacket(data);
 	}
 }
@@ -1865,12 +1889,12 @@ export const api = {
 		});
 	},
 	getMatchHistory: async (user_uuid: string) => {
-		return makeRequest<GameHistory[]>("/api/games/history/" + user_uuid, "GET");	
+		return makeRequest<GameHistory[]>("/api/games/history/" + user_uuid, "GET");
 	},
 	changePlayerColor: async (lobby: string, color: string) => {
 		return makeRequest<APIResponse>("/api/games/lobby/" + lobby, "PATCH", {
 			color
-		});	
+		});
 	},
 	ws: {
 		connect: async () => {
@@ -1941,7 +1965,7 @@ export const api = {
 							break;
 						case WsNamespace.Pong:
 							wsPongMessage(data as WsPong);
-							break ;
+							break;
 						case WsNamespace.Meta:
 							const metadata = data as WsMeta;
 							stWebsocketUUID.set(metadata.uuid);

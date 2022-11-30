@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { pop, replace } from "svelte-spa-router";
+	import { location, pop, replace } from "svelte-spa-router";
 	import { GAME_HEIGHT, GAME_WIDTH } from "../pong/Pong";
 	import { onDestroy, onMount } from "svelte";
 	import type { PongClient } from "../pong/PongClient";
@@ -46,7 +46,11 @@
 		if ($stLobby) {
 			replace("/play/casual");
 		} else {
-			pop();
+			setTimeout(() => {
+				if ($location !== "/") {
+					pop();
+				}
+			}, 0);
 		}
 	}
 

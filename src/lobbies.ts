@@ -21,4 +21,5 @@ export interface GameHistory {
 	winner: LobbyWinner,
 	players: [string, string],
 	players_scores: [number, number],
+	players_xp: [number, number],
 }
