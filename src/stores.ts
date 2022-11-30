@@ -148,6 +148,7 @@ export async function tryToLog() {
 		id: response.identifier,
 		avatar: response.avatar,
 		tfa: response.twofactor,
+		xp: response.xp,
 	});
 
 	stServerDown.set(false);

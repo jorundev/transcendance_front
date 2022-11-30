@@ -17,6 +17,7 @@
 	import { LobbyWinner } from "../lobbies";
 	import type { User } from "../users";
 	import GameEndModal from "../components/Game/GameEndModal.svelte";
+	import XpBar from "../components/XPBar.svelte";
 
 	let id = "";
 	
@@ -37,6 +38,7 @@
 	
 	async function setGameEndModal()
 	{
+		window.history.replaceState({}, null, "/#/");
 		const hasAll =
 			query.has("p1")
 			&& query.has("p2")
@@ -90,8 +92,8 @@
 			} catch (_e) {}
 		} else {
 			gameEndModal = null;
+			replace("/");
 		}
-		//replace("/");
 	}
 	
 	$: if (query) {
@@ -154,17 +156,8 @@
 					<div class="user">
 						<div class="name">{$stLoggedUser?.username}</div>
 						<div class="id">#{id}</div>
-						<div class="rank" />
 					</div>
-					<div class="level">
-						<div class="level-text">Level 16</div>
-						<div class="level-back">
-							<div
-								class="level-inner"
-								style="width: {levelPercentage}%;"
-							/>
-						</div>
-					</div>
+					<XpBar xp={$stLoggedUser.xp}></XpBar>
 				</div>
 			</div>
 		</Card>
@@ -244,14 +237,16 @@
 
 	.profile {
 		display: flex;
+		align-items: center;
 		gap: 16px;
 		width: 100%;
 
 		.info {
+			box-sizing: border-box;
 			padding-top: 10px;
 			padding-bottom: 10px;
 			display: flex;
-			flex-direction: column;
+			align-items: center;
 			gap: 16px;
 			width: 100%;
 

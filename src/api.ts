@@ -319,6 +319,7 @@ export interface WhoAmIResponse extends APIResponse {
 	email: string;
 	avatar: string | null;
 	twofactor: boolean;
+	xp: number;
 }
 
 export interface ChangeAvatarResponse extends APIResponse {

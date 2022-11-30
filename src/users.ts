@@ -7,6 +7,7 @@ export interface LoggedUser {
 	avatar: string | null;
 	uuid: string;
 	tfa: boolean;
+	xp: number;
 }
 
 export interface User {
@@ -19,6 +20,7 @@ export interface User {
 	has_blocked: boolean;
 	is_online: ConnectionStatus,
 	lobby?: string,
+	xp: number,
 }
 
 export interface UserDictionary {

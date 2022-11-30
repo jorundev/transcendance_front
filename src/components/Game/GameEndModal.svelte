@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { LobbyWinner } from "../../lobbies";
+	import { LobbyWinner } from "../../lobbies";
 	import type { User } from "../../users";
 	import Modal from "../Kit/Modal.svelte";
 	import ClickOutside from "svelte-click-outside";
@@ -7,6 +7,8 @@
 	import { createEventDispatcher } from "svelte";
 	import { stLoggedUser } from "../../stores";
 	import UserAvatar from "../Users/UserAvatar.svelte";
+	import XpBar from "../XPBar.svelte";
+	import Button from "../Kit/Button.svelte";
 
 	interface GameEndModalInfo {
 		winner: LobbyWinner;
@@ -20,7 +22,8 @@
 	let dispatch = createEventDispatcher();
 
 	export let data: GameEndModalInfo;
-	let weWon = data.player1.uuid === $stLoggedUser.uuid;
+	let weWon = (data.winner === LobbyWinner.Player1 && data.player1.uuid === $stLoggedUser.uuid)
+		|| (data.winner === LobbyWinner.Player2 && data.player2.uuid === $stLoggedUser.uuid);
 </script>
 
 <Modal>
@@ -43,7 +46,15 @@
                         <UserAvatar uuid={data.player2.uuid}></UserAvatar>
                     </div>
                 </div>
-                <div class="xp-gain"></div>
+                <div class="xp-gain">
+					<div class="desc">You gained {data.xp} xp!</div>
+					<XpBar xp={$stLoggedUser.xp} xp_end={data.xp}></XpBar>
+					<div class="ok">
+						<div class="yeah">
+							<Button padding="8px" on:click={() => dispatch("back")}>Ok</Button>
+						</div>
+					</div>
+				</div>
 			</Card>
 		</ClickOutside>
 	</div>
@@ -58,16 +69,42 @@
 	}
     
     .score {
+		margin-left: auto;
+		margin-right: auto;
+		max-width: 240px;
         box-sizing: border-box;
         width: 100%;
         padding: 10px;
         display: flex;
         justify-content: space-between;
         align-items: center;
+		padding-top: 18px;
+		padding-bottom: 18px;
     }
+	
+	.ok {
+		padding-top: 10px;
+		width: 100%;
+		display: flex;
+		justify-content: center;
+	}
+	
+	.yeah {
+		width: 160px;
+	}
+	
+	.xp-gain {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		.desc {
+			width: 100%;
+			text-align: center;
+		}
+	}
     
     .sc {
-        font-size: 18px;
+        font-size: 22px;
     }
     
     .sep {
@@ -76,13 +113,13 @@
     }
     
     .avatar {
-        width: 40px;
-        height: 40px;
+        width: 60px;
+        height: 60px;
         flex-shrink: 0;
     }
 
 	.status {
-		width: 240px;
+		width: 320px;
 		text-align: center;
 		font-size: 20px;
 		padding: 10px;
