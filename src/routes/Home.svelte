@@ -31,6 +31,7 @@
 		player1Score: number;
 		player2Score: number;
 		xp: number;
+		oldxp: number;
 	}
 	
 	let gameEndModal: GameEndModalInfo = null;
@@ -44,7 +45,8 @@
 			&& query.has("w")
 			&& query.has("pt1")
 			&& query.has("pt2")
-			&& query.has("xp");
+			&& query.has("xp")
+			&& query.has("oldxp");
 		if (hasAll) {
 			try {
 				const w: LobbyWinner = parseInt(query.get("w"));
@@ -75,8 +77,9 @@
 				const player2Score = parseInt(query.get("pt2"));
 				
 				const xp = parseInt(query.get("xp"));
+				const oldxp = parseInt(query.get("oldxp"));
 				
-				if (isNaN(xp) || isNaN(player1Score) || isNaN(player2Score)) {
+				if (isNaN(xp) || isNaN(oldxp) || isNaN(player1Score) || isNaN(player2Score)) {
 					throw "";
 				}
 				
@@ -87,6 +90,7 @@
 					winner: w,
 					player1Score,
 					player2Score,
+					oldxp,
 				};
 			} catch (_e) {}
 		} else {

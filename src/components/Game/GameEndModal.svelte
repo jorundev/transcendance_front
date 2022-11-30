@@ -15,6 +15,7 @@
 		player1: User;
 		player2: User;
 		xp: number;
+		oldxp: number;
         player1Score: number;
 		player2Score: number;
 	}
@@ -48,7 +49,7 @@
                 </div>
                 <div class="xp-gain">
 					<div class="desc">You gained {data.xp} xp!</div>
-					<XpBar xp={$stLoggedUser.xp} xp_end={data.xp}></XpBar>
+					<XpBar xp={data.oldxp} xp_end={$stLoggedUser.xp}></XpBar>
 					<div class="ok">
 						<div class="yeah">
 							<Button padding="8px" on:click={() => dispatch("back")}>Ok</Button>

@@ -1418,16 +1418,27 @@ async function wsGameEnd(data: WsGameEnd) {
 		stPongClient.set(null);
 		stLobby.set(null);
 	}
-	
+
 	const isPlayer1 = data.history.players[0] === get(stLoggedUser).uuid;
+	const xp = (isPlayer1) ? data.history.players_xp[0] : data.history.players_xp[1];
+	
+	const oldxp = get(stLoggedUser).xp;
+	
+	stLoggedUser.update((old) => {
+		old.xp += xp;
+		return old;
+	});
+
 	replace(`/?
 		p1=${data.history.players[0]}
 		&p2=${data.history.players[1]}
 		&w=${data.history.winner}
 		&pt1=${data.history.players_scores[0]}
 		&pt2=${data.history.players_scores[1]}
-		&xp=${(isPlayer1) ? data.history.players_xp[0] : data.history.players_xp[1]}
+		&xp=${xp}
+		&oldxp=${oldxp}
 	`);
+	
 }
 
 async function wsGameMessage(data: WsGame) {
