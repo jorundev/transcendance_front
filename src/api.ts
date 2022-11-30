@@ -1907,6 +1907,11 @@ export const api = {
 			color
 		});
 	},
+	kickFromLobby: async (lobby: string, user_uuid: string) => {
+		return makeRequest<APIResponse>("/api/games/lobby/" + lobby, "DELETE", {
+			user_uuid
+		});
+	},
 	ws: {
 		connect: async () => {
 			if (get(stWebsocket) == null) {

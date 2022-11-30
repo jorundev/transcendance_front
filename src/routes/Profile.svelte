@@ -14,6 +14,7 @@
 	import { onMount } from "svelte";
 	import { push } from "svelte-spa-router";
 	import { ConnectionStatus } from "../friends";
+	import XpBar from "../components/XPBar.svelte";
 
 	export let params: {
 		uuid?: string;
@@ -382,15 +383,7 @@
 								<div class="id">#{profileID}</div>
 								<div class="rank" />
 							</div>
-							<div class="level">
-								<div class="level-text">Level 16</div>
-								<div class="level-back">
-									<div
-										class="level-inner"
-										style="width: {levelPercentage}%;"
-									/>
-								</div>
-							</div>
+							<XpBar xp={user.xp}></XpBar>
 							<div class="buttons">
 								{#if user?.is_online !== ConnectionStatus.InGame}
 									<Button

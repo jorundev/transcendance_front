@@ -122,6 +122,7 @@
 						ready={$stLobby?.players_status?.[0] ===
 							LobbyPlayerReadyState.Ready}
 						canBeReady={allPlayersInLobby}
+						player1={isMaster}
 						on:ready={() => ready(player1)}
 					/>
 					{#if isMaster && !player2}
@@ -133,6 +134,7 @@
 					{:else if player2}
 						<LobbyUser
 							uuid={player2}
+							player1={isMaster}
 							player
 							invited={$stLobby?.players_status?.[1] ===
 								LobbyPlayerReadyState.Invited}
@@ -156,7 +158,7 @@
 				</div>
 				<div class="content">
 					{#each spectators as uuid}
-						<LobbyUser {uuid} />
+						<LobbyUser {uuid} player1={isMaster}/>
 					{/each}
 				</div>
 			</div>

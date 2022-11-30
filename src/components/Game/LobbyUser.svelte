@@ -5,7 +5,7 @@
 	import UserAvatar from "../Users/UserAvatar.svelte";
 	import { createEventDispatcher } from "svelte";
 	import Button from "../Kit/Button.svelte";
-	import { stLoggedUser } from "../../stores";
+	import { stLobby, stLoggedUser, stToast } from "../../stores";
 
 	export let uuid: string = "";
 	export let player: boolean = false;
@@ -13,6 +13,7 @@
 
 	export let invited = false;
 	export let ready = false;
+	export let player1 = false;
 
 	let isPlayer: boolean;
 	$: isPlayer = player && $stLoggedUser.uuid === uuid;
@@ -39,6 +40,15 @@
 	class="luser"
 	class:isplayer={isPlayer}
 	class:invited={invited && player}
+	on:click={async () => {
+		if (!isPlayer && player1) {
+			const res = await api.kickFromLobby($stLobby.uuid, uuid);
+			if (res === null || res === APIStatus.NoResponse || res.statusCode === 404) {
+				stToast.set("Error while kicking player from lobby");
+				return ;
+			}
+		}
+	}}
 >
 	<div class="avatar">
 		<UserAvatar {uuid} />

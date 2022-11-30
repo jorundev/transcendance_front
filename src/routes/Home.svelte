@@ -175,12 +175,6 @@
 				</div>
 			</Card>
 		</div>
-		<Card>
-			<div class="home-div">
-				<div class="title">Match History</div>
-				<MatchHistory user={$stLoggedUser?.uuid}/>
-			</div>
-		</Card>
 		<div>
 			<Card>
 				<div class="home-div">
@@ -193,6 +187,12 @@
 				</div>
 			</Card>
 		</div>
+		<Card>
+			<div class="home-div">
+				<div class="title">Match History</div>
+				<MatchHistory user={$stLoggedUser?.uuid}/>
+			</div>
+		</Card>
 	</div>
 	<div class="s-column nomobile">
 		<div class="artwork" />
