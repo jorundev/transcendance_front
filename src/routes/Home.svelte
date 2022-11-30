@@ -163,7 +163,7 @@
 						<div class="name">{$stLoggedUser?.username}</div>
 						<div class="id">#{id}</div>
 					</div>
-					<XpBar xp={$stLoggedUser.xp}></XpBar>
+					<XpBar xp={$stLoggedUser?.xp}></XpBar>
 				</div>
 			</div>
 		</Card>
