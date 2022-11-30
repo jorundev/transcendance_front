@@ -261,32 +261,6 @@
 					color: #787771;
 				}
 			}
-
-			.level {
-				display: flex;
-				align-items: center;
-				gap: 10px;
-
-				.level-text {
-					color: rgb(230, 230, 230);
-					font-size: 14px;
-					flex-shrink: 0;
-				}
-				.level-back {
-					height: 10px;
-					background: rgb(50, 50, 50);
-					border-radius: 10px;
-					width: 100%;
-
-					.level-inner {
-						height: 100%;
-						border-radius: 10px;
-						border-top-right-radius: 0;
-						border-bottom-right-radius: 0;
-						background: rgb(170, 29, 142);
-					}
-				}
-			}
 		}
 	}
 
