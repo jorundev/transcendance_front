@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { PongRanking } from "../pong/ranking";
+	import { PongRanking } from "../pong/Ranking";
 
 	const calculator = new PongRanking();
 
