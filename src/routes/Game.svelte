@@ -44,7 +44,7 @@
 
 	$: if (!$stPongClient) {
 		if ($stLobby) {
-			replace("/play/casual");
+			replace("/");
 		} else {
 			setTimeout(() => {
 				if ($location !== "/") {

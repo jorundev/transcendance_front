@@ -41,7 +41,7 @@
 		if (l !== null && l !== APIStatus.NoResponse) {
 			$stLobby = l;
 			$stLobbies[l.uuid] = l;
-			setTimeout(() => push("/play/casual"));
+			setTimeout(() => push("/play/lobby"));
 		}
 	}
 </script>

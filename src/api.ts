@@ -1210,11 +1210,13 @@ async function wsGameLeave(data: WsGameLeave) {
 			old[data.lobby_uuid].players_status[1] =
 				LobbyPlayerReadyState.Invited;
 		}
-		// Remove player from spectators
-		old[data.lobby_uuid].spectators =
-			old[data.lobby_uuid].spectators?.filter(
-				(uuid) => uuid !== data.user_uuid
-			) ?? [];
+		if (old[data.lobby_uuid]) {
+			// Remove player from spectators
+			old[data.lobby_uuid].spectators =
+				old[data.lobby_uuid].spectators?.filter(
+					(uuid) => uuid !== data.user_uuid
+				) ?? [];
+		}
 		return old;
 	});
 

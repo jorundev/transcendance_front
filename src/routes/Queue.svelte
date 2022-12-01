@@ -9,7 +9,7 @@
     $: {
         if (inQueue && $stLobby) {
             inQueue = false;
-            replace("/play/casual");
+            replace("/play/lobby/matchmaking");
         }
     }
 

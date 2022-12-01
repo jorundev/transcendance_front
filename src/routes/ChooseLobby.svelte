@@ -14,7 +14,7 @@
 			}
 			$stLobby = lobby;
 		}
-		setTimeout(() => push("/play/casual"), 0);
+		setTimeout(() => push("/play/lobby"), 0);
 	}
 </script>
 

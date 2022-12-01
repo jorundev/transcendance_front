@@ -71,7 +71,7 @@
 		lobby.players[1] = uuid;
 		lobby.players_status[1] = LobbyPlayerReadyState.Invited;
 		$stLobby = lobby;
-		setTimeout(() => push("/play/casual"), 0);
+		setTimeout(() => push("/play/lobby"), 0);
 		await api.invitePlayerToLobby(uuid);
 	}
 </script>

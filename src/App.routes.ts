@@ -28,14 +28,14 @@ import { get } from "svelte/store";
 import { api } from "./api";
 
 location.subscribe(async (loc) => {
-	if (get(stLobby) && !loc.startsWith("/play/casual") && !loc.startsWith("/game")) {
+	if (get(stLobby) && !loc.startsWith("/play/lobby") && !loc.startsWith("/game")) {
 		console.log("Leaving lobby");
 		await api.leaveLobby(get(stLobby).uuid);
 		stLobby.set(null);
 	}
 });
 
-function requiresLogin(component: typeof SvelteComponentDev): WrappedComponent {
+function requiresLogin(component: typeof SvelteComponentDev, props?: any): WrappedComponent {
 	return wrap({
 		component,
 		userData: {
@@ -46,6 +46,7 @@ function requiresLogin(component: typeof SvelteComponentDev): WrappedComponent {
 				return await tryLoggingIn();
 			},
 		],
+		props,
 	});
 }
 function requiresNoLogin(
@@ -78,7 +79,7 @@ export default {
 	"/profile/:user/:id": requiresLogin(Profile),
 	"/play": requiresLogin(ChooseLobby),
 	"/game": requiresLogin(Game),
-	"/play/casual": requiresLogin(Casual),
+	"/play/lobby": requiresLogin(Casual),
 	"/play/queue": requiresLogin(Queue),
 	"/login": requiresNoLogin(Login),
 	"/login/oauth-error": requiresNoLogin(Login),

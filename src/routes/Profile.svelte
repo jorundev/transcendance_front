@@ -179,7 +179,7 @@
 				return;
 			}
 			$stLobby = lobby;
-			setTimeout(() => push("/play/casual"), 0);
+			setTimeout(() => push("/play/lobby"), 0);
 			displayPlayAgainstModal = false;
 			return;
 		}
@@ -192,7 +192,7 @@
 		lobby.players[1] = params.uuid;
 		lobby.players_status[1] = LobbyPlayerReadyState.Invited;
 		$stLobby = lobby;
-		setTimeout(() => push("/play/casual"), 0);
+		setTimeout(() => push("/play/lobby"), 0);
 		displayPlayAgainstModal = false;
 		await api.invitePlayerToLobby(params.uuid);
 	}

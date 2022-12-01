@@ -74,7 +74,7 @@
 				dispatch("read");
 				if (lobby) {
 					$stLobby = lobby;
-					setTimeout(() => push("/play/casual"), 0);
+					setTimeout(() => push("/play/lobby"), 0);
 				}
 			} else if (
 				(lobby as any).status === 400
