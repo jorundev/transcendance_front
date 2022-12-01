@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { stChannels, stLoggedUser, stUsers } from "../../stores";
+	import { stChannels, stLoggedUser, stToast, stUsers } from "../../stores";
 
 	import { onDestroy, onMount, tick } from "svelte";
 	import BubbleSet from "./BubbleSet.svelte";
@@ -306,8 +306,17 @@
 		}
 	}
 
+	let canSendMessage = true;
 	async function sendMessage() {
+		if (!canSendMessage) {
+			return ;
+		}
 		const value = textArea.value.trim();
+		
+		if (value.length > 500) {
+			stToast.set("Messages are limited to 500 characters");
+			return ;
+		}
 		textArea.value = "";
 		if (value == "") {
 			return;
@@ -335,6 +344,9 @@
 				return;
 			}
 		}
+		
+		canSendMessage = false;
+		setTimeout(() => canSendMessage = true, 200);
 
 		updateMessages();
 	}

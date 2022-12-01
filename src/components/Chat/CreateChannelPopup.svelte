@@ -62,6 +62,24 @@
 
 		return resp.uuid;
 	}
+	
+	$: console.log(error);
+	
+	function checkChannelName() {
+		if (channel_value.length > 32) {
+			error = "Channel names are limited to 32 characters";
+			return ;
+		}
+		
+		const validCharacters: Array<string> = [..."abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789"];
+		
+		if ([...channel_value].filter((c) => !validCharacters.includes(c)).length > 0) {
+			error = "Channel names are limited to alphanumerical characters and underscores";
+			return ;
+		}
+		
+		error = "";
+	}
 
 	$: {
 		if (channel_type === "private") {
@@ -112,7 +130,12 @@
 				type="text"
 				placeholder="Channel Name"
 				bind:value={channel_value}
+				on:input={checkChannelName}
+				on:blur={checkChannelName}
 			/>
+			{#if error.length > 0}
+				<div style="color: red; padding-bottom: 16px; max-width: 400px;">{error}</div>
+			{/if}
 			<input
 				type="password"
 				placeholder="Password"
@@ -128,7 +151,7 @@
 				>
 				<Button
 					active={channel_value.length > 0 &&
-						(!has_password || password_value.length > 0)}
+						(!has_password || password_value.length > 0) && error.length === 0}
 					timeoutVisible
 					timeout={2000}
 					on:click={async () => {
