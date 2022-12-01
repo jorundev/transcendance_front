@@ -18,6 +18,9 @@
 	let color: HTMLInputElement;
 
 	export let spectators: Array<string> = [];
+		
+	let isSpectator = false;
+	$: isSpectator = spectators.includes($stLoggedUser?.uuid);
 
 	let maxSpectatorCount = 0;
 
@@ -96,12 +99,12 @@
 {/if}
 
 <svelte:head>
-	<title>Casual Game - NEW SHINJI MEGA PONG ULTIMATE</title>
+	<title>Lobby - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
 <svelte:window bind:innerWidth />
 {#if $stLoggedUser}
 	<div class="casual">
-		<div class="title">Casual Game</div>
+		<div class="title">Lobby</div>
 		<div class="grid">
 			<div class="players" class:game={allPlayersReady}>
 				<div class="desc">
@@ -125,7 +128,7 @@
 						player1={isMaster}
 						on:ready={() => ready(player1)}
 					/>
-					{#if isMaster && !player2}
+					{#if isMaster && !player2 && !$stLobby.is_matchmaking}
 						<div class="button">
 							<Button on:click={() => (inviteFriendModal = true)}
 								>Invite friend</Button
@@ -173,8 +176,10 @@
 						<Button highlight={$stGameSettings.background === "blue"} padding="6px" on:click={() => $stGameSettings.background = "blue"}>Blue</Button>
 						<Button highlight={$stGameSettings.background === "green"} padding="6px" on:click={() => $stGameSettings.background = "green"}>Green</Button>
 					</div>
-					<div class="opt">Paddle color</div>
-					<input type="color" value="#ffffff" bind:this={color} on:change={change}>
+					{#if !isSpectator}
+						<div class="opt">Paddle color</div>
+						<input type="color" value="#ffffff" bind:this={color} on:change={change}>
+					{/if}
 				</div>
 			</div>
 		</div>

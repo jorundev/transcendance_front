@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { api, APIStatus } from "../api";
-	import { stLobby, stToast } from "../stores";
+	import { stLobby, stLoggedUser, stToast } from "../stores";
 	import { push } from "svelte-spa-router";
 	import Card from "../components/Kit/Card.svelte";
 	import LobbyList from "../components/Game/LobbyList.svelte";
+	import XpBar from "../components/XPBar.svelte";
 
 	async function createCasualLobby() {
 		if ($stLobby === null) {
@@ -21,16 +22,17 @@
 <svelte:head><title>Play - NEW SHINJI MEGA PONG ULTIMATE</title></svelte:head>
 <div class="play">
 	<div class="your-rank">
-		<Card>
-			<div class="content">
+		<!-- <Card> -->
+			<!-- <div class="content">
 				<div class="rank-logo" />
 				<div class="rank">
 					<div class="rank-name">Sachiel</div>
 					<div class="rank-number">Rank 3</div>
 				</div>
-			</div>
-		</Card>
-		<div class="title">Your Rank</div>
+			</div> -->
+			<XpBar xp={$stLoggedUser?.xp}></XpBar>
+		<!-- </Card> -->
+		<!-- <div class="title">Your Rank</div> -->
 	</div>
 	<div class="choices">
 		<div class="choice" on:click={createCasualLobby}>
@@ -97,11 +99,11 @@
 		justify-content: center;
 
 		.your-rank {
-			width: 260px;
+			width: 400px;
 			display: flex;
 			flex-direction: column;
-			height: 148px;
-			background: rgb(21, 98, 21);
+			// height: 148px;
+			// background: rgb(21, 98, 21);
 			border-radius: 14px;
 
 			.title {

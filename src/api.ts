@@ -443,6 +443,7 @@ export interface Lobby {
 	players_status: [LobbyPlayerReadyState, LobbyPlayerReadyState];
 	spectators: Array<string>;
 	max_spectators: number;
+	is_matchmaking: boolean;
 }
 
 export async function getUsersFromUUIDs(channel: APIChannel): Promise<
@@ -1422,6 +1423,13 @@ async function wsGameEnd(data: WsGameEnd) {
 	}
 
 	const isPlayer1 = data.history.players[0] === get(stLoggedUser).uuid;
+	const isPlayer2 = data.history.players[1] === get(stLoggedUser).uuid;
+	
+	if (!isPlayer1 && !isPlayer2) {
+		replace("/");
+		return ;
+	}
+	
 	const xp = (isPlayer1) ? data.history.players_xp[0] : data.history.players_xp[1];
 	
 	const oldxp = get(stLoggedUser).xp;
