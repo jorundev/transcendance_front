@@ -17,10 +17,10 @@
 	data-id={tooltip}
 	style="--trans-y:{-h}px; --trans-x:{w / 2}px;"
 	on:mouseenter={() => {
-		is_hovered = tooltip.length != 0;
+		is_hovered = tooltip.length !== 0;
 	}}
 	on:click={() => {
-		is_hovered = true;
+		is_hovered = tooltip.length !== 0;
 	}}
 	on:mouseleave={() => {
 		is_hovered = false;
