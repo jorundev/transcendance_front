@@ -27,14 +27,13 @@
 
 	let hash = "";
 	$: {
-		if (hash.startsWith("/login") && !$stLoggedUser) {
+		if (hash === "/login" && !$stLoggedUser) {
 			api.whoami().then((val) => {
 				if (val !== null && val !== APIStatus.NoResponse && (val as any).statusCode !== 401) {
 					replace("/");
 				}
 			});
-		}
-		if (
+		} else if (
 			hash.startsWith("/login") ||
 			hash.startsWith("/postsignup") ||
 			hash.startsWith("/setup2fa")
