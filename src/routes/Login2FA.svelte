@@ -3,6 +3,7 @@
 	import Button from "../components/Kit/Button.svelte";
 	import Card from "../components/Kit/Card.svelte";
 	import { replace } from "svelte-spa-router";
+	import { stServerDown, stToast } from '../stores';
 
 	let buttonText = "Continue";
 	let buttonActive = true;
@@ -45,6 +46,8 @@
 			})
 			.catch((e) => {
 				console.error(e);
+				stToast.set("Something wrong happened with the server");
+				stServerDown.set(true);
 			});
 	}
 

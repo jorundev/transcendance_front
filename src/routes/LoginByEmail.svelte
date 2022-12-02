@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { validateEmail } from "../utils";
 	import { replace } from "svelte-spa-router";
+	import { stServerDown, stToast } from "../stores";
 
 	enum State {
 		LogIn,
@@ -91,11 +92,8 @@
 					show_error = true;
 					return;
 				} else if (res.status >= 500 && res.status <= 599) {
-					errormsg =
-						"Something is wrong with the server (Error " +
-						res.status +
-						")";
-					show_error = true;
+					stToast.set("Something wrong happened with the server");
+					stServerDown.set(true);
 				}
 			})
 			.catch((e) => {
@@ -135,11 +133,8 @@
 					errormsg = "Email address is already taken";
 					show_error = true;
 				} else if (res.status >= 500 && res.status <= 599) {
-					errormsg =
-						"Something is wrong with the server (Error " +
-						res.status +
-						")";
-					show_error = true;
+					stToast.set("Something wrong happened with the server");
+					stServerDown.set(true);
 				}
 			})
 			.catch((err) => {

@@ -3,7 +3,7 @@
 	import { api, type TFAInitResponse } from "../api";
     import SvelteSegmentedInput from 'svelte-segmented-input';
 	import { replace } from "svelte-spa-router";
-	import { stLoggedUser } from "../stores";
+	import { stLoggedUser, stServerDown, stToast } from "../stores";
 
     let qrLinkPromise = api.getQRCode();
     let tip = false;
@@ -82,6 +82,8 @@
                 }
             })
             .catch((e) => {
+                stToast.set("Something wrong happened with the server");
+				stServerDown.set(true);
                 console.error(e);
             });
 	}

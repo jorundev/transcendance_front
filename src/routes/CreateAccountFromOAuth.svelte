@@ -2,6 +2,7 @@
 	import { validateEmail } from "../utils";
 	import { querystring, replace } from "svelte-spa-router";
 	import { onMount } from "svelte";
+	import { stServerDown, stToast } from "../stores";
 
 	interface LoginRequest {
 		email: string;
@@ -137,14 +138,19 @@
 			body: JSON.stringify(req),
 		})
 			.then((res) => {
-				if (res.status == 200) {
+				if (res.status === 200) {
 					replace("/postsignup/2fa");
-				} else if (res.status == 401) {
+				} else if (res.status === 401) {
 					show_error = true;
+				} else if (res.status === 500 || res.status === 502) {
+					stToast.set("Something wrong happened with the server");
+					stServerDown.set(true);
 				}
 			})
 			.catch((e) => {
+				stToast.set("Something wrong happened with the server");
 				console.error(e);
+				stServerDown.set(true);
 			});
 	}
 
@@ -180,10 +186,15 @@
 			.then(async (res) => {
 				if (res.status == 201) {
 					await login();
+				} else if (res.status === 500 || res.status === 502) {
+					stToast.set("Something wrong happened with the server");
+					stServerDown.set(true);
 				}
 			})
 			.catch((e) => {
+				stToast.set("Something wrong happened with the server");
 				console.log("Critical error: ", e);
+				stServerDown.set(true);
 			});
 	}
 
