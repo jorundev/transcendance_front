@@ -885,7 +885,10 @@ async function wsChatLeave(data: WsChatLeave) {
 
 	// For the other ones, just set the appropriate data
 	stChannels.update((channels) => {
-		if (data.user == loggedUser.uuid) {
+		if (data.user === channels[data.channel].administrator) {
+			channels[data.channel].administrator = "";
+		}
+		if (data.user === loggedUser.uuid) {
 			channels[data.channel].joined = false;
 		}
 		channels[data.channel].users = channels[data.channel].users.filter(
