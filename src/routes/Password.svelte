@@ -13,6 +13,40 @@
 	let currentPassword = "";
 	let newPassword = "";
 	let newPasswordConfirm = "";
+	
+	let passerr = "";
+	
+	function checkPassword() {
+		if (newPassword.length === 0) {
+			passerr = "Password cannot be empty";
+			return ;
+		}
+		
+		if (newPassword.length < 8) {
+			passerr = "Password should be at least 8 characters long";
+			return ;
+		}
+		
+		if (newPassword.toLowerCase() === newPassword || newPassword.toUpperCase() === newPassword) {
+			passerr = "Password should contain uppercase AND lowercase letters";
+			return ;
+		}
+		
+		const numbers: Array<string> = [..."0123456789"];
+		
+		if ([...newPassword].filter((c) => numbers.includes(c)).length === 0) {
+			passerr = "Password should contain numbers";
+			return ;
+		}
+		
+		const specialChars: Array<string> = [...`"'/|!@#$%^&*()[]{}<>`];
+		
+		if ([...newPassword].filter((c) => specialChars.includes(c)).length === 0){
+			passerr = "Password should contain special characters -> " + `"'/|!@#$%^&*()[]{}<>`;
+			return ;
+		}
+		passerr = "";
+	}
 
 	async function validate() {
 		errorTextTop = "";
@@ -106,7 +140,12 @@
 					type="password"
 					placeholder="New password"
 					bind:value={newPassword}
+					on:input={checkPassword}
+					on:blur={checkPassword}
 				/>
+				{#if passerr.length !== 0}
+					<div style="color: red;">{passerr}</div>
+				{/if}
 				<input
 					type="password"
 					placeholder="Confirm new password"
