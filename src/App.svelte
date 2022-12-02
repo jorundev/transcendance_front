@@ -22,10 +22,15 @@
 	let serverDownInterval = null;
 
 	let innerWidth = 0;
+	let marqueeWidth = 0;
 
 	let hash = "";
 	$: {
-		if (hash.startsWith("/login") || hash.startsWith("/postsignup") || hash.startsWith("/setup2fa")) {
+		if (
+			hash.startsWith("/login") ||
+			hash.startsWith("/postsignup") ||
+			hash.startsWith("/setup2fa")
+		) {
 			$stSidebarSelected = null;
 		} else {
 			if (hash.startsWith("/settings")) {
@@ -158,9 +163,12 @@
 			replace(event.detail.userData.redirect);
 		}
 	}
-	
+
 	function resize() {
-		document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+		document.documentElement.style.setProperty(
+			"--app-height",
+			`${window.innerHeight}px`
+		);
 	}
 </script>
 
@@ -169,9 +177,17 @@
 		<title>Server down - NEW SHINJI MEGA PONG ULTIMATE</title>
 	{/if}
 </svelte:head>
-<svelte:window bind:innerWidth on:resize={resize}></svelte:window>
+<svelte:window bind:innerWidth on:resize={resize} />
 {#if $stToast !== null}
-	<div class="toast" transition:slide on:click|stopPropagation={() => stToast.set(null)}>{$stToast}</div>
+	<div
+		class="toast"
+		transition:slide
+		on:click|stopPropagation={() => stToast.set(null)}
+	>
+		<div class="marquee" bind:clientWidth={marqueeWidth} class:active={marqueeWidth > window.innerWidth}>
+			{$stToast}
+		</div>
+	</div>
 {/if}
 {#if $stLoggedUser && !$websocketConnected}
 	<Modal><SpinnerModal /></Modal>
@@ -210,16 +226,16 @@
 		overflow: hidden;
 		max-width: 1600px;
 	}
-	
+
 	.router {
 		height: 100%;
 		overflow-y: auto;
 		overflow-x: hidden;
 	}
-	
+
 	.toast {
+		position: relative;
 		cursor: pointer;
-		padding-left: 60px;
 		display: flex;
 		align-items: center;
 		position: fixed;
@@ -227,10 +243,29 @@
 		top: 0;
 		height: 78px;
 		font-size: 20px;
+		overflow-wrap: break-word;
 		background: rgb(209, 60, 60);
 		color: white;
 		z-index: 200;
 		border-bottom: 1px solid rgb(72, 0, 0);
+		
+		@keyframes marquee {
+			from {
+				transform: translateX(0);
+			}
+			to {
+				transform: translateX(calc(-100% + 100vw - 16px));
+			}
+		}
+		
+		.marquee {
+			padding-left: 16px;
+			position: absolute;
+			
+			&.active {
+				animation: marquee 6s linear;
+			}
+		}
 	}
 
 	@media screen and (max-width: 799px) {

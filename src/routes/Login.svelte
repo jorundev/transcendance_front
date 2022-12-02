@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { stLoggedUser, stServerDown } from "../stores";
+	import { stLoggedUser, stServerDown, stToast } from "../stores";
 	import { onMount } from "svelte";
 	import { push, replace } from "svelte-spa-router";
 	import Modal from "../components/Kit/Modal.svelte";
