@@ -3,6 +3,7 @@
 
 	import Router, { replace } from "svelte-spa-router";
 	import { slide } from "svelte/transition";
+	import { api, APIStatus } from "./api";
 	import routes from "./App.routes";
 	import Modal from "./components/Kit/Modal.svelte";
 	import SpinnerModal from "./components/Kit/SpinnerModal.svelte";
@@ -26,6 +27,13 @@
 
 	let hash = "";
 	$: {
+		if (hash.startsWith("/login") && !$stLoggedUser) {
+			api.whoami().then((val) => {
+				if (val !== null && val !== APIStatus.NoResponse && (val as any).statusCode !== 401) {
+					replace("/");
+				}
+			});
+		}
 		if (
 			hash.startsWith("/login") ||
 			hash.startsWith("/postsignup") ||
