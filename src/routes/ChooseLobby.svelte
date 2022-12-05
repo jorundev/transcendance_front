@@ -114,33 +114,6 @@
 				font-size: 18px;
 			}
 		}
-
-		.content {
-			min-width: 200px;
-			display: flex;
-			justify-content: center;
-		}
-
-		.rank-logo {
-			background-image: url("/img/angels/sachiel.svg");
-			background-size: cover;
-			width: 80px;
-			height: 80px;
-			border-radius: 100%;
-		}
-
-		.rank {
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			justify-content: center;
-			margin-left: 16px;
-			font-size: 14px;
-
-			.rank-name {
-				font-size: 20px;
-			}
-		}
 	}
 
 	.choice {

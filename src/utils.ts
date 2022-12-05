@@ -1,3 +1,5 @@
+import * as EmailValidator from 'email-validator';
+
 export function browserName(): string {
 	const agent = window.navigator.userAgent.toLowerCase();
 
@@ -22,9 +24,7 @@ export function browserName(): string {
 }
 
 export function validateEmail(email: string): boolean {
-	return /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
-		email
-	);
+	return EmailValidator.validate(email);
 }
 
 function hashString(str: string): number {
