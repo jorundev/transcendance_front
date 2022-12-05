@@ -170,6 +170,11 @@
 			return ;
 		}
 		
+		if (password.length > 100) {
+			passerr = "Passwords are limited to 100 characters";
+			return ;
+		}
+		
 		if (password.length < 8) {
 			passerr = "Password should be at least 8 characters long";
 			return ;

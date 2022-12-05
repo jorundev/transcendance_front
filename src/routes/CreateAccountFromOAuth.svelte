@@ -86,6 +86,11 @@
 			return ;
 		}
 		
+		if (password.length > 100) {
+			passerr = "Passwords are limited to 100 characters";
+			return ;
+		}
+		
 		if (password.toLowerCase() === password || password.toUpperCase() === password) {
 			passerr = "Password should contain uppercase AND lowercase letters";
 			return ;

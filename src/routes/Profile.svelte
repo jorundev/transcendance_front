@@ -12,7 +12,7 @@
 	import { padIdentifier } from "../utils";
 	import { stFriends, stLobby, stLoggedUser, stToast, stUsers } from "../stores";
 	import { onMount } from "svelte";
-	import { push } from "svelte-spa-router";
+	import { push, replace } from "svelte-spa-router";
 	import { ConnectionStatus } from "../friends";
 	import XpBar from "../components/XPBar.svelte";
 
@@ -36,6 +36,7 @@
 				(auser as any).statusCode === 400
 			) {
 				user = undefined;
+				replace("/profile/404");
 			} else {
 				params = {
 					uuid: auser.uuid,

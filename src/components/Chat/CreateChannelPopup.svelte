@@ -12,6 +12,7 @@
 	let has_password = false;
 	let has_password_cache = false;
 	let error = "";
+	let passerr = "";
 
 	let channel_value: string = "";
 	let password_value: string = "";
@@ -89,6 +90,14 @@
 			has_password = has_password_cache;
 		}
 	}
+	
+	function checkPassword() {
+		if (password_value.length > 100) {
+			passerr = "Passwords are limited to 100 characters";
+			return ;
+		}
+		passerr = "";
+	}
 </script>
 
 <div class="csp">
@@ -141,7 +150,12 @@
 				placeholder="Password"
 				bind:value={password_value}
 				disabled={!has_password}
+				on:input={checkPassword}
+				on:blur={checkPassword}
 			/>
+			{#if passerr.length > 0}
+				<div style="color: red; padding-bottom: 16px; max-width: 400px;">{passerr}</div>
+			{/if}
 			<div class="buttons">
 				<Button
 					highlight={false}
@@ -151,7 +165,7 @@
 				>
 				<Button
 					active={channel_value.length > 0 &&
-						(!has_password || password_value.length > 0) && error.length === 0}
+						(!has_password || password_value.length > 0) && error.length === 0 && passerr.length === 0}
 					timeoutVisible
 					timeout={2000}
 					on:click={async () => {
