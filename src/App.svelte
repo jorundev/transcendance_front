@@ -27,7 +27,9 @@
 
 	let hash = "";
 	$: {
+		console.log(hash);
 		if (hash === "/login" && !$stLoggedUser) {
+			$stSidebarSelected = null;
 			api.whoami().then((val) => {
 				if (val !== null && val !== APIStatus.NoResponse && (val as any).statusCode !== 401) {
 					replace("/");
