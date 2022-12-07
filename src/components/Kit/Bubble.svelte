@@ -1,15 +1,22 @@
 <script lang="ts">
+	import { stUsers } from "../../stores";
 	import type { ChatMessage } from "../../channels";
 	export let message: ChatMessage;
 	export let side: "left" | "right";
 	export let last: boolean;
 	export let one_above: boolean;
+
+	let reveal = false;
 </script>
 
 <div class="bubble {side}" class:last class:one-above={one_above}>
-	<div class="message">
-		{message.value}
-	</div>
+	{#if $stUsers[message.sender].is_blocked && !reveal}
+		<div class="message blocked" on:click={() => reveal = true}>You have blocked this user. Click to reveal message</div>
+	{:else}
+		<div class="message">
+			{message.value}
+		</div>
+	{/if}
 </div>
 
 <style lang="scss">
@@ -30,6 +37,12 @@
 		line-height: 22px;
 		margin-top: 3px;
 		margin-bottom: 3px;
+
+		.blocked {
+			opacity: .5;
+			cursor: pointer;
+			color: rgb(179, 179, 179);
+		}
 
 		&.deleted {
 			opacity: 0.8;

@@ -258,8 +258,9 @@ async function makeRequest<T>(
 		}
 
 		switch (response.status) {
+			case 422:
 			case 500:
-				stToast.set("Error 500: Something wrong happened with the server");
+				stToast.set("Error: Something wrong happened with the server");
 				return null
 			case 502:
 				console.error("A terrible error happened: ", response);
@@ -1427,16 +1428,16 @@ async function wsGameEnd(data: WsGameEnd) {
 
 	const isPlayer1 = data.history.players[0] === get(stLoggedUser).uuid;
 	const isPlayer2 = data.history.players[1] === get(stLoggedUser).uuid;
-	
+
 	if (!isPlayer1 && !isPlayer2) {
 		replace("/");
 		return ;
 	}
-	
+
 	const xp = (isPlayer1) ? data.history.players_xp[0] : data.history.players_xp[1];
-	
+
 	const oldxp = get(stLoggedUser).xp;
-	
+
 	stLoggedUser.update((old) => {
 		old.xp += xp;
 		return old;
@@ -1451,7 +1452,7 @@ async function wsGameEnd(data: WsGameEnd) {
 		&xp=${xp}
 		&oldxp=${oldxp}
 	`);
-	
+
 }
 
 async function wsGameMessage(data: WsGame) {

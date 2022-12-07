@@ -76,14 +76,10 @@
 					$stLobby = lobby;
 					setTimeout(() => push("/play/lobby"), 0);
 				}
-			} else if (
-				(lobby as any).status === 400
-			) {
+			} else if ((lobby as any).statusCode === 400) {
 				stToast.set("You already are in the lobby");
 				dispatch("read");
-			} else if (
-				(lobby as any).status === 404
-			) {
+			} else if ((lobby as any).statusCode === 404) {
 				stToast.set("This lobby does not exists anymore");
 				dispatch("read");
 			}
@@ -109,8 +105,17 @@
 							{user?.username}
 						</div>
 						<div class="buttons">
-							<Button red on:click={removeFriend}>No</Button>
-							<Button on:click={sendFriendRequest}>Yes</Button>
+							<Button
+								timeoutVisible
+								timeout={400}
+								red
+								on:click={removeFriend}>No</Button
+							>
+							<Button
+								timeoutVisible
+								timeout={400}
+								on:click={sendFriendRequest}>Yes</Button
+							>
 						</div>
 					{:else if modalData.type === NotificationType.GameInvite}
 						<div class="title">Join casual lobby ?</div>
@@ -122,6 +127,8 @@
 						<div class="buttons">
 							<Button
 								red
+								timeoutVisible
+								timeout={400}
 								on:click={async () => {
 									await api.readNotification(modalData.uuid);
 									if (
@@ -134,7 +141,11 @@
 									dispatch("back");
 								}}>No</Button
 							>
-							<Button on:click={goToLobby}>Yes</Button>
+							<Button
+								timeoutVisible
+								timeout={400}
+								on:click={goToLobby}>Yes</Button
+							>
 						</div>
 					{/if}
 				</div>

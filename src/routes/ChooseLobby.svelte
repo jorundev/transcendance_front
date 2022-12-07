@@ -2,7 +2,6 @@
 	import { api, APIStatus } from "../api";
 	import { stLobby, stLoggedUser, stToast } from "../stores";
 	import { push } from "svelte-spa-router";
-	import Card from "../components/Kit/Card.svelte";
 	import LobbyList from "../components/Game/LobbyList.svelte";
 	import XpBar from "../components/XPBar.svelte";
 
@@ -31,6 +30,13 @@
 				</div>
 			</div> -->
 			<XpBar xp={$stLoggedUser?.xp}></XpBar>
+			<div class="rules">
+				Game rules:
+				<br>
+				- First to 11 points wins
+				<br>
+				- Ball velocity increases each time a player touches it
+			</div>
 		<!-- </Card> -->
 		<!-- <div class="title">Your Rank</div> -->
 	</div>
@@ -87,6 +93,11 @@
 			overflow-y: auto;
 		}
 	}
+	.rules {
+		padding: 6px;
+		line-height: 2ch;
+		font-size: 13px;
+	}
 	.play {
 		display: flex;
 		gap: 30px;
@@ -133,7 +144,7 @@
 			align-items: center;
 			width: 100%;
 			height: 100%;
-			
+
 			.title {
 				text-align: center;
 			}

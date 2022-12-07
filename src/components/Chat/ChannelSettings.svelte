@@ -36,13 +36,18 @@
 		}
 	}
 
-	$: if (!require_password) password = "";
+	$: if (!require_password) {
+		password = "";
+		passerr = "";
+	}
 
 	let dispatch = createEventDispatcher();
 	let is_moderator = false;
 	let is_administrator = false;
 
 	let canClickOutside = false;
+
+	let passerr = "";
 
 	function getProfilePictureLinkFrom(from: string | null): string {
 		return from ? "/pictures/" + from : "/img/default.jpg";
@@ -102,6 +107,13 @@
 			return;
 		}
 		api.deleteChannel(channel.uuid);
+	}
+
+	function checkPassword() {
+		passerr = "";
+		if (password?.length > 100) {
+			passerr = "Passwords are limited to 100 characters";
+		}
 	}
 
 	let destroyChannelText = "Destroy channel";
@@ -220,8 +232,13 @@
 							type="password"
 							disabled={!require_password}
 							placeholder="Channel password"
+							on:input={checkPassword}
+							on:blur={checkPassword}
 						/>
-						{#if password?.length != 0 || (!require_password && channel.has_password)}
+						{#if passerr.length > 0 && require_password}
+							<div style="color: red">{passerr}</div>
+						{/if}
+						{#if (passerr.length === 0 && password?.length != 0) || (!require_password && channel.has_password)}
 							<Button on:click={changePassword}
 								>Change password</Button
 							>
@@ -417,7 +434,7 @@
 			}
 		}
 	}
-	
+
 	.desc {
 		text-align: center;
 		color: rgb(130, 142, 167);

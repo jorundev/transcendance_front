@@ -10,7 +10,13 @@
 	import Modal from "../components/Kit/Modal.svelte";
 	import ClickOutside from "svelte-click-outside";
 	import { padIdentifier } from "../utils";
-	import { stFriends, stLobby, stLoggedUser, stToast, stUsers } from "../stores";
+	import {
+		stFriends,
+		stLobby,
+		stLoggedUser,
+		stToast,
+		stUsers,
+	} from "../stores";
 	import { onMount } from "svelte";
 	import { push, replace } from "svelte-spa-router";
 	import { ConnectionStatus } from "../friends";
@@ -135,7 +141,7 @@
 
 	async function sendFriendRequest() {
 		const resp = await api.sendFriendRequest(params.uuid);
-		if (resp !== null && resp !== APIStatus.NoResponse) {
+		if (resp !== null && resp !== APIStatus.NoResponse && ((resp as any).statusCode !== 404 && (resp as any).statusCode !== 404)) {
 			$stFriends[params.uuid] = {
 				uuid: params.uuid,
 				avatar: user?.avatar,
@@ -145,6 +151,8 @@
 				friendship: resp.friendship,
 			};
 			clearModals();
+		} else if ((resp as any).statusCode === 404 || (resp as any).statusCode === 400) {
+			stToast.set("Error when sending friend request");
 		}
 	}
 
@@ -186,7 +194,11 @@
 		}
 
 		const lobby = await api.createLobby();
-		if (lobby === null || lobby === APIStatus.NoResponse || (lobby as any).statusCode === 400) {
+		if (
+			lobby === null ||
+			lobby === APIStatus.NoResponse ||
+			(lobby as any).statusCode === 400
+		) {
 			stToast.set("Something wrong happened when creating lobby");
 			return;
 		}
@@ -234,13 +246,17 @@
 								</div>
 								<div class="modbuttons">
 									<Button
+										timeoutVisible
+										timeout={400}
 										highlight={false}
 										on:click={() =>
 											(displayAddFriendModal = false)}
 										>Back</Button
 									>
-									<Button on:click={sendFriendRequest}
-										>Yes</Button
+									<Button
+										on:click={sendFriendRequest}
+										timeoutVisible
+										timeout={400}>Yes</Button
 									>
 								</div>
 							</ClickOutside>
@@ -274,12 +290,18 @@
 								</div>
 								<div class="modbuttons">
 									<Button
+										timeoutVisible
+										timeout={400}
 										highlight={false}
 										on:click={() =>
 											(displayPlayAgainstModal = false)}
 										>Back</Button
 									>
-									<Button on:click={play}>Yes</Button>
+									<Button
+										on:click={play}
+										timeoutVisible
+										timeout={400}>Yes</Button
+									>
 								</div>
 							</ClickOutside>
 						</div>
@@ -313,12 +335,16 @@
 								</div>
 								<div class="modbuttons">
 									<Button
+										timeoutVisible
+										timeout={400}
 										highlight={false}
 										on:click={() =>
 											(displayBlockModal = false)}
 										>Back</Button
 									>
 									<Button
+										timeoutVisible
+										timeout={400}
 										red={!user?.is_blocked}
 										on:click={block}>Yes</Button
 									>
@@ -355,13 +381,18 @@
 								</div>
 								<div class="modbuttons">
 									<Button
+										timeoutVisible
+										timeout={400}
 										highlight={false}
 										on:click={() =>
 											(displayCancelRequestModal = false)}
 										>Back</Button
 									>
-									<Button red on:click={cancelFriendRequest}
-										>Yes</Button
+									<Button
+										red
+										on:click={cancelFriendRequest}
+										timeoutVisible
+										timeout={400}>Yes</Button
 									>
 								</div>
 							</ClickOutside>
@@ -384,11 +415,13 @@
 								<div class="id">#{profileID}</div>
 								<div class="rank" />
 							</div>
-							<XpBar xp={user.xp}></XpBar>
+							<XpBar xp={user.xp} />
 							<div class="buttons">
 								{#if user?.is_online !== ConnectionStatus.InGame}
 									<Button
 										padding="6px"
+										timeoutVisible
+										timeout={400}
 										on:click={() =>
 											(displayPlayAgainstModal = true)}
 										active={show &&
@@ -400,6 +433,8 @@
 									>
 								{:else}
 									<Button
+										timeoutVisible
+										timeout={400}
 										padding="6px"
 										on:click={() =>
 											(displayPlayAgainstModal = true)}
@@ -413,6 +448,8 @@
 
 								{#if pending}
 									<Button
+										timeoutVisible
+										timeout={400}
 										highlight={false}
 										padding="6px"
 										on:click={() =>
@@ -423,6 +460,8 @@
 									>
 								{:else if requested}
 									<Button
+										timeoutVisible
+										timeout={400}
 										padding="6px"
 										on:click={() =>
 											(displayAddFriendModal = true)}
@@ -432,6 +471,8 @@
 									>
 								{:else if friends}
 									<Button
+										timeoutVisible
+										timeout={400}
 										red
 										padding="6px"
 										on:click={() =>
@@ -442,6 +483,8 @@
 									>
 								{:else}
 									<Button
+										timeoutVisible
+										timeout={400}
 										padding="6px"
 										on:click={() =>
 											(displayAddFriendModal = true)}
@@ -455,6 +498,8 @@
 								{/if}
 								{#if isBlocked}
 									<Button
+										timeoutVisible
+										timeout={400}
 										padding="6px"
 										on:click={() =>
 											(displayBlockModal = true)}
@@ -463,6 +508,8 @@
 										>Unblock</Button
 									>{:else}
 									<Button
+										timeoutVisible
+										timeout={400}
 										padding="6px"
 										red
 										on:click={() =>
@@ -481,7 +528,7 @@
 						<Card>
 							<div class="home-div">
 								<div class="title">Match History</div>
-								<MatchHistory user={user?.uuid}/>
+								<MatchHistory user={user?.uuid} />
 							</div>
 						</Card>
 					</div>
