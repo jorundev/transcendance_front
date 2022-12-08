@@ -141,7 +141,12 @@
 
 	async function sendFriendRequest() {
 		const resp = await api.sendFriendRequest(params.uuid);
-		if (resp !== null && resp !== APIStatus.NoResponse && ((resp as any).statusCode !== 404 && (resp as any).statusCode !== 404)) {
+		if (
+			resp !== null &&
+			resp !== APIStatus.NoResponse &&
+			(resp as any).statusCode !== 404 &&
+			(resp as any).statusCode !== 404
+		) {
 			$stFriends[params.uuid] = {
 				uuid: params.uuid,
 				avatar: user?.avatar,
@@ -151,7 +156,10 @@
 				friendship: resp.friendship,
 			};
 			clearModals();
-		} else if ((resp as any).statusCode === 404 || (resp as any).statusCode === 400) {
+		} else if (
+			(resp as any).statusCode === 404 ||
+			(resp as any).statusCode === 400
+		) {
 			stToast.set("Error when sending friend request");
 		}
 	}

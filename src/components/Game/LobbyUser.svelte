@@ -16,7 +16,9 @@
 	export let player1 = false;
 
 	let isPlayer: boolean;
-	$: isPlayer = player && $stLoggedUser.uuid === uuid || $stLobby?.spectators?.includes(uuid);
+	$: isPlayer =
+		(player && $stLoggedUser.uuid === uuid) ||
+		$stLobby?.spectators?.includes(uuid);
 
 	let user: User;
 
@@ -43,9 +45,13 @@
 	on:click={async () => {
 		if (!isPlayer && player1 && !$stLobby.is_matchmaking) {
 			const res = await api.kickFromLobby($stLobby.uuid, uuid);
-			if (res === null || res === APIStatus.NoResponse || res.statusCode === 404) {
+			if (
+				res === null ||
+				res === APIStatus.NoResponse ||
+				res.statusCode === 404
+			) {
 				stToast.set("Error while kicking player from lobby");
-				return ;
+				return;
 			}
 		}
 	}}

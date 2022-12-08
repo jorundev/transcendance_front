@@ -332,7 +332,7 @@
 							}
 						}
 					}
-					
+
 					.avatar {
 						padding-right: 10px;
 						width: 40px;
@@ -365,7 +365,7 @@
 						}
 					}
 				}
-				
+
 				.info {
 					display: flex;
 					.id {

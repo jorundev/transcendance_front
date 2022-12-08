@@ -28,14 +28,21 @@ import { get } from "svelte/store";
 import { api } from "./api";
 
 location.subscribe(async (loc) => {
-	if (get(stLobby) && !loc.startsWith("/play/lobby") && !loc.startsWith("/game")) {
+	if (
+		get(stLobby) &&
+		!loc.startsWith("/play/lobby") &&
+		!loc.startsWith("/game")
+	) {
 		console.log("Leaving lobby");
 		await api.leaveLobby(get(stLobby).uuid);
 		stLobby.set(null);
 	}
 });
 
-function requiresLogin(component: typeof SvelteComponentDev, props?: any): WrappedComponent {
+function requiresLogin(
+	component: typeof SvelteComponentDev,
+	props?: any
+): WrappedComponent {
 	return wrap({
 		component,
 		userData: {

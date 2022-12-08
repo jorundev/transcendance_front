@@ -1,8 +1,8 @@
 <div class="center">
-    <div class="mod">
-        <div class="lds-dual-ring" />
-        Connecting
-    </div>
+	<div class="mod">
+		<div class="lds-dual-ring" />
+		Connecting
+	</div>
 </div>
 
 <style lang="scss">
@@ -11,18 +11,18 @@
 		height: 100%;
 		display: grid;
 		place-items: center;
-        
-        .mod {
-            width: 400px;
-            height: 400px;
-            gap: 40px;
-            text-align: center;
-            justify-content: center;
-            align-items: center;
-            display: flex;
-            flex-direction: column;
-            font-size: 20px;
-        }
+
+		.mod {
+			width: 400px;
+			height: 400px;
+			gap: 40px;
+			text-align: center;
+			justify-content: center;
+			align-items: center;
+			display: flex;
+			flex-direction: column;
+			font-size: 20px;
+		}
 	}
 	.lds-dual-ring {
 		display: inline-block;

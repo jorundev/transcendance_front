@@ -8,9 +8,9 @@
 	import Modal from "../components/Kit/Modal.svelte";
 	import Card from "../components/Kit/Card.svelte";
 	import ClickOutside from "svelte-click-outside";
-	
+
 	let innerWidth = 0;
-	
+
 	let tfaDisableWarning = false;
 </script>
 
@@ -20,29 +20,41 @@
 </svelte:head>
 {#if $stLoggedUser != null}
 	{#if tfaDisableWarning}
-	<Modal>
-		<div class="warning">
-			<ClickOutside on:clickoutside={() => tfaDisableWarning = false}>
-			<div class="card">
-				<Card>
-					<div class="wtitle">Disable 2FA</div>
-					<div class="text">Are you sure you want to disable Two-Factor Authentication ? Without it, your account is less secure.</div>
-					<div class="buttons">
-						<Button highlight={false} on:click={() => tfaDisableWarning = false}>Back</Button>
-						<Button on:click={() => {
-							api.remove2FA();
-							stLoggedUser.update((old) => {
-								old.tfa = false;
-								return old;
-							});
-							tfaDisableWarning = false;
-						}}>Yes</Button>
+		<Modal>
+			<div class="warning">
+				<ClickOutside
+					on:clickoutside={() => (tfaDisableWarning = false)}
+				>
+					<div class="card">
+						<Card>
+							<div class="wtitle">Disable 2FA</div>
+							<div class="text">
+								Are you sure you want to disable Two-Factor
+								Authentication ? Without it, your account is
+								less secure.
+							</div>
+							<div class="buttons">
+								<Button
+									highlight={false}
+									on:click={() => (tfaDisableWarning = false)}
+									>Back</Button
+								>
+								<Button
+									on:click={() => {
+										api.remove2FA();
+										stLoggedUser.update((old) => {
+											old.tfa = false;
+											return old;
+										});
+										tfaDisableWarning = false;
+									}}>Yes</Button
+								>
+							</div>
+						</Card>
 					</div>
-				</Card>
+				</ClickOutside>
 			</div>
-			</ClickOutside>
-		</div>
-	</Modal>
+		</Modal>
 	{/if}
 	<!-- <SideBar active="settings"/> -->
 	<div class="s">
@@ -60,16 +72,23 @@
 			<div class="category">Status</div>
 			<p class="status">
 				{#if $stLoggedUser.tfa}
-					Two-Factor Authentication is currently <span class="enabled">enabled</span>.
+					Two-Factor Authentication is currently <span class="enabled"
+						>enabled</span
+					>.
 				{:else}
-					Two-Factor Authentication is currently <span class="disabled">disabled</span>. To add security to your account, consider activating it
+					Two-Factor Authentication is currently <span
+						class="disabled">disabled</span
+					>. To add security to your account, consider activating it
 				{/if}
 			</p>
 			<div class="button">
 				{#if $stLoggedUser.tfa}
-					<Button red on:click={() => {
-						tfaDisableWarning = true;
-					}}>Disable</Button>
+					<Button
+						red
+						on:click={() => {
+							tfaDisableWarning = true;
+						}}>Disable</Button
+					>
 				{:else}
 					<Button on:click={() => push("/setup2fa")}>Enable</Button>
 				{/if}
@@ -94,27 +113,27 @@
 		max-width: 1200px;
 		padding-top: 10px;
 	}
-	
+
 	.warning {
 		display: grid;
 		place-items: center;
 		width: 100%;
 		height: 100%;
-		
+
 		.text {
 			font-size: 18px;
 			margin-bottom: 26px;
 		}
-		
+
 		.card {
 			max-width: 600px;
 		}
-		
+
 		.wtitle {
 			font-size: 24px;
-			margin-bottom: 10px;;
+			margin-bottom: 10px;
 		}
-		
+
 		.buttons {
 			display: flex;
 			gap: 10px;
@@ -144,29 +163,29 @@
 		background-position: center;
 		background-repeat: no-repeat;
 	}
-	
+
 	.status {
 		margin-left: 12px;
 		margin-right: 12px;
 		font-size: 18px;
 		line-height: 22px;
 	}
-	
+
 	.enabled {
 		color: rgb(0, 193, 0);
 	}
-	
+
 	.disabled {
 		color: red;
 	}
-	
+
 	.button {
 		margin-left: 12px;
 		margin-right: 12px;
 		margin-top: 16px;
 		max-width: 400px;
 	}
-	
+
 	.category {
 		margin-left: 10px;
 		margin-right: 10px;
@@ -183,7 +202,7 @@
 		font-weight: bold;
 		text-transform: uppercase;
 	}
-	
+
 	@media screen and (min-width: 800px) {
 		.settings {
 			padding-left: 59px;
@@ -213,20 +232,19 @@
 			align-items: center;
 		}
 	}
-	
+
 	@media screen and (max-width: 800px) {
 		.status {
 			text-align: center;
 			margin-top: 20px;
 		}
-		
+
 		.warning {
 			.card {
 				max-width: 420px;
 			}
 		}
-		
-		
+
 		.button {
 			margin-left: auto;
 			margin-right: auto;

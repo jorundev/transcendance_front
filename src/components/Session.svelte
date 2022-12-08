@@ -145,7 +145,7 @@
 		width: 40px;
 		height: 40px;
 		background-size: cover;
-		
+
 		&::after {
 			content: "";
 			position: absolute;
@@ -158,20 +158,20 @@
 			background-position-y: bottom;
 			background-repeat: no-repeat;
 		}
-		
-		&[data-os="apple"]::after {	
+
+		&[data-os="apple"]::after {
 			background-image: url("/img/os/apple.png");
 		}
 
-		&[data-os="android"]::after {	
+		&[data-os="android"]::after {
 			background-image: url("/img/os/android.png");
 		}
 
-		&[data-os="linux"]::after {	
+		&[data-os="linux"]::after {
 			background-image: url("/img/os/linux.png");
 		}
 
-		&[data-os="windows"]::after {	
+		&[data-os="windows"]::after {
 			background-image: url("/img/os/windows.png");
 		}
 	}

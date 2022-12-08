@@ -1,4 +1,4 @@
-import * as EmailValidator from 'email-validator';
+import * as EmailValidator from "email-validator";
 
 export function browserName(): string {
 	const agent = window.navigator.userAgent.toLowerCase();

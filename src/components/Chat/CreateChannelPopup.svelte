@@ -24,11 +24,11 @@
 			password_value = "";
 		}
 	}
-	
+
 	let canClickOutside = false;
-	
+
 	onMount(() => {
-		setTimeout(() => canClickOutside = true, 200);
+		setTimeout(() => (canClickOutside = true), 200);
 	});
 
 	function setPasswordCache() {
@@ -56,29 +56,38 @@
 
 		for (let i = 0; i < 10; ++i) {
 			await new Promise((resolve) => setTimeout(resolve, 150));
-			if ($stChannels[resp.uuid] !== undefined && $stChannels[resp.uuid].joined) {
-				break ;
+			if (
+				$stChannels[resp.uuid] !== undefined &&
+				$stChannels[resp.uuid].joined
+			) {
+				break;
 			}
 		}
 
 		return resp.uuid;
 	}
-	
+
 	$: console.log(error);
-	
+
 	function checkChannelName() {
 		if (channel_value.length > 32) {
 			error = "Channel names are limited to 32 characters";
-			return ;
+			return;
 		}
-		
-		const validCharacters: Array<string> = [..."abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789"];
-		
-		if ([...channel_value].filter((c) => !validCharacters.includes(c)).length > 0) {
-			error = "Channel names are limited to alphanumerical characters and underscores";
-			return ;
+
+		const validCharacters: Array<string> = [
+			..."abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789",
+		];
+
+		if (
+			[...channel_value].filter((c) => !validCharacters.includes(c))
+				.length > 0
+		) {
+			error =
+				"Channel names are limited to alphanumerical characters and underscores";
+			return;
 		}
-		
+
 		error = "";
 	}
 
@@ -90,99 +99,111 @@
 			has_password = has_password_cache;
 		}
 	}
-	
+
 	function checkPassword() {
 		if (password_value.length > 100) {
 			passerr = "Passwords are limited to 100 characters";
-			return ;
+			return;
 		}
 		passerr = "";
 	}
 </script>
 
 <div class="csp">
-	<ClickOutside on:clickoutside={() => {
-		if (canClickOutside) dispatch("back");
-	}}>
-	<Card>
-		<div class="title">Create channel</div>
-		<div class="body">
-			<div class="visib">
+	<ClickOutside
+		on:clickoutside={() => {
+			if (canClickOutside) dispatch("back");
+		}}
+	>
+		<Card>
+			<div class="title">Create channel</div>
+			<div class="body">
+				<div class="visib">
+					<input
+						bind:group={channel_type}
+						type="radio"
+						name="visibility"
+						id="public"
+						value="public"
+						checked={true}
+					/>
+					<label for="public">Public</label>
+					<input
+						bind:group={channel_type}
+						type="radio"
+						name="visibility"
+						id="private"
+						value="private"
+					/>
+					<label for="private">Private</label>
+				</div>
+				<div class="password">
+					<input
+						disabled={channel_type === "private"}
+						type="checkbox"
+						id="password"
+						bind:checked={has_password}
+					/>
+					<label for="password">Require a password</label>
+				</div>
 				<input
-					bind:group={channel_type}
-					type="radio"
-					name="visibility"
-					id="public"
-					value="public"
-					checked={true}
+					type="text"
+					placeholder="Channel Name"
+					bind:value={channel_value}
+					on:input={checkChannelName}
+					on:blur={checkChannelName}
 				/>
-				<label for="public">Public</label>
+				{#if error.length > 0}
+					<div
+						style="color: red; padding-bottom: 16px; max-width: 400px;"
+					>
+						{error}
+					</div>
+				{/if}
 				<input
-					bind:group={channel_type}
-					type="radio"
-					name="visibility"
-					id="private"
-					value="private"
+					type="password"
+					placeholder="Password"
+					bind:value={password_value}
+					disabled={!has_password}
+					on:input={checkPassword}
+					on:blur={checkPassword}
 				/>
-				<label for="private">Private</label>
-			</div>
-			<div class="password">
-				<input
-					disabled={channel_type === "private"}
-					type="checkbox"
-					id="password"
-					bind:checked={has_password}
-				/>
-				<label for="password">Require a password</label>
-			</div>
-			<input
-				type="text"
-				placeholder="Channel Name"
-				bind:value={channel_value}
-				on:input={checkChannelName}
-				on:blur={checkChannelName}
-			/>
-			{#if error.length > 0}
-				<div style="color: red; padding-bottom: 16px; max-width: 400px;">{error}</div>
-			{/if}
-			<input
-				type="password"
-				placeholder="Password"
-				bind:value={password_value}
-				disabled={!has_password}
-				on:input={checkPassword}
-				on:blur={checkPassword}
-			/>
-			{#if passerr.length > 0}
-				<div style="color: red; padding-bottom: 16px; max-width: 400px;">{passerr}</div>
-			{/if}
-			<div class="buttons">
-				<Button
-					highlight={false}
-					on:click={() => {
-						dispatch("back");
-					}}>Back</Button
-				>
-				<Button
-					active={channel_value.length > 0 &&
-						(!has_password || password_value.length > 0) && error.length === 0 && passerr.length === 0}
-					timeoutVisible
-					timeout={2000}
-					on:click={async () => {
-						if (
-							channel_value.length > 0 &&
-							(!has_password || password_value.length > 0)
-						) {
-							const uuid = await createChannel();
-							if (uuid != null) {
-								dispatch("create", { uuid });
+				{#if passerr.length > 0}
+					<div
+						style="color: red; padding-bottom: 16px; max-width: 400px;"
+					>
+						{passerr}
+					</div>
+				{/if}
+				<div class="buttons">
+					<Button
+						highlight={false}
+						on:click={() => {
+							dispatch("back");
+						}}>Back</Button
+					>
+					<Button
+						active={channel_value.length > 0 &&
+							(!has_password || password_value.length > 0) &&
+							error.length === 0 &&
+							passerr.length === 0}
+						timeoutVisible
+						timeout={2000}
+						on:click={async () => {
+							if (
+								channel_value.length > 0 &&
+								(!has_password || password_value.length > 0)
+							) {
+								const uuid = await createChannel();
+								if (uuid != null) {
+									dispatch("create", { uuid });
+								}
 							}
-						}
-					}}>Create</Button
-				>
+						}}>Create</Button
+					>
+				</div>
 			</div>
-		</div>
-	</Card>
+		</Card>
 	</ClickOutside>
 </div>
 

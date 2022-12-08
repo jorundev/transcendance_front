@@ -68,7 +68,11 @@
 
 		const pm = api.changeChannelAvatar(file, channel.uuid);
 		avatarPromise = pm.then((obj) => {
-			if (obj !== null && obj !== APIStatus.NoResponse && (obj as any).statusCode !== 413) {
+			if (
+				obj !== null &&
+				obj !== APIStatus.NoResponse &&
+				(obj as any).statusCode !== 413
+			) {
 				return getProfilePictureLinkFrom(obj.avatar);
 			}
 		});
@@ -292,7 +296,9 @@
 								/>
 							{/await}
 						</div>
-						<div class="desc">Supported formats: webp, png, apng, jpeg, gif</div>
+						<div class="desc">
+							Supported formats: webp, png, apng, jpeg, gif
+						</div>
 					</div>
 					<div class="category">
 						<div class="category-name">Administrator</div>

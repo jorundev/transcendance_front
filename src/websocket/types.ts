@@ -5,15 +5,15 @@
 import type { Lobby } from "src/api";
 import type { ConnectionStatus } from "src/friends";
 import type { GameHistory } from "src/lobbies";
-import type { PlayerRole } from 'src/pong/Pong';
+import type { PlayerRole } from "src/pong/Pong";
 import type { NotificationType } from "../notifications";
 
 export enum WsNamespace {
-	Chat = 'Chat',
-	User = 'User',
-	Game = 'Game',
-	Meta = 'Meta',
-	Pong = 'Pong',
+	Chat = "Chat",
+	User = "User",
+	Game = "Game",
+	Meta = "Meta",
+	Pong = "Pong",
 }
 
 /**
@@ -201,18 +201,18 @@ export interface WsUserStatusInGame extends WsUser {
  * Game
  */
 
- export enum GameAction {
-	Invite = 'INVITE',
-	Decline = 'DECLINE',
-	Join = 'JOIN',
-	Spectate = 'SPECTATE',
-	Ready = 'READY',
-	Start = 'START',
-	Leave = 'LEAVE',
-	Wait = 'WAIT',
-	Match = 'MATCH',
-	Disband = 'DISBAND',
-	End = 'END',
+export enum GameAction {
+	Invite = "INVITE",
+	Decline = "DECLINE",
+	Join = "JOIN",
+	Spectate = "SPECTATE",
+	Ready = "READY",
+	Start = "START",
+	Leave = "LEAVE",
+	Wait = "WAIT",
+	Match = "MATCH",
+	Disband = "DISBAND",
+	End = "END",
 }
 
 export interface WsGame {
@@ -281,20 +281,19 @@ export interface WsGameEnd {
  * Lobby
  */
 
- export interface WsMeta {
+export interface WsMeta {
 	namespace: WsNamespace.Meta;
 	uuid: string;
 }
-
 
 /**
  * Pong
  */
 
- export enum PongAction {
-	Bounce = 'BOUNCE',
+export enum PongAction {
+	Bounce = "BOUNCE",
 	Move = "MOVE",
-	Reset = 'RESET',
+	Reset = "RESET",
 }
 
 export interface WsPong {
@@ -308,12 +307,12 @@ export interface WsPongBounce extends WsPong {
 }
 
 export interface WsPongMove extends WsPong {
-    action: PongAction.Move;
-    player: PlayerRole;
-    data: {
-        tick: number;
-        moveTarget: number;
-    };
+	action: PongAction.Move;
+	player: PlayerRole;
+	data: {
+		tick: number;
+		moveTarget: number;
+	};
 }
 
 export interface WsPongReset extends WsPong {

@@ -16,15 +16,18 @@
 		player2: User;
 		xp: number;
 		oldxp: number;
-        player1Score: number;
+		player1Score: number;
 		player2Score: number;
 	}
 
 	let dispatch = createEventDispatcher();
 
 	export let data: GameEndModalInfo;
-	let weWon = (data.winner === LobbyWinner.Player1 && data.player1.uuid === $stLoggedUser.uuid)
-		|| (data.winner === LobbyWinner.Player2 && data.player2.uuid === $stLoggedUser.uuid);
+	let weWon =
+		(data.winner === LobbyWinner.Player1 &&
+			data.player1.uuid === $stLoggedUser.uuid) ||
+		(data.winner === LobbyWinner.Player2 &&
+			data.player2.uuid === $stLoggedUser.uuid);
 </script>
 
 <Modal>
@@ -36,23 +39,26 @@
 				{:else}
 					<div class="status lost">You lost!</div>
 				{/if}
-                <div class="score">
-                    <div class="avatar">
-                        <UserAvatar uuid={data.player1.uuid}></UserAvatar>
-                    </div>
-                    <div class="sc">{data.player1Score}</div>
-                    <div class="sep">|</div>
-                    <div class="sc">{data.player2Score}</div>
-                    <div class="avatar">
-                        <UserAvatar uuid={data.player2.uuid}></UserAvatar>
-                    </div>
-                </div>
-                <div class="xp-gain">
+				<div class="score">
+					<div class="avatar">
+						<UserAvatar uuid={data.player1.uuid} />
+					</div>
+					<div class="sc">{data.player1Score}</div>
+					<div class="sep">|</div>
+					<div class="sc">{data.player2Score}</div>
+					<div class="avatar">
+						<UserAvatar uuid={data.player2.uuid} />
+					</div>
+				</div>
+				<div class="xp-gain">
 					<div class="desc">You gained {data.xp} xp!</div>
-					<XpBar xp={data.oldxp} xp_end={$stLoggedUser.xp}></XpBar>
+					<XpBar xp={data.oldxp} xp_end={$stLoggedUser.xp} />
 					<div class="ok">
 						<div class="yeah">
-							<Button padding="8px" on:click={() => dispatch("back")}>Ok</Button>
+							<Button
+								padding="8px"
+								on:click={() => dispatch("back")}>Ok</Button
+							>
 						</div>
 					</div>
 				</div>
@@ -68,32 +74,32 @@
 		display: grid;
 		place-items: center;
 	}
-    
-    .score {
+
+	.score {
 		margin-left: auto;
 		margin-right: auto;
 		max-width: 240px;
-        box-sizing: border-box;
-        width: 100%;
-        padding: 10px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+		box-sizing: border-box;
+		width: 100%;
+		padding: 10px;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
 		padding-top: 18px;
 		padding-bottom: 18px;
-    }
-	
+	}
+
 	.ok {
 		padding-top: 10px;
 		width: 100%;
 		display: flex;
 		justify-content: center;
 	}
-	
+
 	.yeah {
 		width: 160px;
 	}
-	
+
 	.xp-gain {
 		display: flex;
 		flex-direction: column;
@@ -103,21 +109,21 @@
 			text-align: center;
 		}
 	}
-    
-    .sc {
-        font-size: 22px;
-    }
-    
-    .sep {
-        font-size: 1.4ch;
-        opacity: .5;
-    }
-    
-    .avatar {
-        width: 60px;
-        height: 60px;
-        flex-shrink: 0;
-    }
+
+	.sc {
+		font-size: 22px;
+	}
+
+	.sep {
+		font-size: 1.4ch;
+		opacity: 0.5;
+	}
+
+	.avatar {
+		width: 60px;
+		height: 60px;
+		flex-shrink: 0;
+	}
 
 	.status {
 		width: 320px;

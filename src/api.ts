@@ -207,7 +207,7 @@ async function makeRequest<T>(
 ): Promise<T | APIStatus.NoResponse | null> {
 	let promise: Promise<Response>;
 
-	for (; ;) {
+	for (;;) {
 		switch (method) {
 			case "GET":
 				promise = fetchGET(url);
@@ -261,7 +261,7 @@ async function makeRequest<T>(
 			case 422:
 			case 500:
 				stToast.set("Error: Something wrong happened with the server");
-				return null
+				return null;
 			case 502:
 				console.error("A terrible error happened: ", response);
 				stServerDown.set(true);
@@ -1208,7 +1208,7 @@ async function wsGameLeave(data: WsGameLeave) {
 			// If it's player 2 AND they were actually in the lobby (not invited)
 			old[data.lobby_uuid].players[1] === data.user_uuid &&
 			old[data.lobby_uuid].players_status[1] !==
-			LobbyPlayerReadyState.Invited
+				LobbyPlayerReadyState.Invited
 		) {
 			// Remove them from the lobby
 			old[data.lobby_uuid].players[1] = "";
@@ -1431,10 +1431,12 @@ async function wsGameEnd(data: WsGameEnd) {
 
 	if (!isPlayer1 && !isPlayer2) {
 		replace("/");
-		return ;
+		return;
 	}
 
-	const xp = (isPlayer1) ? data.history.players_xp[0] : data.history.players_xp[1];
+	const xp = isPlayer1
+		? data.history.players_xp[0]
+		: data.history.players_xp[1];
 
 	const oldxp = get(stLoggedUser).xp;
 
@@ -1452,7 +1454,6 @@ async function wsGameEnd(data: WsGameEnd) {
 		&xp=${xp}
 		&oldxp=${oldxp}
 	`);
-
 }
 
 async function wsGameMessage(data: WsGame) {
@@ -1593,12 +1594,12 @@ export const api = {
 	getChannelMessages: async (uuid: string, page: number) => {
 		return makeRequest<ChannelMessagesResponse>(
 			"/api/chats/channels/" +
-			uuid +
-			"/messages" +
-			"?page=" +
-			page +
-			"&limit=" +
-			chatPageSize,
+				uuid +
+				"/messages" +
+				"?page=" +
+				page +
+				"&limit=" +
+				chatPageSize,
 			"GET"
 		);
 	},
@@ -1654,7 +1655,7 @@ export const api = {
 				"POST",
 				{ message }
 			);
-		} catch (_e) { }
+		} catch (_e) {}
 	},
 	deleteMessage: async (channel: string, uuid: string) => {
 		return makeRequest(
@@ -1850,13 +1851,13 @@ export const api = {
 	},
 	createLobby: async () => {
 		return makeRequest<Lobby>("/api/games/lobby", "POST", {
-			websocket_uuid: get(stWebsocketUUID)
+			websocket_uuid: get(stWebsocketUUID),
 		});
 	},
 	invitePlayerToLobby: async (user_uuid: string) => {
 		return makeRequest<Lobby>("/api/games/lobby/invite", "POST", {
 			user_uuid,
-			websocket_uuid: get(stWebsocketUUID)
+			websocket_uuid: get(stWebsocketUUID),
 		});
 	},
 	joinLobby: async (lobby_uuid: string) => {
@@ -1864,7 +1865,7 @@ export const api = {
 			"/api/games/lobby/join/" + lobby_uuid,
 			"POST",
 			{
-				websocket_uuid: get(stWebsocketUUID)
+				websocket_uuid: get(stWebsocketUUID),
 			}
 		);
 	},
@@ -1905,25 +1906,28 @@ export const api = {
 	},
 	joinQueue: async () => {
 		return makeRequest("/api/games/matchmaking", "POST", {
-			websocket_uuid: get(stWebsocketUUID)
+			websocket_uuid: get(stWebsocketUUID),
 		});
 	},
 	leaveQueue: async () => {
 		return makeRequest("/api/games/matchmaking", "DELETE", {
-			websocket_uuid: get(stWebsocketUUID)
+			websocket_uuid: get(stWebsocketUUID),
 		});
 	},
 	getMatchHistory: async (user_uuid: string) => {
-		return makeRequest<GameHistory[]>("/api/games/history/" + user_uuid, "GET");
+		return makeRequest<GameHistory[]>(
+			"/api/games/history/" + user_uuid,
+			"GET"
+		);
 	},
 	changePlayerColor: async (lobby: string, color: string) => {
 		return makeRequest<APIResponse>("/api/games/lobby/" + lobby, "PATCH", {
-			color
+			color,
 		});
 	},
 	kickFromLobby: async (lobby: string, user_uuid: string) => {
 		return makeRequest<APIResponse>("/api/games/lobby/" + lobby, "DELETE", {
-			user_uuid
+			user_uuid,
 		});
 	},
 	ws: {
@@ -1933,9 +1937,9 @@ export const api = {
 					window.location.protocol === "https:" ? "wss" : "ws";
 				const ws = new ReconnectingWebSocket(
 					protocol +
-					"://" +
-					window.location.hostname +
-					"/api/streaming"
+						"://" +
+						window.location.hostname +
+						"/api/streaming"
 				);
 				stWebsocket.set(ws);
 
@@ -1961,6 +1965,9 @@ export const api = {
 						await initLobbies();
 					});
 					console.log("Successfully connected to websocket");
+					// setInterval(() => {
+					// 	ws.send(JSON.stringify({ data: 100 }));
+					// }, 1000);
 				};
 
 				ws.onclose = (e) => {

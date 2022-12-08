@@ -20,12 +20,12 @@
 	import XpBar from "../components/XPBar.svelte";
 
 	let id = "";
-	
+
 	let query: URLSearchParams;
 	$: query = new URLSearchParams($querystring);
-	
+
 	interface GameEndModalInfo {
-		winner: LobbyWinner,
+		winner: LobbyWinner;
 		player1: User;
 		player2: User;
 		player1Score: number;
@@ -33,27 +33,30 @@
 		xp: number;
 		oldxp: number;
 	}
-	
+
 	let gameEndModal: GameEndModalInfo = null;
-	
-	async function setGameEndModal()
-	{
+
+	async function setGameEndModal() {
 		window.history.replaceState({}, null, "/#/");
 		const hasAll =
-			query.has("p1")
-			&& query.has("p2")
-			&& query.has("w")
-			&& query.has("pt1")
-			&& query.has("pt2")
-			&& query.has("xp")
-			&& query.has("oldxp");
+			query.has("p1") &&
+			query.has("p2") &&
+			query.has("w") &&
+			query.has("pt1") &&
+			query.has("pt2") &&
+			query.has("xp") &&
+			query.has("oldxp");
 		if (hasAll) {
 			try {
 				const w: LobbyWinner = parseInt(query.get("w"));
-				if (w !== LobbyWinner.Player1 && w !== LobbyWinner.Player2 && w !== LobbyWinner.Tie) {
+				if (
+					w !== LobbyWinner.Player1 &&
+					w !== LobbyWinner.Player2 &&
+					w !== LobbyWinner.Tie
+				) {
 					throw "";
-				}	
-				
+				}
+
 				const p1 = query.get("p1");
 				if (p1.length === 0) {
 					throw "";
@@ -62,27 +65,40 @@
 				if (p2.length === 0) {
 					throw "";
 				}
-				
+
 				const player1 = await api.getUserData(p1);
-				if (player1 === null || player1 === APIStatus.NoResponse || (player1 as any).statusCode === 404) {
+				if (
+					player1 === null ||
+					player1 === APIStatus.NoResponse ||
+					(player1 as any).statusCode === 404
+				) {
 					throw "";
 				}
-				
+
 				const player2 = await api.getUserData(p2);
-				if (player2 === null || player2 === APIStatus.NoResponse || (player2 as any).statusCode === 404) {
+				if (
+					player2 === null ||
+					player2 === APIStatus.NoResponse ||
+					(player2 as any).statusCode === 404
+				) {
 					throw "";
 				}
-				
+
 				const player1Score = parseInt(query.get("pt1"));
 				const player2Score = parseInt(query.get("pt2"));
-				
+
 				const xp = parseInt(query.get("xp"));
 				const oldxp = parseInt(query.get("oldxp"));
-				
-				if (isNaN(xp) || isNaN(oldxp) || isNaN(player1Score) || isNaN(player2Score)) {
+
+				if (
+					isNaN(xp) ||
+					isNaN(oldxp) ||
+					isNaN(player1Score) ||
+					isNaN(player2Score)
+				) {
 					throw "";
 				}
-				
+
 				gameEndModal = {
 					player1,
 					player2,
@@ -98,7 +114,7 @@
 			replace("/");
 		}
 	}
-	
+
 	$: if (query) {
 		setGameEndModal();
 	}
@@ -137,10 +153,13 @@
 	<title>Home - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
 {#if gameEndModal !== null}
-<GameEndModal data={gameEndModal} on:back={() => {
-	gameEndModal = null;
-	replace("/");
-	}}></GameEndModal>
+	<GameEndModal
+		data={gameEndModal}
+		on:back={() => {
+			gameEndModal = null;
+			replace("/");
+		}}
+	/>
 {/if}
 {#if modalData !== undefined}
 	<NotificationModal
@@ -163,7 +182,7 @@
 						<div class="name">{$stLoggedUser?.username}</div>
 						<div class="id">#{id}</div>
 					</div>
-					<XpBar xp={$stLoggedUser?.xp}></XpBar>
+					<XpBar xp={$stLoggedUser?.xp} />
 				</div>
 			</div>
 		</Card>
@@ -190,7 +209,7 @@
 		<Card>
 			<div class="home-div">
 				<div class="title">Match History</div>
-				<MatchHistory user={$stLoggedUser?.uuid}/>
+				<MatchHistory user={$stLoggedUser?.uuid} />
 			</div>
 		</Card>
 	</div>

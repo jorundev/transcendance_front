@@ -64,7 +64,11 @@
 
 	async function invite() {
 		const lobby = await api.createLobby();
-		if (lobby === null || lobby === APIStatus.NoResponse || (lobby as any).statusCode === 400) {
+		if (
+			lobby === null ||
+			lobby === APIStatus.NoResponse ||
+			(lobby as any).statusCode === 400
+		) {
 			stToast.set("Something wrong happened when creating lobby");
 			return;
 		}

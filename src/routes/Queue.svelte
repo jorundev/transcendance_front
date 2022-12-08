@@ -5,13 +5,13 @@
 	import { pop, replace } from "svelte-spa-router";
 
 	let inQueue = false;
-    
-    $: {
-        if (inQueue && $stLobby) {
-            inQueue = false;
-            replace("/play/lobby");
-        }
-    }
+
+	$: {
+		if (inQueue && $stLobby) {
+			inQueue = false;
+			replace("/play/lobby");
+		}
+	}
 
 	onMount(async () => {
 		if ($stLobby) {
@@ -26,9 +26,9 @@
 			return;
 		} else if ((resp as any).statusCode === 400) {
 			stToast.set("You already are in a queue");
-            pop();
-            inQueue = false;
-            return ;
+			pop();
+			inQueue = false;
+			return;
 		}
 
 		inQueue = true;
@@ -61,10 +61,10 @@
 			</div>
 			<div class="spinner-wrapper">
 				<div class="spinner">
-                    <div class="bounce1"></div>
-                    <div class="bounce2"></div>
-                    <div class="bounce3"></div>
-                </div>
+					<div class="bounce1" />
+					<div class="bounce2" />
+					<div class="bounce3" />
+				</div>
 			</div>
 		</div>
 	</div>
@@ -92,10 +92,10 @@
 			}
 		}
 	}
-    
-    .spinner-wrapper {
-        transform: translateY(-40px);
-    }
+
+	.spinner-wrapper {
+		transform: translateY(-40px);
+	}
 
 	.spinner {
 		margin: 100px auto 0;

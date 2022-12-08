@@ -11,7 +11,9 @@
 
 <div class="bubble {side}" class:last class:one-above={one_above}>
 	{#if $stUsers[message.sender].is_blocked && !reveal}
-		<div class="message blocked" on:click={() => reveal = true}>You have blocked this user. Click to reveal message</div>
+		<div class="message blocked" on:click={() => (reveal = true)}>
+			You have blocked this user. Click to reveal message
+		</div>
 	{:else}
 		<div class="message">
 			{message.value}
@@ -39,7 +41,7 @@
 		margin-bottom: 3px;
 
 		.blocked {
-			opacity: .5;
+			opacity: 0.5;
 			cursor: pointer;
 			color: rgb(179, 179, 179);
 		}

@@ -309,13 +309,13 @@
 	let canSendMessage = true;
 	async function sendMessage() {
 		if (!canSendMessage) {
-			return ;
+			return;
 		}
 		const value = textArea.value.trim();
-		
+
 		if (value.length > 500) {
 			stToast.set("Messages are limited to 500 characters");
-			return ;
+			return;
 		}
 		textArea.value = "";
 		if (value == "") {
@@ -344,9 +344,9 @@
 				return;
 			}
 		}
-		
+
 		canSendMessage = false;
-		setTimeout(() => canSendMessage = true, 200);
+		setTimeout(() => (canSendMessage = true), 200);
 
 		updateMessages();
 	}
@@ -586,7 +586,7 @@
 		margin-bottom: 82px;
 		padding-top: 82px;
 		flex-direction: column-reverse;
-		
+
 		&.mobile {
 			@media screen and (min-width: 800px) {
 				padding-left: 68px;

@@ -6,7 +6,7 @@
 	import { padIdentifier } from "../utils";
 </script>
 
-<svelte:window/>
+<svelte:window />
 <svelte:head>
 	<title>Blocked accounts - NEW SHINJI MEGA PONG ULTIMATE</title>
 </svelte:head>
@@ -28,11 +28,13 @@
 				{#each Object.entries($stUsers).filter(([_, user]) => user.is_blocked) as [uuid, user] (uuid)}
 					<div class="user" on:click={() => push("/profile/" + uuid)}>
 						<div class="avatar">
-							<UserAvatar {uuid}></UserAvatar>
+							<UserAvatar {uuid} />
 						</div>
 						<div class="info">
 							<div class="username">{user.username}</div>
-							<div class="id">#{padIdentifier(parseInt(user.identifier))}</div>
+							<div class="id">
+								#{padIdentifier(parseInt(user.identifier))}
+							</div>
 						</div>
 					</div>
 				{/each}
@@ -57,30 +59,30 @@
 		max-width: 1200px;
 		padding-top: 10px;
 	}
-	
+
 	.user-list {
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
 		margin-right: 10px;
 		max-width: 400px;
-		
+
 		.user {
 			.avatar {
 				width: 40px;
 				height: 40px;
 				flex-shrink: 0;
 			}
-			
+
 			.info {
 				display: flex;
 				align-items: center;
-				
+
 				.id {
 					color: rgb(93, 93, 93);
 				}
 			}
-			
+
 			&:hover {
 				cursor: pointer;
 				background: rgb(35, 35, 35);
@@ -165,14 +167,14 @@
 			align-items: center;
 		}
 	}
-	
+
 	@media screen and (max-width: 799px) {
 		.user-list {
 			max-width: none;
 			width: 100%;
 			padding-top: 10px;
 			gap: 0;
-			
+
 			.user {
 				background-color: black;
 				border-radius: 0;

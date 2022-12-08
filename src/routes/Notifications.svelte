@@ -12,7 +12,7 @@
 	.notifications {
 		padding: 16px;
 	}
-	
+
 	@media screen and (min-width: 800px) {
 		.notifications {
 			margin-left: 52px;

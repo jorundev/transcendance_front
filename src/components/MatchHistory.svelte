@@ -21,21 +21,21 @@
 </script>
 
 {#if data.length === 0}
-<div class="nodata">No match history yet</div>
+	<div class="nodata">No match history yet</div>
 {:else}
-<div class="matches">
+	<div class="matches">
 		{#each data as matchData}
-			<MatchData data={matchData} {user}/>
+			<MatchData data={matchData} {user} />
 		{/each}
 	</div>
-	{/if}
+{/if}
 
-<style lang="scss">	
+<style lang="scss">
 	.matches {
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
-		
+
 		overflow-x: hidden;
 		overflow-y: auto;
 		max-height: 600px;

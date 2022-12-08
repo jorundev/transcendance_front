@@ -14,7 +14,10 @@
 </script>
 
 {#each friends as [uuid, friend]}
-	<div class="friend" on:click={() => push("/profile/" + friend.name + "/" + friend.id)}>
+	<div
+		class="friend"
+		on:click={() => push("/profile/" + friend.name + "/" + friend.id)}
+	>
 		<div
 			class="avatar"
 			class:online={friend.status === ConnectionStatus.Online}
@@ -22,7 +25,10 @@
 		>
 			<UserAvatar {uuid} />
 		</div>
-		<div class="name" style={`font-size: calc(200px / (${friend.name.length} + 10));`}>
+		<div
+			class="name"
+			style={`font-size: calc(200px / (${friend.name.length} + 10));`}
+		>
 			{friend.name}
 			<div class="id">#{padIdentifier(parseInt(friend.id))}</div>
 		</div>

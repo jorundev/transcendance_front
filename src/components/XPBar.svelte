@@ -81,10 +81,15 @@
 		border-radius: 6px;
 
 		&.glow {
-            border: 1px solid red;
-    box-shadow:0 0 10px #ff0000;
-    background: rgb(75,11,11);
-background: linear-gradient(110deg, rgb(109, 28, 28) 0%, rgba(172,29,29,1) 35%, rgba(194,35,35,1) 100%);
+			border: 1px solid red;
+			box-shadow: 0 0 10px #ff0000;
+			background: rgb(75, 11, 11);
+			background: linear-gradient(
+				110deg,
+				rgb(109, 28, 28) 0%,
+				rgba(172, 29, 29, 1) 35%,
+				rgba(194, 35, 35, 1) 100%
+			);
 		}
 	}
 

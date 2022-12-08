@@ -18,9 +18,9 @@ export interface User {
 	friendship: UsersFriendship;
 	is_blocked: boolean;
 	has_blocked: boolean;
-	is_online: ConnectionStatus,
-	lobby?: string,
-	xp: number,
+	is_online: ConnectionStatus;
+	lobby?: string;
+	xp: number;
 }
 
 export interface UserDictionary {

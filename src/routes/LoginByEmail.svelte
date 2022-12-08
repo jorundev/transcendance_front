@@ -30,7 +30,7 @@
 	let active: boolean;
 
 	let state = State.LogIn;
-	
+
 	$: if (state === State.SignUp) {
 		checkEmail();
 		if (password.length > 0) {
@@ -52,10 +52,10 @@
 		password.length != 0 &&
 		(state == State.LogIn || confirm.length != 0) &&
 		(state == State.LogIn || username.length != 0) &&
-		(state === State.LogIn || (
-		passerr.length === 0 &&
-		confirmerr.length === 0 &&
-		usererr.length === 0)) &&
+		(state === State.LogIn ||
+			(passerr.length === 0 &&
+				confirmerr.length === 0 &&
+				usererr.length === 0)) &&
 		isEmailValid;
 
 	async function login(firstConnection: boolean) {
@@ -141,64 +141,76 @@
 				console.log("Critical error: ", err);
 			});
 	}
-	
+
 	function checkUsername() {
 		if (username.length > 16) {
 			usererr = "Usernames are limited to 16 characters";
-			return ;
+			return;
 		}
-		
-		const validCharacters: Array<string> = [..."abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789"];
-		
-		if ([...username].filter((c) => !validCharacters.includes(c)).length > 0) {
-			usererr = "Usernames are limited to alphanumerical characters and underscores";
-			return ;
+
+		const validCharacters: Array<string> = [
+			..."abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789",
+		];
+
+		if (
+			[...username].filter((c) => !validCharacters.includes(c)).length > 0
+		) {
+			usererr =
+				"Usernames are limited to alphanumerical characters and underscores";
+			return;
 		}
-		
+
 		usererr = "";
 	}
 
 	function checkEmail() {
 		isEmailValid = validateEmail(email) || email.length == 0;
 	}
-	
+
 	function checkPassword() {
 		isPasswordValid = false;
-		
+
 		if (password.length === 0) {
 			passerr = "Password cannot be empty";
-			return ;
+			return;
 		}
-		
+
 		if (password.length > 100) {
 			passerr = "Passwords are limited to 100 characters";
-			return ;
+			return;
 		}
-		
+
 		if (password.length < 8) {
 			passerr = "Password should be at least 8 characters long";
-			return ;
+			return;
 		}
-		
-		if (password.toLowerCase() === password || password.toUpperCase() === password) {
+
+		if (
+			password.toLowerCase() === password ||
+			password.toUpperCase() === password
+		) {
 			passerr = "Password should contain uppercase AND lowercase letters";
-			return ;
+			return;
 		}
-		
+
 		const numbers: Array<string> = [..."0123456789"];
-		
+
 		if ([...password].filter((c) => numbers.includes(c)).length === 0) {
 			passerr = "Password should contain numbers";
-			return ;
+			return;
 		}
-		
+
 		const specialChars: Array<string> = [...`"'/|!@#$%^&*()[]{}<>`];
-		
-		if ([...password].filter((c) => specialChars.includes(c)).length === 0){
-			passerr = "Password should contain special characters -> " + `"'/|!@#$%^&*()[]{}<>`;
-			return ;
+
+		if (
+			[...password].filter((c) => specialChars.includes(c)).length === 0
+		) {
+			passerr =
+				"Password should contain special characters -> " +
+				`"'/|!@#$%^&*()[]{}<>`;
+			return;
 		}
-		
+
 		isPasswordValid = true;
 		passerr = "";
 	}
@@ -247,7 +259,12 @@
 		{/if}
 		{#if state == State.SignUp}
 			<div class="title">Create an account</div>
-			<input placeholder="Username" bind:value={username} on:blur={checkUsername} on:input={checkUsername}/>
+			<input
+				placeholder="Username"
+				bind:value={username}
+				on:blur={checkUsername}
+				on:input={checkUsername}
+			/>
 			{#if usererr.length > 0}
 				<div style="color: red;">{usererr}</div>
 			{/if}
@@ -272,15 +289,18 @@
 				type="password"
 				placeholder="Confirm password"
 				bind:value={confirm}
-				on:input={() => confirmerr = (password !== confirm) ? "Passwords do not match" : ""}
-				on:blur={() => confirmerr = (password !== confirm) ? "Passwords do not match" : ""}
+				on:input={() =>
+					(confirmerr =
+						password !== confirm ? "Passwords do not match" : "")}
+				on:blur={() =>
+					(confirmerr =
+						password !== confirm ? "Passwords do not match" : "")}
 			/>
 			{#if confirmerr.length > 0}
 				<div style="color: red;">{confirmerr}</div>
 			{/if}
-			<button
-				class:active
-				on:click={async () => await signup()}>Sign up</button
+			<button class:active on:click={async () => await signup()}
+				>Sign up</button
 			>
 			<a
 				href={undefined}

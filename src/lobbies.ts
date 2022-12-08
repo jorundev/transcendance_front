@@ -17,9 +17,9 @@ export interface LobbyDictionary {
 }
 
 export interface GameHistory {
-	uuid: string,
-	winner: LobbyWinner,
-	players: [string, string],
-	players_scores: [number, number],
-	players_xp: [number, number],
+	uuid: string;
+	winner: LobbyWinner;
+	players: [string, string];
+	players_scores: [number, number];
+	players_xp: [number, number];
 }

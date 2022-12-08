@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
+	import { fade } from "svelte/transition";
 </script>
 
-<div class="modal" transition:fade="{{ duration: 150 }}">
+<div class="modal" transition:fade={{ duration: 150 }}>
 	<slot />
 </div>
 

@@ -257,7 +257,7 @@
 		color: white;
 		z-index: 200;
 		border-bottom: 1px solid rgb(72, 0, 0);
-		
+
 		@keyframes marquee {
 			from {
 				transform: translateX(0);
@@ -266,11 +266,11 @@
 				transform: translateX(calc(-100% + 100vw - 16px));
 			}
 		}
-		
+
 		.marquee {
 			padding-left: 16px;
 			position: absolute;
-			
+
 			&.active {
 				animation: marquee 6s linear;
 			}

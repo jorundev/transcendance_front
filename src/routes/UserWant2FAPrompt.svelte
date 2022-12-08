@@ -12,10 +12,7 @@
 		<Card>
 			<div class="lock" />
 			<div class="title">Enable Two-Factor Authentication ?</div>
-			<Button
-				text="Enable"
-				on:click={() => replace("/setup2fa")}
-			/>
+			<Button text="Enable" on:click={() => replace("/setup2fa")} />
 			<div
 				class="next"
 				on:click={() => {

@@ -68,7 +68,12 @@
 				Sessions
 			</div>
 			<div class="category">Activity</div>
-			<div class="setting" on:click={() => push("/settings/blocked-accounts")}>Blocked accounts</div>
+			<div
+				class="setting"
+				on:click={() => push("/settings/blocked-accounts")}
+			>
+				Blocked accounts
+			</div>
 		</div>
 	</div>
 {/if}

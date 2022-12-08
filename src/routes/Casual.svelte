@@ -14,11 +14,11 @@
 	$: if ($stLobby === null) {
 		replace("/play");
 	}
-	
+
 	let color: HTMLInputElement;
 
 	export let spectators: Array<string> = [];
-		
+
 	let isSpectator = false;
 	$: isSpectator = spectators.includes($stLoggedUser?.uuid);
 
@@ -37,8 +37,15 @@
 
 	async function change() {
 		if ($stLobby && color) {
-			const res = await api.changePlayerColor($stLobby?.uuid, color.value);
-			if (res === null || res === APIStatus.NoResponse || (res as any).statusCode === 400) {
+			const res = await api.changePlayerColor(
+				$stLobby?.uuid,
+				color.value
+			);
+			if (
+				res === null ||
+				res === APIStatus.NoResponse ||
+				(res as any).statusCode === 400
+			) {
 				stToast.set("Error: Could not change paddle color");
 			}
 		}
@@ -161,24 +168,45 @@
 				</div>
 				<div class="content">
 					{#each spectators as uuid}
-						<LobbyUser {uuid} player1={isMaster}/>
+						<LobbyUser {uuid} player1={isMaster} />
 					{/each}
 				</div>
 			</div>
 			<div class="game-look">
-				<div class="desc">
-					Game Options
-				</div>
+				<div class="desc">Game Options</div>
 				<div class="inner">
 					<div class="opt">Background</div>
 					<div class="buttons">
-						<Button highlight={$stGameSettings.background === "red"} padding="6px" on:click={() => $stGameSettings.background = "red"}>Red</Button>
-						<Button highlight={$stGameSettings.background === "blue"} padding="6px" on:click={() => $stGameSettings.background = "blue"}>Blue</Button>
-						<Button highlight={$stGameSettings.background === "green"} padding="6px" on:click={() => $stGameSettings.background = "green"}>Green</Button>
+						<Button
+							highlight={$stGameSettings.background === "red"}
+							padding="6px"
+							on:click={() =>
+								($stGameSettings.background = "red")}
+							>Red</Button
+						>
+						<Button
+							highlight={$stGameSettings.background === "blue"}
+							padding="6px"
+							on:click={() =>
+								($stGameSettings.background = "blue")}
+							>Blue</Button
+						>
+						<Button
+							highlight={$stGameSettings.background === "green"}
+							padding="6px"
+							on:click={() =>
+								($stGameSettings.background = "green")}
+							>Green</Button
+						>
 					</div>
 					{#if !isSpectator}
 						<div class="opt">Paddle color</div>
-						<input type="color" value="#ffffff" bind:this={color} on:change={change}>
+						<input
+							type="color"
+							value="#ffffff"
+							bind:this={color}
+							on:change={change}
+						/>
 					{/if}
 				</div>
 			</div>
@@ -201,7 +229,7 @@
 		display: grid;
 		place-items: center;
 	}
-	
+
 	.opt {
 		padding-top: 10px;
 		padding-bottom: 4px;
@@ -267,20 +295,20 @@
 
 		.game-look {
 			min-width: 320px;
-			
+
 			.inner {
 				display: flex;
 				flex-direction: column;
 				justify-content: center;
 				padding: 10px;
 				padding-top: 0;
-				
+
 				.buttons {
 					padding-top: 6px;
 					display: flex;
 					gap: 10px;
 				}
-				
+
 				input[type="color"] {
 					cursor: pointer;
 					width: 100%;
@@ -289,7 +317,7 @@
 					margin: 0;
 					padding: 0;
 					position: relative;
-					
+
 					&:focus {
 						outline: none;
 					}
