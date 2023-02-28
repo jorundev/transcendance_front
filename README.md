@@ -1,3 +1,1 @@
-# Frontend
-
-yes
+Please refer from [this](https://github.com/marousta/NEW-SHINJI-MEGA-PONG-ULTIMATE) repository.
